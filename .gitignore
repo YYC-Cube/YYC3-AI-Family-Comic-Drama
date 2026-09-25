@@ -1,0 +1,46 @@
+# ===== 密钥零入库（红线） =====
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ===== macOS / 编辑器 =====
+.DS_Store
+.vscode/
+!.vscode/settings.json
+.idea/
+
+# ===== 二进制资产红线：模型/素材/成片全部落 NAS =====
+*.safetensors
+*.ckpt
+*.pt
+*.bin
+*.gguf
+*.mp4
+*.mov
+*.avi
+*.wav
+*.mp3
+models/
+!**/models/**/.gitkeep
+
+# ===== 运行时产物 =====
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+dist/
+build/
+.next/
+*.log
+storage/temp/*
+storage/logs/*
+!storage/temp/.gitkeep
+!storage/logs/.gitkeep
+
+# ===== 临时产物 =====
+tmp/
+*.tmp
+*.bak

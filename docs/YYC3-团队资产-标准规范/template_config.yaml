@@ -1,0 +1,420 @@
+# YYC³ 文档模版配置
+# Document Template Configuration for YYC³ Project
+
+version: "3.0.0"
+created: "2026-03-27"
+description: "YYC³可复用文档模版配置体系"
+
+# 全局变量配置
+global_variables:
+  brand_name: "YanYuCloudCube"
+  brand_slogan_cn: "言启象限 | 语枢未来"
+  brand_slogan_en: "Words Initiate Quadrants, Language Serves as Core for Future"
+  brand_vision_cn: "万象归元于云枢 | 深栈智启新纪元"
+  brand_vision_en: "All things converge in cloud pivot; Deep stacks ignite a new era of intelligence"
+  contact_email: "admin@0379.email"
+  default_author: "YanYuCloudCube Team"
+  default_version: "v3.0.0"
+
+# 验证规则配置
+validation_rules:
+  require_brand_header: true
+  require_brand_footer: true
+  require_metadata: true
+  require_core_philosophy: true
+  min_length: 500
+  max_length: 100000
+
+# 模版定义
+templates:
+  # 主文档模版
+  main_document:
+    name: "主文档模版"
+    version: "v3.0.0"
+    type: "main"
+    variables:
+      doc_title: ""
+      doc_description: ""
+      doc_category: ""
+      doc_section: ""
+    content: |
+      ---
+      @file: {{file_name}}
+      @description: {{doc_description}}
+      @author: {{author}}
+      @version: {{version}}
+      @created: {{created_date}}
+      @updated: {{updated_date}}
+      @status: {{status}}
+      @tags: {{tags}}
+      @checksum: {{checksum}}
+      @trace_id: {{trace_id}}
+      ---
+      
+      > ***YanYuCloudCube***
+      > *言启象限 | 语枢未来*
+      > ***Words Initiate Quadrants, Language Serves as Core for Future***
+      > *万象归元于云枢 | 深栈智启新纪元*
+      > ***All things converge in cloud pivot; Deep stacks ignite a new era of intelligence***
+      
+      ---
+      
+      # {{doc_title}}
+      
+      ## 核心理念
+      
+      **五高架构**：高可用 | 高性能 | 高安全 | 高扩展 | 高智能
+      **五标体系**：标准化 | 规范化 | 自动化 | 可视化 | 智能化
+      **五化转型**：流程化 | 数字化 | 生态化 | 工具化 | 服务化
+      **五维评估**：时间维 | 空间维 | 属性维 | 事件维 | 关联维
+      
+      ---
+      
+      ## 文档概述
+      
+      {{doc_description}}
+      
+      ---
+      
+      ## 详细内容
+      
+      {{content}}
+      
+      ---
+      
+      ## 文档追溯信息
+      
+      | 属性 | 值 |
+      |------|-----|
+      | 文档版本 | {{version}} |
+      | 创建日期 | {{created_date}} |
+      | 更新日期 | {{updated_date}} |
+      | 内容校验 | {{checksum}} |
+      | 追溯ID | {{trace_id}} |
+      | 关联文档 | {{related_docs}} |
+      
+      ---
+      
+      <div align="center">
+      
+      > 「***YanYuCloudCube***」
+      > 「***<admin@0379.email>***」
+      > 「***Words Initiate Quadrants, Language Serves as Core for the Future***」
+      > 「***All things converge in cloud pivot; Deep stacks ignite a new era of intelligence***」
+      
+      **© 2025-2026 YYC³ Team. All Rights Reserved.**
+      </div>
+
+  # README文档模版
+  readme_document:
+    name: "README索引模版"
+    version: "v3.0.0"
+    type: "readme"
+    variables:
+      dir_name: ""
+      dir_description: ""
+    content: |
+      ---
+      @file: README.md
+      @description: {{dir_name}} 目录文档索引
+      @author: YanYuCloudCube Team
+      @version: v3.0.0
+      @created: {{created_date}}
+      @updated: {{updated_date}}
+      @status: published
+      @tags: [文档索引],[README]
+      ---
+      
+      > ***YanYuCloudCube***
+      > *言启象限 | 语枢未来*
+      > ***Words Initiate Quadrants, Language Serves as Core for Future***
+      > *万象归元于云枢 | 深栈智启新纪元*
+      > ***All things converge in cloud pivot; Deep stacks ignite a new era of intelligence***
+      
+      ---
+      
+      # {{dir_name}}
+      
+      ## 核心理念
+      
+      **五高架构**：高可用 | 高性能 | 高安全 | 高扩展 | 高智能
+      **五标体系**：标准化 | 规范化 | 自动化 | 可视化 | 智能化
+      **五化转型**：流程化 | 数字化 | 生态化 | 工具化 | 服务化
+      **五维评估**：时间维 | 空间维 | 属性维 | 事件维 | 关联维
+      
+      ---
+      
+      ## 目录概述
+      
+      {{dir_description}}
+      
+      ---
+      
+      ## 文档索引
+      
+      | 序号 | 文档名称 | 描述 | 标签 |
+      |------|----------|------|------|
+      {{doc_table}}
+      
+      ---
+      
+      ## 文档规范
+      
+      - **命名规范**：`{编号}-{阶段}-{模块}-{文档名称}.md`
+      - **版本规范**：主版本.次版本.修订版本 (如 v3.0.0)
+      - **标签规范**：使用方括号包裹，如 `[标签1],[标签2]`
+      
+      ---
+      
+      <div align="center">
+      
+      > 「***YanYuCloudCube***」
+      > 「***<admin@0379.email>***」
+      > 「***Words Initiate Quadrants, Language Serves as Core for the Future***」
+      > 「***All things converge in cloud pivot; Deep stacks ignite a new era of intelligence***」
+      
+      **© 2025-2026 YYC³ Team. All Rights Reserved.**
+      </div>
+
+  # 预留文档模版
+  reserved_document:
+    name: "预留文档模版"
+    version: "v3.0.0"
+    type: "reserved"
+    variables:
+      category: ""
+    content: |
+      ---
+      @file: RES-DOC-001.md
+      @description: 预留文档，用于记录未来可能添加的内容
+      @author: YanYuCloudCube Team
+      @version: v3.0.0
+      @created: {{created_date}}
+      @updated: {{updated_date}}
+      @status: reserved
+      @tags: [{{category}}],[预留文档]
+      ---
+      
+      > ***YanYuCloudCube***
+      > *言启象限 | 语枢未来*
+      > ***Words Initiate Quadrants, Language Serves as Core for Future***
+      > *万象归元于云枢 | 深栈智启新纪元*
+      > ***All things converge in cloud pivot; Deep stacks ignite a new era of intelligence***
+      
+      ---
+      
+      # 预留文档
+      
+      ## 说明
+      
+      本文档为预留文档，用于记录未来可能添加的内容。
+      
+      当有新的文档需求时，可以基于本模版进行扩展。
+      
+      ---
+      
+      <div align="center">
+      
+      > 「***YanYuCloudCube***」
+      > 「***<admin@0379.email>***」
+      > 「***Words Initiate Quadrants, Language Serves as Core for the Future***」
+      > 「***All things converge in cloud pivot; Deep stacks ignite a new era of intelligence***」
+      
+      **© 2025-2026 YYC³ Team. All Rights Reserved.**
+      </div>
+
+  # 架构设计文档模版
+  architecture_document:
+    name: "架构设计文档模版"
+    version: "v3.0.0"
+    type: "main"
+    variables:
+      system_name: ""
+      architecture_type: ""
+    content: |
+      ---
+      @file: {{file_name}}
+      @description: {{system_name}} {{architecture_type}} 架构设计文档
+      @author: YanYuCloudCube Team
+      @version: v3.0.0
+      @created: {{created_date}}
+      @updated: {{updated_date}}
+      @status: published
+      @tags: [架构设计],[{{architecture_type}}],[{{system_name}}]
+      ---
+      
+      > ***YanYuCloudCube***
+      > *言启象限 | 语枢未来*
+      > ***Words Initiate Quadrants, Language Serves as Core for Future***
+      > *万象归元于云枢 | 深栈智启新纪元*
+      > ***All things converge in cloud pivot; Deep stacks ignite a new era of intelligence***
+      
+      ---
+      
+      # {{system_name}} {{architecture_type}} 架构设计
+      
+      ## 核心理念
+      
+      **五高架构**：高可用 | 高性能 | 高安全 | 高扩展 | 高智能
+      **五标体系**：标准化 | 规范化 | 自动化 | 可视化 | 智能化
+      **五化转型**：流程化 | 数字化 | 生态化 | 工具化 | 服务化
+      **五维评估**：时间维 | 空间维 | 属性维 | 事件维 | 关联维
+      
+      ---
+      
+      ## 1. 架构概述
+      
+      ### 1.1 设计目标
+      
+      ### 1.2 设计原则
+      
+      ### 1.3 技术选型
+      
+      ---
+      
+      ## 2. 架构设计
+      
+      ### 2.1 整体架构
+      
+      ```
+      ┌─────────────────────────────────────────────────────────────┐
+      │                    系统架构图                                │
+      ├─────────────────────────────────────────────────────────────┤
+      │                                                             │
+      │   ┌─────────┐   ┌─────────┐   ┌─────────┐                 │
+      │   │  表现层  │   │  业务层  │   │  数据层  │                 │
+      │   └─────────┘   └─────────┘   └─────────┘                 │
+      │                                                             │
+      └─────────────────────────────────────────────────────────────┘
+      ```
+      
+      ### 2.2 模块划分
+      
+      ### 2.3 接口设计
+      
+      ---
+      
+      ## 3. 技术实现
+      
+      ### 3.1 核心组件
+      
+      ### 3.2 数据流设计
+      
+      ### 3.3 安全设计
+      
+      ---
+      
+      ## 4. 部署架构
+      
+      ### 4.1 部署拓扑
+      
+      ### 4.2 资源规划
+      
+      ---
+      
+      ## 5. 运维保障
+      
+      ### 5.1 监控方案
+      
+      ### 5.2 容灾方案
+      
+      ---
+      
+      <div align="center">
+      
+      > 「***YanYuCloudCube***」
+      > 「***<admin@0379.email>***」
+      > 「***Words Initiate Quadrants, Language Serves as Core for the Future***」
+      > 「***All things converge in cloud pivot; Deep stacks ignite a new era of intelligence***」
+      
+      **© 2025-2026 YYC³ Team. All Rights Reserved.**
+      </div>
+
+  # API文档模版
+  api_document:
+    name: "API接口文档模版"
+    version: "v3.0.0"
+    type: "main"
+    variables:
+      api_name: ""
+      api_version: ""
+    content: |
+      ---
+      @file: {{file_name}}
+      @description: {{api_name}} API接口文档
+      @author: YanYuCloudCube Team
+      @version: {{api_version}}
+      @created: {{created_date}}
+      @updated: {{updated_date}}
+      @status: published
+      @tags: [API文档],[{{api_name}}]
+      ---
+      
+      > ***YanYuCloudCube***
+      > *言启象限 | 语枢未来*
+      > ***Words Initiate Quadrants, Language Serves as Core for Future***
+      > *万象归元于云枢 | 深栈智启新纪元*
+      > ***All things converge in cloud pivot; Deep stacks ignite a new era of intelligence***
+      
+      ---
+      
+      # {{api_name}} API接口文档
+      
+      ## 接口概述
+      
+      | 属性 | 值 |
+      |------|-----|
+      | API名称 | {{api_name}} |
+      | 版本 | {{api_version}} |
+      | 协议 | RESTful / GraphQL |
+      | 认证方式 | Bearer Token |
+      
+      ---
+      
+      ## 接口列表
+      
+      ### 1. 接口名称
+      
+      **请求方式**：`POST /api/v1/resource`
+      
+      **请求参数**：
+      
+      | 参数名 | 类型 | 必填 | 说明 |
+      |--------|------|------|------|
+      | param1 | string | 是 | 参数说明 |
+      
+      **响应示例**：
+      
+      ```json
+      {
+        "code": 200,
+        "message": "success",
+        "data": {}
+      }
+      ```
+      
+      ---
+      
+      <div align="center">
+      
+      > 「***YanYuCloudCube***」
+      > 「***<admin@0379.email>***」
+      > 「***Words Initiate Quadrants, Language Serves as Core for the Future***」
+      > 「***All things converge in cloud pivot; Deep stacks ignite a new era of intelligence***」
+      
+      **© 2025-2026 YYC³ Team. All Rights Reserved.**
+      </div>
+
+# 文档追溯配置
+traceability:
+  enabled: true
+  auto_checksum: true
+  version_control: true
+  change_log: true
+  related_docs_tracking: true
+
+# 迭代配置
+iteration:
+  auto_increment_version: true
+  preserve_history: true
+  max_history_versions: 10

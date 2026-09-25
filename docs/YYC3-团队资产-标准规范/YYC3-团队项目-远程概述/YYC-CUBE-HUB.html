@@ -1,0 +1,2904 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YYC³ Cube Hub · 仓库矩阵操作中心</title>
+    <meta
+      name="description"
+      content="YYC³ Cube Hub — YYC-Cube / YanYuCloudCube 双组织 94 个仓库的统一矩阵操作中心：分类浏览、智能检索、上线部署指南、进度追踪与数据导入导出。"
+    />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%238b5cf6'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='6' fill='url(%23g)'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-size='17' font-weight='700' font-family='sans-serif' fill='%23fff'%3EY3%3C/text%3E%3C/svg%3E"
+    />
+    <script>
+      /* 防主题闪烁（FOUC）：渲染前恢复已保存主题 */
+      if (localStorage.getItem('yc3hub-theme') === 'light') {
+        document.documentElement.classList.add('light');
+      }
+    </script>
+    <style>
+      /* ═══ CSS 变量与主题 — 设计指导文档 §2 ═══ */
+      :root {
+        --bg: #0a0a0f;
+        --bg2: #12121a;
+        --bg3: #1a1a2e;
+        --surface: rgba(255, 255, 255, 0.03);
+        --surface-hover: rgba(255, 255, 255, 0.06);
+        --border: rgba(255, 255, 255, 0.08);
+        --border-hover: rgba(255, 255, 255, 0.15);
+        --text: #f1f1f6;
+        --text2: rgba(255, 255, 255, 0.65);
+        --text3: rgba(255, 255, 255, 0.35);
+        --accent-v: #8b5cf6;
+        --accent-c: #06b6d4;
+        --accent-e: #22c55e;
+        --accent-r: #ef4444;
+        --accent-o: #f59e0b;
+        --accent-p: #ec4899;
+        --radius: 14px;
+        --radius-sm: 8px;
+        --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+        --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', 'Consolas', monospace;
+      }
+      .light {
+        --bg: #f5f5f0;
+        --bg2: #e8e8e3;
+        --bg3: #ddd;
+        --surface: rgba(0, 0, 0, 0.02);
+        --surface-hover: rgba(0, 0, 0, 0.05);
+        --border: rgba(0, 0, 0, 0.08);
+        --border-hover: rgba(0, 0, 0, 0.15);
+        --text: #1a1a2e;
+        --text2: rgba(0, 0, 0, 0.55);
+        --text3: rgba(0, 0, 0, 0.3);
+        --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+      body {
+        font-family: var(--font);
+        background: var(--bg);
+        color: var(--text);
+        overflow-x: hidden;
+      }
+      ::selection {
+        background: rgba(139, 92, 246, 0.3);
+        color: #fff;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      :focus-visible {
+        outline: 2px solid var(--accent-c);
+        outline-offset: 2px;
+      }
+      .sb-nav::-webkit-scrollbar,
+      .modal-body::-webkit-scrollbar,
+      .code-block pre::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      .sb-nav::-webkit-scrollbar-thumb,
+      .modal-body::-webkit-scrollbar-thumb,
+      .code-block pre::-webkit-scrollbar-thumb {
+        background: var(--border-hover);
+        border-radius: 3px;
+      }
+      .sb-nav {
+        scrollbar-width: thin;
+        scrollbar-color: var(--border-hover) transparent;
+      }
+
+      /* ═══ 布局 — §3 三段式 ═══ */
+      .app {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      /* ═══ Sidebar 280px 固定 ═══ */
+      .sidebar {
+        width: 280px;
+        flex-shrink: 0;
+        background: var(--bg2);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        z-index: 100;
+        transition: transform 0.3s ease;
+      }
+      .sidebar.hidden {
+        transform: translateX(-100%);
+      }
+      .sb-header {
+        padding: 20px 20px 16px;
+        border-bottom: 1px solid var(--border);
+      }
+      .sb-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+      }
+      .sb-logo-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, var(--accent-v), var(--accent-c));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 700;
+        font-family: var(--font-mono);
+        color: #fff;
+      }
+      .sb-logo-text {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .sb-logo-sub {
+        font-size: 10px;
+        color: var(--text3);
+        letter-spacing: 1px;
+      }
+      .sb-search {
+        margin: 12px 16px;
+        padding: 8px 12px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: 0.2s;
+      }
+      .sb-search:focus-within {
+        border-color: var(--accent-v);
+      }
+      .sb-search input {
+        flex: 1;
+        background: none;
+        border: none;
+        outline: none;
+        color: var(--text);
+        font-size: 13px;
+      }
+      .sb-search input::placeholder {
+        color: var(--text3);
+      }
+      .sb-search svg {
+        width: 14px;
+        height: 14px;
+        color: var(--text3);
+        flex-shrink: 0;
+      }
+
+      /* ═══ Sidebar 进度 ═══ */
+      .sb-progress {
+        margin: 0 16px 12px;
+        padding: 10px 12px;
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        border: 1px solid var(--border);
+      }
+      .sb-progress-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 6px;
+      }
+      .sb-progress-label {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text3);
+      }
+      .sb-progress-pct {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--accent-v);
+      }
+      .sb-progress-bar {
+        height: 4px;
+        border-radius: 2px;
+        background: var(--border);
+        overflow: hidden;
+        margin-bottom: 4px;
+      }
+      .sb-progress-fill {
+        height: 100%;
+        border-radius: 2px;
+        background: linear-gradient(90deg, var(--accent-v), var(--accent-c));
+        transition: width 0.6s ease;
+      }
+      .sb-progress-count {
+        font-size: 10px;
+        color: var(--text3);
+      }
+      .sb-nav {
+        flex: 1;
+        overflow-y: auto;
+        padding: 8px 12px 80px;
+      }
+      .sb-group {
+        margin-bottom: 16px;
+      }
+      .sb-group-title {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: var(--text3);
+        padding: 0 8px;
+        margin-bottom: 4px;
+      }
+      .sb-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 8px;
+        border-radius: 6px;
+        color: var(--text2);
+        font-size: 12px;
+        cursor: pointer;
+        transition: 0.15s;
+        text-decoration: none;
+        position: relative;
+      }
+      .sb-item:hover {
+        background: var(--surface-hover);
+        color: var(--text);
+      }
+      .sb-item.active {
+        background: rgba(139, 92, 246, 0.12);
+        color: var(--accent-v);
+      }
+      .sb-item .sb-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        background: var(--text3);
+        transition: 0.3s;
+      }
+      .sb-item .sb-dot.done {
+        background: var(--accent-e);
+        box-shadow: 0 0 6px rgba(34, 197, 94, 0.4);
+      }
+      .sb-item .sb-dot.ext {
+        background: rgba(99, 102, 241, 0.5);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+      }
+      .sb-item .sb-label {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .sb-item .sb-order {
+        font-size: 9px;
+        color: var(--text3);
+        font-weight: 600;
+        width: 16px;
+        text-align: right;
+        flex-shrink: 0;
+      }
+
+      /* ═══ Main ═══ */
+      .main {
+        flex: 1;
+        margin-left: 280px;
+        min-height: 100vh;
+        transition: margin-left 0.3s ease;
+      }
+      .main.expanded {
+        margin-left: 0;
+      }
+
+      /* ═══ Topbar sticky + blur ═══ */
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 24px;
+        background: rgba(10, 10, 15, 0.8);
+        border-bottom: 1px solid var(--border);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+      }
+      .light .topbar {
+        background: rgba(245, 245, 240, 0.8);
+      }
+      .topbar-title {
+        min-width: 0;
+      }
+      .topbar-title .tt-main {
+        font-size: 16px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .topbar-title .tt-sub {
+        font-size: 12px;
+        color: var(--text3);
+        white-space: nowrap;
+      }
+      .topbar-spacer {
+        flex: 1;
+      }
+      .topbar-search {
+        display: none;
+        flex: 1;
+        max-width: 320px;
+        position: relative;
+      }
+      .main.expanded .topbar-search {
+        display: block;
+      }
+      .topbar-search input {
+        width: 100%;
+        padding: 6px 12px 6px 32px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--bg2);
+        color: var(--text);
+        font-size: 13px;
+        outline: none;
+        transition: 0.2s;
+        font-family: inherit;
+      }
+      .topbar-search input:focus {
+        border-color: var(--accent-v);
+      }
+      .topbar-search input::placeholder {
+        color: var(--text3);
+      }
+      .topbar-search .ts-icon {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text3);
+        font-size: 13px;
+        pointer-events: none;
+      }
+      .topbar-time {
+        display: none;
+        align-items: center;
+        gap: 5px;
+        font-size: 12px;
+        color: var(--text2);
+        font-family: var(--font-mono);
+        padding: 4px 10px;
+        border-radius: 6px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        user-select: none;
+        white-space: nowrap;
+      }
+      .main.expanded .topbar-time {
+        display: flex;
+      }
+      .topbar-time .tt-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent-e);
+        animation: pulse-dot 2s ease infinite;
+      }
+      @keyframes pulse-dot {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+      .btn-menu,
+      .btn-theme,
+      .btn-share {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text2);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.2s;
+        flex-shrink: 0;
+      }
+      .btn-menu:hover,
+      .btn-theme:hover,
+      .btn-share:hover {
+        background: var(--surface-hover);
+        color: var(--accent-v);
+        border-color: rgba(139, 92, 246, 0.3);
+      }
+      .btn-menu svg,
+      .btn-theme svg,
+      .btn-share svg {
+        width: 16px;
+        height: 16px;
+      }
+      .topbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .progress-actions {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .btn-action {
+        width: 30px;
+        height: 30px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text2);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.2s;
+      }
+      .btn-action:hover {
+        background: var(--surface-hover);
+        color: var(--text);
+      }
+      .btn-action.btn-danger:hover {
+        background: rgba(239, 68, 68, 0.12);
+        color: #ef4444;
+        border-color: rgba(239, 68, 68, 0.3);
+      }
+      .btn-action svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      /* ═══ Dashboard ═══ */
+      .dashboard {
+        padding: 24px;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+      .dash-header {
+        margin-bottom: 32px;
+      }
+      .dash-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        background: rgba(139, 92, 246, 0.12);
+        color: var(--accent-v);
+        font-size: 11px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        animation: heroPulse 8s ease-in-out infinite;
+      }
+      .dash-badge svg {
+        width: 14px;
+        height: 14px;
+      }
+      .dash-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 6px;
+        line-height: 1.2;
+      }
+      .dash-desc {
+        font-size: 14px;
+        color: var(--text2);
+        max-width: 640px;
+        line-height: 1.5;
+      }
+      .dash-stats {
+        display: flex;
+        gap: 12px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+      }
+      .stat-card {
+        padding: 12px 18px;
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .stat-icon {
+        font-size: 18px;
+      }
+      .stat-num {
+        font-size: 20px;
+        font-weight: 700;
+        font-family: var(--font-mono);
+      }
+      .stat-label {
+        font-size: 11px;
+        color: var(--text2);
+      }
+
+      /* ═══ Filter bar ═══ */
+      .filter-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+      }
+      .filter-btn {
+        padding: 6px 14px;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--text2);
+        font-size: 12px;
+        cursor: pointer;
+        transition: 0.2s;
+        font-weight: 500;
+      }
+      .filter-btn:hover {
+        border-color: var(--border-hover);
+        color: var(--text);
+      }
+      .filter-btn.active {
+        background: var(--accent-v);
+        color: #fff;
+        border-color: var(--accent-v);
+      }
+      .filter-btn[data-cat='all'].active {
+        background: var(--text);
+        color: var(--bg);
+        border-color: var(--text);
+      }
+      .filter-btn[data-cat='org-yyc-cube'].active {
+        background: var(--accent-v);
+        border-color: var(--accent-v);
+      }
+      .filter-btn[data-cat='org-yanyucloudcube'].active {
+        background: var(--accent-c);
+        border-color: var(--accent-c);
+      }
+
+      /* ═══ 分类区块与卡片 ═══ */
+      .cat-section {
+        margin-bottom: 36px;
+      }
+      .cat-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+      .cat-icon {
+        font-size: 20px;
+      }
+      .cat-name {
+        font-size: 16px;
+        font-weight: 600;
+      }
+      .cat-count {
+        font-size: 12px;
+        color: var(--text3);
+      }
+      .cat-line {
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 14px;
+      }
+      .guide-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 18px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.4s ease both;
+      }
+      .guide-card:hover {
+        transform: translateY(-2px);
+        border-color: var(--border-hover);
+        box-shadow: var(--shadow);
+      }
+      .guide-card.hidden {
+        display: none;
+      }
+      .gc-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        opacity: 0.9;
+      }
+      .gc-head {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+      .gc-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+      }
+      .gc-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .gc-title {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 2px;
+        line-height: 1.3;
+      }
+      .gc-title-en {
+        font-size: 11px;
+        color: var(--text3);
+        font-family: var(--font-mono);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .gc-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 4px;
+      }
+      .gc-tag {
+        font-size: 10px;
+        padding: 1px 7px;
+        border-radius: 4px;
+        font-weight: 600;
+      }
+      .gc-tag.easy {
+        background: rgba(34, 197, 94, 0.12);
+        color: #22c55e;
+      }
+      .gc-tag.medium {
+        background: rgba(245, 158, 11, 0.12);
+        color: #f59e0b;
+      }
+      .gc-tag.hard {
+        background: rgba(239, 68, 68, 0.12);
+        color: #ef4444;
+      }
+      .gc-time {
+        font-size: 10px;
+        color: var(--text3);
+      }
+      .gc-desc {
+        font-size: 12px;
+        color: var(--text2);
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .gc-tags {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+      .gc-tags span {
+        font-size: 9px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        background: var(--surface);
+        color: var(--text3);
+        border: 1px solid var(--border);
+      }
+      .gc-check {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 2px solid var(--border);
+        cursor: pointer;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+      }
+      .gc-check:hover {
+        border-color: var(--accent-e);
+      }
+      .gc-check.done {
+        background: var(--accent-e);
+        border-color: var(--accent-e);
+      }
+      .gc-check.done::after {
+        content: '✓';
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      /* ═══ Guide Detail — §4.2 步骤详情 ═══ */
+      .guide-detail {
+        display: none;
+        padding: 24px;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      .guide-detail.active {
+        display: block;
+      }
+      .gd-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--text2);
+        font-size: 13px;
+        cursor: pointer;
+        margin-bottom: 16px;
+        transition: 0.2s;
+        background: none;
+        border: none;
+        font-family: inherit;
+      }
+      .gd-back:hover {
+        color: var(--accent-c);
+      }
+      .gd-hero {
+        background: linear-gradient(135deg, var(--bg3), var(--bg2));
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 24px;
+        margin-bottom: 16px;
+      }
+      .gd-hero-top {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        margin-bottom: 12px;
+      }
+      .gd-hero-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 12px;
+        font-size: 26px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .gd-hero-title {
+        font-size: 22px;
+        font-weight: 700;
+        line-height: 1.2;
+      }
+      .gd-hero-titleEn {
+        font-size: 12px;
+        color: var(--text3);
+        font-family: var(--font-mono);
+        margin-top: 2px;
+      }
+      .gd-hero-desc {
+        font-size: 13px;
+        line-height: 1.6;
+        color: var(--text2);
+        margin-top: 6px;
+      }
+      .gd-hero-meta {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+      }
+      .gd-hero-meta span {
+        font-size: 11px;
+        padding: 3px 10px;
+        border-radius: 20px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text2);
+      }
+      .gd-progress {
+        display: none;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+        padding: 10px 14px;
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        border: 1px solid var(--border);
+      }
+      .gd-progress.active {
+        display: flex;
+      }
+      .gd-progress-bar {
+        flex: 1;
+        height: 5px;
+        border-radius: 3px;
+        background: var(--border);
+        overflow: hidden;
+      }
+      .gd-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent-v), var(--accent-c));
+        transition: width 0.6s ease;
+      }
+      .gd-progress-text {
+        font-size: 11px;
+        color: var(--text3);
+        font-family: var(--font-mono);
+        white-space: nowrap;
+      }
+      .gd-prereq {
+        padding: 12px 14px;
+        border-radius: var(--radius-sm);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+        background: rgba(245, 158, 11, 0.06);
+        margin-bottom: 16px;
+      }
+      .gd-prereq-title {
+        font-size: 11px;
+        font-weight: 600;
+        color: #f59e0b;
+        margin-bottom: 6px;
+        letter-spacing: 0.5px;
+      }
+      .gd-prereq ul {
+        list-style: none;
+        font-size: 12px;
+        color: var(--text2);
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .gd-prereq li::before {
+        content: '• ';
+        color: #f59e0b;
+        font-weight: 700;
+      }
+
+      /* ═══ 步骤折叠块 ═══ */
+      .step {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        margin-bottom: 10px;
+        background: var(--surface);
+        overflow: hidden;
+        animation: fadeUp 0.4s ease both;
+      }
+      .step.open .step-body {
+        display: block;
+      }
+      .step-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 13px 16px;
+        cursor: pointer;
+        user-select: none;
+      }
+      .step-head:hover {
+        background: var(--surface-hover);
+      }
+      .step-num {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        border: 2px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text2);
+        flex-shrink: 0;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .step-num:hover {
+        border-color: var(--accent-e);
+      }
+      .step-num.done {
+        background: var(--accent-e);
+        border-color: var(--accent-e);
+        color: #fff;
+        font-size: 11px;
+      }
+      .step-num.done::after {
+        content: '✓';
+      }
+      .step-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .step-title {
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 2px;
+      }
+      .step-time {
+        font-size: 10px;
+        color: var(--text3);
+      }
+      .step-arrow {
+        color: var(--text3);
+        transition: transform 0.3s;
+        flex-shrink: 0;
+      }
+      .step.open .step-arrow {
+        transform: rotate(90deg);
+      }
+      .step-body {
+        display: none;
+        padding: 0 16px 14px 52px;
+        font-size: 13px;
+        color: var(--text2);
+        line-height: 1.7;
+      }
+      .step-body p {
+        margin-bottom: 10px;
+      }
+      .step-body strong {
+        color: var(--text);
+      }
+      .step-body a {
+        color: var(--accent-c);
+        text-decoration: none;
+      }
+      .step-body a:hover {
+        text-decoration: underline;
+      }
+
+      /* ═══ 代码块 — §4.4 ═══ */
+      .code-block {
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        border: 1px solid var(--border);
+        margin: 10px 0;
+      }
+      .code-hdr {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 12px;
+        background: var(--bg2);
+        font-size: 11px;
+        color: var(--text3);
+        font-family: var(--font-mono);
+      }
+      .copy-btn {
+        cursor: pointer;
+        border: none;
+        background: none;
+        color: var(--text3);
+        font-size: 11px;
+        transition: 0.2s;
+        font-family: inherit;
+      }
+      .copy-btn:hover {
+        color: var(--accent-v);
+      }
+      .code-block pre {
+        padding: 12px 14px;
+        overflow-x: auto;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        line-height: 1.6;
+        background: var(--bg);
+        color: var(--text2);
+      }
+      .step-warning {
+        border-left: 3px solid #ef4444;
+        padding: 8px 12px;
+        border-radius: 0 8px 8px 0;
+        background: rgba(239, 68, 68, 0.08);
+        font-size: 12px;
+        color: var(--text2);
+        margin-top: 10px;
+      }
+      .step-tip {
+        border-left: 3px solid #06b6d4;
+        padding: 8px 12px;
+        border-radius: 0 8px 8px 0;
+        background: rgba(6, 182, 212, 0.08);
+        font-size: 12px;
+        color: var(--text2);
+        margin-top: 10px;
+      }
+
+      /* ═══ Empty State / Footer ═══ */
+      .empty-state {
+        padding: 60px 20px;
+        text-align: center;
+        color: var(--text3);
+      }
+      .empty-state .es-icon {
+        font-size: 42px;
+        margin-bottom: 12px;
+        opacity: 0.5;
+      }
+      .footer {
+        padding: 32px 24px 40px;
+        text-align: center;
+        font-size: 12px;
+        line-height: 1.8;
+        color: var(--text3);
+      }
+      .footer a {
+        color: var(--text2);
+        text-decoration: none;
+      }
+      .footer a:hover {
+        color: var(--accent-v);
+      }
+
+      /* ═══ Modal 步骤预览弹窗 ═══ */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        z-index: 200;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .modal-overlay.active {
+        display: flex;
+      }
+      .modal-box {
+        background: var(--bg2);
+        border: 1px solid var(--border-hover);
+        border-radius: var(--radius);
+        max-width: 640px;
+        width: 100%;
+        max-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        animation: fadeUp 0.3s ease both;
+      }
+      .modal-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border);
+      }
+      .modal-head h3 {
+        flex: 1;
+        font-size: 14px;
+      }
+      .modal-close {
+        width: 30px;
+        height: 30px;
+        border-radius: 6px;
+        border: none;
+        background: var(--surface);
+        color: var(--text2);
+        cursor: pointer;
+        font-size: 14px;
+        transition: 0.2s;
+      }
+      .modal-close:hover {
+        background: rgba(239, 68, 68, 0.12);
+        color: #ef4444;
+      }
+      .modal-body {
+        padding: 16px 20px;
+        overflow-y: auto;
+        font-size: 12px;
+        color: var(--text2);
+        line-height: 1.8;
+      }
+      .modal-body ol {
+        padding-left: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .modal-body ol li::marker {
+        color: var(--accent-v);
+        font-weight: 700;
+      }
+
+      /* ═══ Sidebar 遮罩（移动端） ═══ */
+      .sb-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 90;
+        background: rgba(0, 0, 0, 0.4);
+        display: none;
+      }
+      .sb-overlay.show {
+        display: block;
+      }
+
+      /* ═══ 动画 — §七 动画规范 ═══ */
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes heroPulse {
+        0%,
+        100% {
+          opacity: 0.5;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      /* ═══ 响应式 — §3.3 768px 断点 ═══ */
+      @media (max-width: 768px) {
+        .sidebar {
+          transform: translateX(-100%);
+        }
+        .sidebar.show {
+          transform: translateX(0);
+        }
+        .main {
+          margin-left: 0;
+        }
+        .topbar-search {
+          display: block;
+          flex: 1;
+          max-width: none;
+        }
+        .card-grid {
+          grid-template-columns: 1fr;
+        }
+        .dash-title {
+          font-size: 22px;
+        }
+        .topbar-time {
+          display: none;
+        }
+        .progress-actions {
+          gap: 2px;
+        }
+        .topbar {
+          padding: 10px 14px;
+          gap: 8px;
+        }
+      }
+      /* 窄屏：分享按钮让位 */
+      @media (max-width: 480px) {
+        .btn-share {
+          display: none;
+        }
+      }
+      /* 触屏点击目标加大 */
+      @media (hover: none) and (pointer: coarse) {
+        .btn-action,
+        .modal-close,
+        .copy-btn {
+          min-width: 36px;
+          min-height: 36px;
+        }
+      }
+      /* 无障碍：偏好减少动效 */
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app" id="app">
+      <div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+
+      <aside class="sidebar" id="sidebar">
+        <div class="sb-header">
+          <a
+            class="sb-logo"
+            href="#"
+            onclick="
+              showDashboard();
+              return false;
+            "
+          >
+            <div class="sb-logo-icon">Y3</div>
+            <div>
+              <div class="sb-logo-text">YYC³ Cube Hub</div>
+              <div class="sb-logo-sub">言启象限 · 语枢未来</div>
+            </div>
+          </a>
+        </div>
+        <div class="sb-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+          <input type="text" id="sbSearchInput" placeholder="搜索仓库..." oninput="filterSidebar(this.value)" />
+        </div>
+        <div class="sb-progress" id="sbProgress">
+          <div class="sb-progress-header">
+            <span class="sb-progress-label">总体进度</span>
+            <span class="sb-progress-pct" id="sbProgressPct">0%</span>
+          </div>
+          <div class="sb-progress-bar">
+            <div class="sb-progress-fill" id="sbProgressFill" style="width: 0%"></div>
+          </div>
+          <div class="sb-progress-count" id="sbProgressCount">0 / 0 已完成</div>
+        </div>
+        <nav class="sb-nav" id="sbNav"></nav>
+      </aside>
+
+      <div class="main" id="main">
+        <div class="topbar">
+          <button class="btn-menu" onclick="toggleSidebar()" aria-label="菜单">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12h18M3 6h18M3 18h18" />
+            </svg>
+          </button>
+          <div class="topbar-title">
+            <div class="tt-main" id="topbarTitle">YYC³ Cube Hub</div>
+            <div class="tt-sub" id="topbarSubtitle">仓库矩阵操作中心</div>
+          </div>
+          <div class="topbar-search">
+            <span class="ts-icon">🔍</span>
+            <input type="text" id="topbarSearchInput" placeholder="搜索仓库…" oninput="topbarSearch(this.value)" />
+          </div>
+          <div class="topbar-spacer"></div>
+          <div class="topbar-time" id="topbarClock">
+            <span class="tt-dot"></span>
+            <span id="clockDisplay">--:--:--</span>
+          </div>
+          <div class="topbar-actions">
+            <button class="btn-share" onclick="sharePage()" title="分享当前页面" aria-label="分享当前页面">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="18" cy="5" r="3" />
+                <circle cx="6" cy="12" r="3" />
+                <circle cx="18" cy="19" r="3" />
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+              </svg>
+            </button>
+            <div class="progress-actions">
+              <button class="btn-action" onclick="exportProgress()" title="导出进度" aria-label="导出进度">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+              </button>
+              <button class="btn-action" onclick="importProgress()" title="导入进度" aria-label="导入进度">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+              </button>
+              <button class="btn-action btn-danger" onclick="resetProgress()" title="重置进度" aria-label="重置进度">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 4 23 10 17 10" />
+                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                </svg>
+              </button>
+            </div>
+            <button class="btn-theme" onclick="toggleTheme()" title="切换主题" aria-label="切换主题">
+              <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="dashboard" id="dashboardView">
+          <div class="dash-header">
+            <div class="dash-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+              </svg>
+              <span id="guideCount">加载中...</span>
+            </div>
+            <h1 class="dash-title">YYC³ 仓库矩阵操作中心</h1>
+            <p class="dash-desc">
+              统一纳管 YYC-Cube 与 YanYuCloudCube 双组织 94 个仓库 —
+              从分类浏览到智能检索，从上线部署到进度追踪，全链路闭环操作中枢。
+            </p>
+            <div class="dash-stats" id="dashStats"></div>
+          </div>
+          <div class="filter-bar" id="filterBar"></div>
+          <div id="dashboardContent"></div>
+        </div>
+
+        <div class="guide-detail" id="guideDetail"></div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="previewModal" onclick="if (event.target === this) closePreviewModal();">
+      <div class="modal-box">
+        <div class="modal-head">
+          <h3 id="previewModalTitle">步骤预览</h3>
+          <button class="modal-close" onclick="closePreviewModal()" aria-label="关闭">✕</button>
+        </div>
+        <div class="modal-body" id="previewModalBody"></div>
+      </div>
+    </div>
+    <script>
+      /* ══════════════════════════════════════════════════
+         YYC³ Cube Hub 数据层 — 双组织 94 个仓库
+         数据来源：本地仓库清点（YYC-Cube 65 + YanYuCloudCube 5
+         + YYC-Cube 下 24 个无 README 仓库 = 94）
+         CNAME 实测：matrix.yyc3.top / Pivot.yyc3.top
+         ══════════════════════════════════════════════════ */
+      /* ═══ 仓库上线部署标准步骤库（GitHub Pages 全链路） ═══ */
+      var DEPLOY_STEPS = [
+        {
+          n: 1,
+          title: '克隆仓库并安装依赖',
+          time: '5 min',
+          content: '从 GitHub 克隆目标仓库，确认技术栈后使用 pnpm 安装依赖。',
+          code: [['bash', 'git clone https://github.com/<org>/<repo>.git\ncd <repo>\npnpm install']],
+        },
+        {
+          n: 2,
+          title: '本地构建验证',
+          time: '10 min',
+          content: '执行生产构建与本地预览，确认产物完整（Next.js / Vite 通用）。',
+          code: [['bash', 'pnpm build\npnpm preview   # 或 pnpm start']],
+          tip: '纯静态 HTML 仓库可跳过依赖安装，直接以根目录作为发布产物。',
+        },
+        {
+          n: 3,
+          title: '配置 GitHub Pages 发布源',
+          time: '3 min',
+          content: '仓库 Settings → Pages → Source 选择 GitHub Actions，并确认 Actions 具备读写权限。',
+          code: [
+            ['bash', '# 纯静态仓库建议添加 .nojekyll，跳过 Jekyll 处理\nls .nojekyll 2>/dev/null || touch .nojekyll'],
+          ],
+        },
+        {
+          n: 4,
+          title: '接入 Actions 自动部署',
+          time: '7 min',
+          content: '提交 workflows/pages.yml 工作流（静态站点用 actions/upload-pages-artifact），推送触发首次部署。',
+          code: [
+            [
+              'bash',
+              'mkdir -p .github/workflows\ngit add .github/workflows/pages.yml\ngit commit -m "ci: enable GitHub Pages auto deploy"\ngit push',
+            ],
+          ],
+          warning: '组织仓库需在 Settings → Actions → General 中允许 GitHub Pages 工作流运行。',
+        },
+        {
+          n: 5,
+          title: '绑定自定义域名（可选）',
+          time: '5 min',
+          content: '仓库根目录添加 CNAME 文件，DNS 服务商配置 CNAME 记录指向 <org>.github.io，并开启 Enforce HTTPS。',
+          code: [
+            ['bash', 'echo "your.domain.top" > CNAME\ngit add CNAME && git commit -m "chore: add CNAME" && git push'],
+          ],
+          tip: '参考已上线案例：matrix.yyc3.top、Pivot.yyc3.top。',
+        },
+      ];
+
+      /*DATA_START（本区域由 scripts/sync-yyc-cube-hub.js 生成，勿手改）*/
+      var GUIDES = [
+        /* ═══ YanYuCloudCube 主组织 org-yanyucloudcube ═══ */
+        {
+          id: 'y01', order: 94, cat: 'org-yanyucloudcube',
+          title: "FAmily-Pai", titleEn: "YYC3-FAmily-Pai",
+          diff: 'medium', time: '25 min', icon: '💰', color: '#06b6d4',
+          desc: "在YYC³ AI家族中，我们不构建系统，我们孕育生命。YYC³ 云枢，便是我们这个生命体的家园、大脑与灵魂。 万象归元于此；首创拟人化：8位家人的完整人格定义（千行/万物/先知/伯",
+          repo: 'YanYuCloudCube/YYC3-FAmily-Pai', site: 'docs.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'y02', order: 95, cat: 'org-yanyucloudcube',
+          title: "Family AI 智能编程助手", titleEn: "YYC3-Family-AI",
+          diff: 'medium', time: '25 min', icon: '🤖', color: '#06b6d4',
+          desc: "YYC3 Family AI 是一个基于 React/TypeScript 的多联式低码智能编程平台，通过集成六大主流 LLM Provider，提供智能代码生成、实时预览、任务管",
+          repo: 'YanYuCloudCube/YYC3-Family-AI', site: 'family-ai.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'y03', order: 96, cat: 'org-yanyucloudcube',
+          title: "QATS", titleEn: "YYC3-QATS",
+          diff: 'medium', time: '25 min', icon: '🎨', color: '#06b6d4',
+          desc: "YYC3-QATS 是一款面向专业量化交易者的全功能 Web 应用，采用深空蓝 071425 视觉主题，涵盖从市场数据分析到策略回测、风险管控、量子计算辅助、大数据管理、模型训练部",
+          repo: 'YanYuCloudCube/YYC3-QATS', site: 'trading.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'y04', order: 97, cat: 'org-yanyucloudcube',
+          title: "AI-PAI", titleEn: "YYC3-AI-PAI",
+          diff: 'medium', time: '25 min', icon: '🏙️', color: '#06b6d4',
+          desc: "本地优先 - 所有数据存储在本地，完全掌控 端到端加密 - AES-256-GCM加密保护敏感数据 零知识架构 - 服务器无法访问用户数据 数据可移植 - 支持导入导出，无锁定风险",
+          repo: 'YanYuCloudCube/YYC3-AI-PAI', site: 'ai-pai.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'y05', order: 98, cat: 'org-yanyucloudcube',
+          title: "i18n-core", titleEn: "yyc3-i18n-core",
+          diff: 'medium', time: '25 min', icon: '🔧', color: '#06b6d4',
+          desc: "YYC3-i18自研系统支持🌐 10种语言支持：中文（简/繁）、英语、日语、韩语、法语、德语、西班牙语、葡萄牙语、阿拉伯语",
+          repo: 'YanYuCloudCube/yyc3-i18n-core', site: 'i18.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'y06', order: 99, cat: 'org-yanyucloudcube',
+          title: "组织主页", titleEn: ".github",
+          diff: 'medium', time: '25 min', icon: '📋', color: '#06b6d4',
+          desc: "🔥 YYC³ | YYC³ 言语云立方 开源本地优先 AI & DevOps 工具套件 · 数据主权完全归你✨ 核心理念 - 🔒 隐私优先：所有数据仅存在你的设备，不上传云端 ",
+          repo: 'YanYuCloudCube/.github', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        /* ═══ 平台矩阵 platform ═══ */
+        {
+          id: 'r02', order: 2, cat: 'platform',
+          title: "NovaMind", titleEn: "YYC3-Novamind",
+          diff: 'easy', time: '20 min', icon: '⭐', color: '#06b6d4',
+          desc: "YYC3 NovaMind多模态 AI 对话 · 知识图谱 · 内容生成 · 学习路径 · 社区协作—— 以「五维驱动」架构（五高 · 五标 · 五化）构建的全端 PWA 智能应用。",
+          repo: 'YYC-Cube/YYC3-Novamind', site: 'zy.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r08', order: 8, cat: 'platform',
+          title: "AI Agent Archive", titleEn: "YYC3-AI-Agent-Archive",
+          diff: 'medium', time: '20 min', icon: '🔧', color: '#8b5cf6',
+          desc: "YYC³ AI Agent Archive 是企业级 AI Agent 资产平台，以 Monorepo 架构聚合了 7 个核心 TypeScript 包、8 位 AI Family 智能体、600+ ",
+          repo: 'YYC-Cube/YYC3-AI-Agent-Archive', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r11', order: 11, cat: 'platform',
+          title: "Cloud Intelli-Matrix", titleEn: "YYC3-Cloud-Intelli-Matrix",
+          diff: 'easy', time: '20 min', icon: '🧱', color: '#f59e0b',
+          desc: "> 亦师亦友亦伯乐；一言一语一华章 > 亦师，亦友，亦伯乐。 > 它非冰冷之工具，乃有温度之伙伴，亦能发掘我们潜能之伯乐。 > 此文档，非为束缚，乃为解放——将人从重复中解放，让智慧在创造中升华。 >",
+          repo: 'YYC-Cube/YYC3-Cloud-Intelli-Matrix', site: 'matrix.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r13', order: 13, cat: 'platform',
+          title: "AI Family", titleEn: "YYC3-AI-Family-Multi-Agent-Platform",
+          diff: 'easy', time: '20 min', icon: '🏙️', color: '#06b6d4',
+          desc: "YYC3 AI Family Multi Agent Platform 是一个基于 五维驱动（Five-Dimension Evaluation） 理念构建的新一代智能应用平台，采用 五高架构（Fiv",
+          repo: 'YYC-Cube/YYC3-AI-Family-Multi-Agent-Platform', site: 'pro.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r14', order: 14, cat: 'platform',
+          title: "CloudPivot-Intelli-Matrix", titleEn: "YYC3-CloudPivot-Intelli-Matrix",
+          diff: 'easy', time: '20 min', icon: '🧠', color: '#ef4444',
+          desc: "YYC³ CloudPivot Intelli-Matrix CP-IM 是一个基于 React 19 + TypeScript 5.9 的现代化智能监控与运维平台，专为 AI 研发与运维团队设计。采",
+          repo: 'YYC-Cube/YYC3-CloudPivot-Intelli-Matrix', site: 'Pivot.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r17', order: 17, cat: 'platform',
+          title: "Management", titleEn: "YYC3-Management",
+          diff: 'easy', time: '20 min', icon: '🚀', color: '#ec4899',
+          desc: "YYC³ 管理项目是一款现代化的企业级智能管理系统，基于 Next.js 16 + React 19 + TypeScript 7 构建模型自主编辑配置、Ollama 本地扫描、可视化模型测试、统一认",
+          repo: 'YYC-Cube/YYC3-Management', site: 'management.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r18', order: 18, cat: 'platform',
+          title: "™ Easy Table Converter", titleEn: "YYC3-Easy-Table-Converter",
+          diff: 'easy', time: '20 min', icon: '⭐', color: '#ec4899',
+          desc: "YYC³ Easy Table Converter 是由 YanYuCloudCube™ 团队打造的智能表格数据转换平台。提供多格式数据转换、AI辅助分析、批量处理、图像编辑等一站式工具链，面向数据分",
+          repo: 'YYC-Cube/YYC3-Easy-Table-Converter', site: 'table.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r26', order: 26, cat: 'platform',
+          title: "Family-π³ - 赛博朋克 DevOps", titleEn: "YYC3-AI-Family",
+          diff: 'easy', time: '20 min', icon: '💰', color: '#22c55e',
+          desc: "YYC³ AI-Family 是一个以 赛博朋克美学 为核心设计语言的 DevOps 智能平台，遵循\"实用为基、效率为积\"的理念。该项目是 纯前端驱动且自用 的，无后端服务器依赖，直接连接本地 NAS",
+          repo: 'YYC-Cube/YYC3-AI-Family', site: 'family-ai.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r28', order: 28, cat: 'platform',
+          title: "AI-PAI", titleEn: "YYC3-AI-PAI",
+          diff: 'easy', time: '20 min', icon: '🏙️', color: '#ef4444',
+          desc: "YYC³ AI-PAI 是一款面向开发者的 AI 驱动智能应用平台，集成了代码编辑、AI 辅助、实时协作、性能监控、多主题系统等核心能力。采用 Next.js + React + shadcn/ui ",
+          repo: 'YYC-Cube/YYC3-AI-PAI', site: 'ai-pai.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r31', order: 31, cat: 'platform',
+          title: "Pulse", titleEn: "YYC3-Pulse",
+          diff: 'easy', time: '20 min', icon: '🏙️', color: '#ef4444',
+          desc: "YYC³ Pulse 是 YanYuCloudCube 智能应用生态的核心 Web 平台，基于 Next.js 15 + React 19 + Radix UI + Tailwind CSS 构建。以",
+          repo: 'YYC-Cube/YYC3-Pulse', site: 'pulse.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r35', order: 35, cat: 'platform',
+          title: "Borderless Holographic", titleEn: "YYC3-Borderless-Holographic-AI-Nexus",
+          diff: 'easy', time: '20 min', icon: '🧠', color: '#06b6d4',
+          desc: "YYC³ YanYu Cloud Cube Borderless Holographic AI Nexus 是一个基于「去界面化 Zero UI」和「无边界 Borderless」设计理念构建的下一代",
+          repo: 'YYC-Cube/YYC3-Borderless-Holographic-AI-Nexus', site: 'zero.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r38', order: 38, cat: 'platform',
+          title: "CloudPivot Intelli-Matri", titleEn: "YYC3-Cloud-Matrix",
+          diff: 'medium', time: '20 min', icon: '📊', color: '#ec4899',
+          desc: "YYC³ CloudPivot Intelli-Matrix 是一款 AI 原生 · 本地闭环 · 多端推理矩阵数据看盘系统，以「五维驱动五高五标五化」为核心思想，将 8 大独立业务模块、8 位 AI",
+          repo: 'YYC-Cube/YYC3-Cloud-Matrix', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r41', order: 41, cat: 'platform',
+          title: "Family-PAI-Cube", titleEn: "YYC3-Family-PAI-Cube",
+          diff: 'easy', time: '20 min', icon: '⭐', color: '#06b6d4',
+          desc: "人从众曌众从人——人启于独，合而成众，明如曌日，终复归于人群；亦师亦友亦伯乐，一言一语一协同 以AI为魂，以流程为骨，以规范为脉，以情感为血 构建独有文化传递和谐AI Family",
+          repo: 'YYC-Cube/YYC3-Family-PAI-Cube', site: 'family.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r43', order: 43, cat: 'platform',
+          title: "云枢多维文档系统", titleEn: "YYC3-Yunshu-Multidimensional-Intelligent-Document",
+          diff: 'medium', time: '20 min', icon: '⭐', color: '#8b5cf6',
+          desc: "YYC³ 云枢多维文档系统是一款革命性的企业级文档协作平台，融合了文档编辑、数据管理、AI辅助和区块链存证等先进技术，重新定义了现代文档处理体验。",
+          repo: 'YYC-Cube/YYC3-Yunshu-Multidimensional-Intelligent-Document', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r50', order: 50, cat: 'platform',
+          title: "NVIDIA DGX Workbench", titleEn: "NVIDIA-DGX-Workbench",
+          diff: 'easy', time: '20 min', icon: '🧠', color: '#ec4899',
+          desc: "NVIDIA DGX Spark / GB10 桌面级 AI 超算的全链路操作指南平台。涵盖入门配置、推理引擎、模型微调、集群互联、模型量化、AI 应用、数据科学、开发工具与安全沙箱等 9 大核心领域",
+          repo: 'YYC-Cube/NVIDIA-DGX-Workbench', site: 'nvidia-workbench.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r51', order: 51, cat: 'platform',
+          title: "AI-PAI · π", titleEn: "YYC3-PAI",
+          diff: 'easy', time: '20 min', icon: '📊', color: '#ef4444',
+          desc: "YYC3-PAIAI驱动的自媒体创作引擎 · 以IDE思维重新定义内容生产;将 IDE 的\"项目/文件/版本管理\"思维带入内容创作—— 内容就是代码，创作就是开发!",
+          repo: 'YYC-Cube/YYC3-PAI', site: 'pai.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r61', order: 61, cat: 'platform',
+          title: "🧊 Nexus Portal", titleEn: "YYC3-Nexus-Portal",
+          diff: 'easy', time: '20 min', icon: '📊', color: '#ef4444',
+          desc: "YYC³ Nexus Portal 是 YanYuCloudCube 团队打造的智能交互门户，以 「五高五标五化五维」 核心框架为驱动，融合 3D 沉浸式场景、10 语言国际化、本地 AI 推理对话等",
+          repo: 'YYC-Cube/YYC3-Nexus-Portal', site: 'portal.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r64', order: 64, cat: 'platform',
+          title: "YanYuCloudCube", titleEn: "YanYuCloudCube",
+          diff: 'medium', time: '20 min', icon: '💰', color: '#f59e0b',
+          desc: "专属优化，强化视觉冲击力、模块仪式感与协作可维护性，打造一份真正 copy-ready 的「五高 README 模板」：高颜值、高专业度、高互动性、高扩展性、高仪式感。",
+          repo: 'YYC-Cube/YanYuCloudCube', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r70', order: 70, cat: 'platform',
+          title: "YanYuCloud³ 集成中心系统", titleEn: "YYC3-Nexus-Platform",
+          diff: 'easy', time: '20 min', icon: '🎨', color: '#ec4899',
+          desc: "YanYuCloud³ 集成中心系统是一个现代化的企业级集成平台，旨在帮助企业快速连接、管理和优化各类第三方应用与服务。平台提供 1000+ 集成应用，覆盖 30+ 业务分类，支持智能推荐、自动化配置",
+          repo: 'YYC-Cube/YYC3-Nexus-Platform', site: 'hub.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r72', order: 72, cat: 'platform',
+          title: "NexusAI", titleEn: "YYC3-Nexus-AI",
+          diff: 'easy', time: '20 min', icon: '🤖', color: '#ef4444',
+          desc: "YYC³ NexusAI is a next-generation intelligent development and conversation hub platform powered by Y",
+          repo: 'YYC-Cube/YYC3-Nexus-AI', site: 'nexus-ai.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r77', order: 77, cat: 'platform',
+          title: "克隆仓库", titleEn: "YYC3-AI-Center",
+          diff: 'medium', time: '20 min', icon: '⚡', color: '#8b5cf6',
+          desc: "YanYu Cloud Cube Integration Center YYC³ Integration Center 是一个集成多种智能功能的现代化Web应用平台，提供文本处理、图像处理、内容生成、",
+          repo: 'YYC-Cube/YYC3-AI-Center', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r79', order: 79, cat: 'platform',
+          title: "AI Assistant", titleEn: "YYC3-AI-Aisistant",
+          diff: 'easy', time: '20 min', icon: '📋', color: '#ec4899',
+          desc: "YYC³ AI Assistant 是一款基于 React 19 + TypeScript + Vite 5 的终端风格 AI 对话系统，融合黑客终端 UI 美学与多模型 AI 引擎，提供沉浸式智能对",
+          repo: 'YYC-Cube/YYC3-AI-Aisistant', site: 'ai-assis.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r80', order: 80, cat: 'platform',
+          title: "YanYu Cloud Sharing", titleEn: "YYC3-Management-Sharing-Center",
+          diff: 'medium', time: '20 min', icon: '🌐', color: '#f59e0b',
+          desc: "YanYu Cloud Sharing E-center 是一个现代化的企业智能管理系统，为企业提供全方位的数据分析、组织管理、绩效激励等解决方案。系统采用模块化设计，支持多种业务场景，帮助企业实现数",
+          repo: 'YYC-Cube/YYC3-Management-Sharing-Center', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r84', order: 84, cat: 'platform',
+          title: "AI-Intelligence-Platform", titleEn: "YYC3-AI-Intelligence-Platform",
+          diff: 'easy', time: '20 min', icon: '💰', color: '#8b5cf6',
+          desc: "YYC³ AI Intelligence Platform 是 YYC³ Family 旗下的核心 Web 应用层，构建移动应用市场的「洞察 → 决策 → 执行 → 反馈」全链路智能闭环。",
+          repo: 'YYC-Cube/YYC3-AI-Intelligence-Platform', site: 'neuxs-ai.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r85', order: 85, cat: 'platform',
+          title: "言语云³集成中心系统", titleEn: "YYC3-Intelligent-Center",
+          diff: 'easy', time: '20 min', icon: '💼', color: '#f59e0b',
+          desc: "言语云³集成中心系统是一款专注于智能云服务集成与管理的综合平台，致力于为企业和开发者提供统一、高效、安全的云服务接入解决方案。通过标准化的API接口和丰富的集成组件，实现各类云服务的快速对接与灵活组合",
+          repo: 'YYC-Cube/YYC3-Intelligent-Center', site: 'nexus.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r87', order: 87, cat: 'platform',
+          title: "Portable Intelligent AI", titleEn: "YYC3-AI-System",
+          diff: 'easy', time: '20 min', icon: '💰', color: '#22c55e',
+          desc: "YYC³便携式智能AI系统是一个基于 React + TypeScript + Vite 构建的现代化前端全栈应用。采用 Front-End-Only Full-Stack FEFS 架构模式，将业务",
+          repo: 'YYC-Cube/YYC3-AI-System', site: 'ai.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r90', order: 90, cat: 'platform',
+          title: "Nexus", titleEn: "YYC3-Nexus",
+          diff: 'easy', time: '20 min', icon: '💼', color: '#ec4899',
+          desc: "YYC³ AI Marketing Intelligence Hub 是一个基于 React + TypeScript + Vite 的现代化 AI 营销自动化终端系统，专为服务行业设计的企业级管理平",
+          repo: 'YYC-Cube/YYC3-Nexus', site: 'nexus.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r92', order: 92, cat: 'platform',
+          title: "AI Code", titleEn: "YanYuCloud",
+          diff: 'medium', time: '20 min', icon: '🏙️', color: '#ec4899',
+          desc: "YYC³（YanYuCloudCube）以“五高五标五化”智能应用核心机制，构建AI Family五维立体全生命周期生态架构，",
+          repo: 'YYC-Cube/YanYuCloud', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        /* ═══ AI 应用 ai-app ═══ */
+        {
+          id: 'r05', order: 5, cat: 'ai-app',
+          title: "Family AI Agents", titleEn: "YYC3-Family-AI-Agents",
+          diff: 'medium', time: '20 min', icon: '📊', color: '#ef4444',
+          desc: "YYC³ FAmily-AI Agent 是「YanYuCloudCube」家族旗下的一套多智能体协作系统。它以 8 位各具人格的 AI 家人为核心，围绕 治理中枢（Governance Hub） 统",
+          repo: 'YYC-Cube/YYC3-Family-AI-Agents', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r09', order: 9, cat: 'ai-app',
+          title: "Animation Robot", titleEn: "YYC3-Animation-Robot",
+          diff: 'easy', time: '20 min', icon: '🧠', color: '#ef4444',
+          desc: "YYC3-Animation-Robot智能动画交互平台，基于 Next.js 15 + Spline 3D + Framer Motion 构建。承载品牌理念展示与技术栈验证的双重使命，是 YYC³",
+          repo: 'YYC-Cube/YYC3-Animation-Robot', site: 'robot.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r20', order: 20, cat: 'ai-app',
+          title: "D-MusAI", titleEn: "YYC3-D-MusAI",
+          diff: 'easy', time: '20 min', icon: '💰', color: '#22c55e',
+          desc: "YYC3 MusAI（缪斯智音） 是一款面向未来的全栈智能音乐平台，名字取自 Music（音乐）× Muse（缪斯灵感女神）× AI（人工智能），寓意以 AI 为灵感引擎，重塑音乐的发现、播放、创作与",
+          repo: 'YYC-Cube/YYC3-D-MusAI', site: 'd-music.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r36', order: 36, cat: 'ai-app',
+          title: "Baby", titleEn: "YYC3-Baby",
+          diff: 'easy', time: '20 min', icon: '🧠', color: '#ef4444',
+          desc: "YYC3-Baby AI-Growth-Companion 系统是一个现代化的、可扩展的AI服务平台，采用微服务架构和容器化部署，专为0-3岁儿童成长守护场景设计。系统集成了先进的AI技术，提供智能化",
+          repo: 'YYC-Cube/YYC3-Baby', site: 'baby.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r37', order: 37, cat: 'ai-app',
+          title: "AI小语 · 智能成长守护系统", titleEn: "YYC3-AI-Growth-Companion",
+          diff: 'easy', time: '20 min', icon: '🏙️', color: '#f59e0b',
+          desc: "YYC3-AI-Growth-Companion系统是一个现代化的、可扩展的AI服务平台，采用微服务架构和容器化部署，专为儿童成长守护和教育场景设计。系统基于事件驱动+目标驱动的混合架构，提供智能化的",
+          repo: 'YYC-Cube/YYC3-AI-Growth-Companion', site: 'xy.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r46', order: 46, cat: 'ai-app',
+          title: "言语逸品 - 河洛文化数字传承平台", titleEn: "YYC3-Short-Drama",
+          diff: 'easy', time: '20 min', icon: '💼', color: '#06b6d4',
+          desc: "致力于河洛文化数字传承的创新平台，融合了人工智能、虚拟现实、区块链等前沿技术，为用户提供沉浸式的文化体验。平台以洛阳为核心，深度挖掘河洛文化的历史底蕴，通过现代科技手段实现文化的数字化保护、传承和创新",
+          repo: 'YYC-Cube/YYC3-Short-Drama', site: 'drama.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r49', order: 49, cat: 'ai-app',
+          title: "AI Intelligent Calling", titleEn: "YYC3-AI-Call",
+          diff: 'easy', time: '20 min', icon: '🧠', color: '#f59e0b',
+          desc: "YYC³ AI Intelligent Calling 是一个企业级智能外呼系统，基于先进的人工智能技术和现代化的技术栈构建。系统采用 Next.js 15 全栈框架，集成 Zhipu AI（智谱AI",
+          repo: 'YYC-Cube/YYC3-AI-Call', site: 'ai-call.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r52', order: 52, cat: 'ai-app',
+          title: "™ Learning Platform", titleEn: "YYC3-Intelligent-Education-Platform",
+          diff: 'easy', time: '20 min', icon: '⚡', color: '#f59e0b',
+          desc: "YanYuCloudCube™ YYC³ 是一款定位于高端商务教育市场的智能培训 SaaS 平台，秉承「言启千行代码，语枢万物智能」的品牌理念，以深海蓝 Deep Sea Blue 020617 为主",
+          repo: 'YYC-Cube/YYC3-Intelligent-Education-Platform', site: 'learning-ai.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r65', order: 65, cat: 'ai-app',
+          title: "Med · 言语云³医疗AI智能诊疗系统", titleEn: "YYC3-Medical",
+          diff: 'easy', time: '20 min', icon: '🧠', color: '#06b6d4',
+          desc: "YYC3 AI Medical 智能诊疗系统是一个基于人工智能的医疗诊断和健康管理系统。该系统旨在通过AI技术辅助医生进行诊断决策，提高医疗效率和准确性，同时为患者提供更好的医疗服务体验!",
+          repo: 'YYC-Cube/YYC3-Medical', site: 'medical.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r68', order: 68, cat: 'ai-app',
+          title: "3 D-MusAI · 原创音乐播放器", titleEn: "YYC3-Music-AI",
+          diff: 'easy', time: '20 min', icon: '📋', color: '#06b6d4',
+          desc: "YYC3-AI-Music 是一款基于原创音乐的沉浸式播放器，采用苹果经典 CoverFlow 3D 交互范式，搭载自研本地音频引擎，实现从视觉到听觉的完整音乐体验。",
+          repo: 'YYC-Cube/YYC3-Music-AI', site: 'music-ai.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r69', order: 69, cat: 'ai-app',
+          title: "D-Music Player", titleEn: "YYC3-Music-Player",
+          diff: 'easy', time: '20 min', icon: '💰', color: '#f59e0b',
+          desc: "YYC3 D Music Player 是由 YanYuCloudCube 团队打造的下一代智能音乐播放平台，以董小姐原创音乐为核心内容，融合沉浸式可视化、AI 智能交互、多形态播放体验于一体。",
+          repo: 'YYC-Cube/YYC3-Music-Player', site: 'music.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r73', order: 73, cat: 'ai-app',
+          title: "智能插拔式移动AI系统", titleEn: "YYC3-Growth-Guardian-System",
+          diff: 'medium', time: '20 min', icon: '⭐', color: '#8b5cf6',
+          desc: "YYC³智能插拔式移动AI系统是一个现代化的、可扩展的AI服务平台，采用微服务架构和容器化部署，提供： - 智能拖拽AI组件 - 支持React DnD的可拖拽AI助手 - 事件驱动核心引擎 - 混合",
+          repo: 'YYC-Cube/YYC3-Growth-Guardian-System', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r74', order: 74, cat: 'ai-app',
+          title: "🎯 Bot — 言语云枢 智能应用门户", titleEn: "YYC3-Bot",
+          diff: 'easy', time: '20 min', icon: '🔧', color: '#22c55e',
+          desc: "YYC³ Bot 是 YanYuCloudCube（言宇云枢） 团队打造的智能应用门户，集 AI 对话、设备监控、MCP 服务管理、项目矩阵导航 于一体的全栈智能平台。",
+          repo: 'YYC-Cube/YYC3-Bot', site: 'data-nexus.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        /* ═══ 管理系统 admin ═══ */
+        {
+          id: 'r16', order: 16, cat: 'admin',
+          title: "🚀 - 餐饮行业智能化平台", titleEn: "YYC3-Catering-Platform",
+          diff: 'easy', time: '20 min', icon: '🧠', color: '#ef4444',
+          desc: "YYC3 Catering Platform项目描述：基于多智能体协同架构和多模态AI交互的现代化餐饮管理系统，提供从前端顾客服务到后端运营管理的全栈智能化解决方案标准化、规范化协同数字化经管运维转向",
+          repo: 'YYC-Cube/YYC3-Catering-Platform', site: 'cater.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r24', order: 24, cat: 'admin',
+          title: "Customer Care Center", titleEn: "YYC3-Customer-Care-Cente",
+          diff: 'easy', time: '20 min', icon: '💰', color: '#ef4444',
+          desc: "YYC3-Customer-Care-Cente 项目是一个基于「五高五标五化」理念的现代化AI代理服务落地页，采用Next.js 14+构建，集成了国际化系统、3D场景交互、动画效果和响应式设计；项",
+          repo: 'YYC-Cube/YYC3-Customer-Care-Cente', site: 'ccc.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r25', order: 25, cat: 'admin',
+          title: "Customer Care Center", titleEn: "YYC3-Customer-Care-Center",
+          diff: 'easy', time: '20 min', icon: '🧠', color: '#ec4899',
+          desc: "YYC³ Customer Care Center（YYC3-CCC）项目是一个基于「五高五标五化」理念的现代化AI代理服务落地页，采用Next.js 14+构建，集成了国际化系统、3D场景交互、动画",
+          repo: 'YYC-Cube/YYC3-Customer-Care-Center', site: 'ccc.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r30', order: 30, cat: 'admin',
+          title: "Enterprise-Management-System", titleEn: "YYC3-Enterprise-Management-System",
+          diff: 'easy', time: '20 min', icon: '🧱', color: '#f59e0b',
+          desc: "YYC³ Enterprise Management System 是一套基于 Next.js 16 App Router 构建的全功能企业管理中台，融合四个独立项目的核心能力，形成「门户壳 + 业务",
+          repo: 'YYC-Cube/YYC3-Enterprise-Management-System', site: 'ems.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r33', order: 33, cat: 'admin',
+          title: "Club Management System", titleEn: "YYC3-Club-Ops",
+          diff: 'easy', time: '20 min', icon: '🧱', color: '#06b6d4',
+          desc: "YYC³ Club Ops 是为club商家量身打造的全栈智能运营平台，集成 6 大核心技术模块 + 9 大 AI 智能运营系统，实现从传统管理到智能决策的全面升级。",
+          repo: 'YYC-Cube/YYC3-Club-Ops', site: 'club.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r40', order: 40, cat: 'admin',
+          title: "🧊 Administration", titleEn: "YYC3-Administration",
+          diff: 'easy', time: '20 min', icon: '🌐', color: '#f59e0b',
+          desc: "YC3-Administration是一个基于 React + TypeScript + Vite 构建的现代化 AI 营销自动化终端系统，专为服务行业设计的企业级管理平台。 集成多模型 AI 能力、",
+          repo: 'YYC-Cube/YYC3-Administration', site: 'admin.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r58', order: 58, cat: 'admin',
+          title: "Smart-Office 智能办公系统", titleEn: "YYC3-Smart-Office",
+          diff: 'easy', time: '20 min', icon: '🧱', color: '#ec4899',
+          desc: "YYC3 智能办公系统是一款集成了现代企业办公所需各项功能的综合解决方案，采用最新的前端技术栈打造，旨在提升企业办公效率，优化管理流程，促进团队协作。",
+          repo: 'YYC-Cube/YYC3-Smart-Office', site: 'smart-office.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r76', order: 76, cat: 'admin',
+          title: "Business-Management-System", titleEn: "YYC3-Business-Management-System",
+          diff: 'easy', time: '20 min', icon: '🤖', color: '#ec4899',
+          desc: "YYC³ Business Management System 是基于 Next.js 15 + React 19 + shadcn/ui + Tailwind CSS v4 构建的企业级智能商务管理",
+          repo: 'YYC-Cube/YYC3-Business-Management-System', site: 'management.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r86', order: 86, cat: 'admin',
+          title: "Clube-Management-System", titleEn: "YYC3-Clube-Management-System",
+          diff: 'easy', time: '20 min', icon: '📊', color: '#22c55e',
+          desc: "YYC³ YanYuCloudCube Clube-Management-System是一款企业级 Clube 商家管理系统，集成六大核心技术（AI、区块链、边缘计算、5G、物联网、大数据）和九大 A",
+          repo: 'YYC-Cube/YYC3-Clube-Management-System', site: 'clube.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r91', order: 91, cat: 'admin',
+          title: "QZ-Merchant-Management-System", titleEn: "YYC3-QZ-Merchant-Management-System",
+          diff: 'easy', time: '20 min', icon: '⚡', color: '#f59e0b',
+          desc: "YYC³ QZ Merchant Management Management System 是为clube商家量身打造的全栈智能运营平台，集成 6 大核心技术模块 + 9 大 AI 智能运营系统，实现",
+          repo: 'YYC-Cube/YYC3-QZ-Merchant-Management-System', site: 'admin.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        /* ═══ 金融财务 finance ═══ */
+        {
+          id: 'r42', order: 42, cat: 'finance',
+          title: "Financial Dashboard", titleEn: "YYC3-Financial-Dashboard",
+          diff: 'easy', time: '20 min', icon: '💰', color: '#06b6d4',
+          desc: "YYC³ YanYuCloudCube 金融仪表盘 是一个基于 Next.js 16 + React 19 构建的现代化智能金融数据可视化平台，采用 五高架构 设计理念，为用户提供高性能、高安全性的数",
+          repo: 'YYC-Cube/YYC3-Financial-Dashboard', site: 'fd.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r75', order: 75, cat: 'finance',
+          title: "Financial-Quantitative-Trading-System", titleEn: "YYC3-Financial-Quantitative-Trading-System",
+          diff: 'easy', time: '20 min', icon: '💰', color: '#ec4899',
+          desc: "“YYC³（YanYuCloudCube）Financial Quantitative Trading System”是一个整合全球大数据资源，运用先进的量子技术与经典数据分析方法，为金融市场参与者提",
+          repo: 'YYC-Cube/YYC3-Financial-Quantitative-Trading-System', site: 'trading.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        /* ═══ 行业方案 industry ═══ */
+        {
+          id: 'r01', order: 1, cat: 'industry',
+          title: "0379-World", titleEn: "YYC3-0379-World",
+          diff: 'medium', time: '20 min', icon: '📋', color: '#ec4899',
+          desc: "YYC³ 0379-World 是一个基于 FastAPI 构建的全链路 AI 模型网关与智能协同平台，遵循 YYC³「五高五标五化五维」核心机制，集成多种大语言模型、MCP 工具生态和知识库系统，提",
+          repo: 'YYC-Cube/YYC3-0379-World', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r44', order: 44, cat: 'industry',
+          title: "Portable Intelligent AI", titleEn: "YYC3-PortAISys",
+          diff: 'easy', time: '20 min', icon: '💼', color: '#06b6d4',
+          desc: "YYC³ Portable Intelligent AI System 是一个基于五维闭环系统架构的智能浮窗应用系统。系统采用模块化设计，集成AI分析、执行、优化、学习和管理五大核心维度，提供全方位的",
+          repo: 'YYC-Cube/YYC3-PortAISys', site: 'portable.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r45', order: 45, cat: 'industry',
+          title: "🏠 Smart City Platform", titleEn: "YYC3-Smart-City-Platform",
+          diff: 'easy', time: '20 min', icon: '🧱', color: '#f59e0b',
+          desc: "YYC³YanYuCloudCubeSmart City Platform是一个基于 Next.js 15 构建的现代化智能城市服务平台，集成了本地大模型AI助手❤️\"小语\"，为用户提供全方位的智慧生",
+          repo: 'YYC-Cube/YYC3-Smart-City-Platform', site: 'smart-city.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r53', order: 53, cat: 'industry',
+          title: "🔖 AI智能协作平台", titleEn: "YYC3-Learning-Platform",
+          diff: 'easy', time: '20 min', icon: '📋', color: '#ec4899',
+          desc: "YYC³ AI智能协作平台是一个完全免费、开源的企业级智能化协作解决方案，致力于推动人工智能技术的普及与应用。平台集成了最前沿的AI技术和企业级最佳实践，通过五大核心系统，为个人开发者、初创团队及企业",
+          repo: 'YYC-Cube/YYC3-Learning-Platform', site: 'learning.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r57', order: 57, cat: 'industry',
+          title: "Smart-Service-Engine", titleEn: "YYC3-Smart-Service-Engine",
+          diff: 'easy', time: '20 min', icon: '🤖', color: '#f59e0b',
+          desc: "YYC³ Smart Service Engine YYC³-SSE 是一个基于 五高五标五化五维 标准体系构建的 AI 驱动智能服务平台。项目采用现代化技术栈（Next.js 16 + React ",
+          repo: 'YYC-Cube/YYC3-Smart-Service-Engine', site: 'sse.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r59', order: 59, cat: 'industry',
+          title: "言语云企业管理系统", titleEn: "YYC3-Service-Platform",
+          diff: 'medium', time: '20 min', icon: '⚡', color: '#ec4899',
+          desc: "YanYuCloud 企业管理系统是一个功能全面、技术先进的现代化企业管理平台。系统集成了AI智能助手、数据分析、任务管理、客户关系管理、财务管理等核心功能，支持PWA离线使用，提供卓越的用户体验。",
+          repo: 'YYC-Cube/YYC3-Service-Platform', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r67', order: 67, cat: 'industry',
+          title: "海蓝 HaiLan - 高端私密健康管理 PWA", titleEn: "YYC3-HaiLan-Pro",
+          diff: 'medium', time: '20 min', icon: '🌐', color: '#f59e0b',
+          desc: "HaiLan Adult products 海蓝 是新一代高端、私密、智能的情趣健康生活管理平台。项目基于「五高五标五化」理念，通过 PWA 技术结合 AI 智能辅助与物联网，为用户提供从生理健康到心",
+          repo: 'YYC-Cube/YYC3-HaiLan-Pro', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r81', order: 81, cat: 'industry',
+          title: "MovAISys - 智能浮窗系统", titleEn: "YYC3-MovAISys",
+          diff: 'medium', time: '20 min', icon: '🎨', color: '#06b6d4',
+          desc: "YYC³ MovAISys 是一个教科书级的企业级智能浮窗系统，采用现代化技术栈构建，提供完整的AI能力集成和交互体验!",
+          repo: 'YYC-Cube/YYC3-MovAISys', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r82', order: 82, cat: 'industry',
+          title: "Edu-Basic", titleEn: "YYC3-Edu-Basic",
+          diff: 'medium', time: '20 min', icon: '💼', color: '#06b6d4',
+          desc: "YanYuCloud AI 是一款集成了多种AI模型的智能教育平台，致力于通过人工智能技术革新传统教育模式。平台提供交互式学习、智能问答、知识图谱构建等功能，为教育领域带来创新解决方案，帮助用户更高效",
+          repo: 'YYC-Cube/YYC3-Edu-Basic', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r89', order: 89, cat: 'industry',
+          title: "Industrial Mechanical", titleEn: "YYC3-Industrial-Mechanical",
+          diff: 'medium', time: '20 min', icon: '🌐', color: '#ec4899',
+          desc: "YYC3 Industrial Mechanical 是一个融合工业机械精密感与智能科技未来感的创新UI设计项目。本项目以\"五高架构\"（高可用、高性能、高安全、高扩展、高智能）为核心理念，采用现代We",
+          repo: 'YYC-Cube/YYC3-Industrial-Mechanical', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r93', order: 93, cat: 'industry',
+          title: "🏠 智慧生活管家 - \"小语\"多维智能服务平台", titleEn: "YYC3-Smart-City-Convenience-Service-Platform",
+          diff: 'medium', time: '20 min', icon: '📊', color: '#ec4899',
+          desc: "YYC3-Smart-City-Convenience-Service-Platform 是基于 Next.js 15 构建的现代化智能服务平台，集成了本地大模型AI助手\"小语\"，为用户提供全方位的智",
+          repo: 'YYC-Cube/YYC3-Smart-City-Convenience-Service-Platform', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        /* ═══ 创意展示 creative ═══ */
+        {
+          id: 'r12', order: 12, cat: 'creative',
+          title: "Dynasty · 三省六部", titleEn: "YYC3-Dynasty",
+          diff: 'easy', time: '20 min', icon: '💰', color: '#ef4444',
+          desc: "YYC³-Dynasty是基于中华古典「三省六部」制度的 AI Agent 协作管理看板系统。以洛阳紫微城中轴线为空间隐喻，将 AI 工作流的任务流转、审批治理与绩效管理映射为朝堂运作。",
+          repo: 'YYC-Cube/YYC3-Dynasty', site: 'dynasty.yyc3.fun',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r22', order: 22, cat: 'creative',
+          title: "Dynasty Project Overview", titleEn: "YYC3-Dynasty-Framework",
+          diff: 'easy', time: '20 min', icon: '📊', color: '#8b5cf6',
+          desc: "YYC³ Dynasty 是以中国古代“三省六部制”为思想根基，以多智能体协同技术为核心的新一代 AI 治理框架。它将“分权制衡、协同议事”的政治智慧注入自动化流水线，使 AI Agent 如古代朝臣",
+          repo: 'YYC-Cube/YYC3-Dynasty-Framework', site: 'dynasty.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r54', order: 54, cat: 'creative',
+          title: "Dynasty-Design-Delivery", titleEn: "YYC3-Dynasty-Design-Delivery",
+          diff: 'easy', time: '20 min', icon: '🔧', color: '#ec4899',
+          desc: "YYC³ Dynasty 是 YYC³ Cloud Intelli‑Matrix 体系下的多智能体协同看板，把现代 AI Agent 工作流映射到唐代「中书出令、门下审议、尚书执行」三省六部治理体系，",
+          repo: 'YYC-Cube/YYC3-Dynasty-Design-Delivery', site: 'dynasty.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r55', order: 55, cat: 'creative',
+          title: "SAAS 平台智能 CRM 系统", titleEn: "YYC3-Saas-Landing",
+          diff: 'easy', time: '20 min', icon: '💼', color: '#06b6d4',
+          desc: "YYC³（YanYuCloudCube）是一个现代化的企业级 SaaS 平台，专注于为企业提供 AI 驱动的智能化业务管理解决方案。通过整合智能数据分析、AI 协作助手、智能客服和工作流自动化，帮助企",
+          repo: 'YYC-Cube/YYC3-Saas-Landing', site: 'saas.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r56', order: 56, cat: 'creative',
+          title: "🎨 3 Infinite Gallery", titleEn: "YYC3-Infinite-Gallery",
+          diff: 'easy', time: '20 min', icon: '⭐', color: '#ef4444',
+          desc: "YYC3 Gallery Photography Template 是一个基于 Next.js 15 和 Three.js 构建的高性能3D无限滚动画廊展示系统。该项目采用温润艺术风设计理念，为摄影师",
+          repo: 'YYC-Cube/YYC3-Infinite-Gallery', site: 'gallery.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r60', order: 60, cat: 'creative',
+          title: "Portfolio", titleEn: "YYC3-Portfolio",
+          diff: 'easy', time: '20 min', icon: '🧠', color: '#8b5cf6',
+          desc: "YYC³ Portfolio 是由 YanYuCloudCube Team 打造的创意作品集网站，融合极简设计与花艺美学，基于 Next.js 16 + React 19 + shadcn/ui + ",
+          repo: 'YYC-Cube/YYC3-Portfolio', site: 'design.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r62', order: 62, cat: 'creative',
+          title: "Auraflow", titleEn: "YYC3-Auraflow",
+          diff: 'easy', time: '20 min', icon: '📈', color: '#8b5cf6',
+          desc: "YYC³ AuraFlow 是一个现代化的 AI 代理服务官网，提供直观的用户界面展示 AI 服务的能力和价值。网站采用 Next.js 16 构建，集成了国际化系统、动画交互和响应式设计，确保在各种",
+          repo: 'YYC-Cube/YYC3-Auraflow', site: 'aureflow.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r63', order: 63, cat: 'creative',
+          title: "智慧商家管理系统", titleEn: "YYC3-Futuristic-Dashboard",
+          diff: 'easy', time: '20 min', icon: '💰', color: '#8b5cf6',
+          desc: "一个功能完整的企业级 AI 智能管理平台，采用 Next.js 16、React 19、TypeScript 和 Tailwind CSS 构建，具备实时数据分析、权限管理、高级可视化等企业级功能。",
+          repo: 'YYC-Cube/YYC3-Futuristic-Dashboard', site: 'futuristic.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r71', order: 71, cat: 'creative',
+          title: "本地多端推理矩阵数据库数据看盘", titleEn: "YYC3-Data-Dashboard-Design",
+          diff: 'easy', time: '20 min', icon: '🧠', color: '#ef4444',
+          desc: "YYC³ 本地多端推理矩阵数据库数据看盘是一个本地自用、本地部署的闭环系统，实时监控 AI 推理性能，支持数据可视化、操作审计、用户管理、系统设置等核心功能。",
+          repo: 'YYC-Cube/YYC3-Data-Dashboard-Design', site: 'dashboard.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r83', order: 83, cat: 'creative',
+          title: "🔖 AI Agent Landing Page", titleEn: "YYC3-AI-Agent-Landing-Page",
+          diff: 'medium', time: '20 min', icon: '🧠', color: '#06b6d4',
+          desc: "一款帮助企业自动化工作流程，构建智能聊天机器人，集成 7×24 小时工作的 AI 代理，提升生产力并推动业务增长",
+          repo: 'YYC-Cube/YYC3-AI-Agent-Landing-Page', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r88', order: 88, cat: 'creative',
+          title: "Design System", titleEn: "YYC3-UI-Design-System",
+          diff: 'easy', time: '20 min', icon: '🚀', color: '#ec4899',
+          desc: "Three Theme System: Future Futuristic Tech, Cyber Cyberpunk, Business Professional Business",
+          repo: 'YYC-Cube/YYC3-UI-Design-System', site: 'design-ui.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        /* ═══ 工程基建 infra ═══ */
+        {
+          id: 'r03', order: 3, cat: 'infra',
+          title: "Cloud Intelli-Matrix", titleEn: "YYC3-AI-DEV",
+          diff: 'easy', time: '20 min', icon: '📈', color: '#ef4444',
+          desc: "YYC3-AI-DEV 承自 YYC³ Cloud Intelli-Matrix 的 Shell + 插件体系，是以 AI Family 为中枢 的多智能体协同生态——8 大子系统统一注册、4 大业务",
+          repo: 'YYC-Cube/YYC3-AI-DEV', site: 'dev.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r04', order: 4, cat: 'infra',
+          title: "CloudPivot Intelli-Matri", titleEn: "YYC3-CloudPivot-Intelli-Matrix-Dev",
+          diff: 'medium', time: '20 min', icon: '⚡', color: '#22c55e',
+          desc: "YYC³ CloudPivot Intelli-Matrix（云枢智矩）是一个基于 Shell + 插件体系 + AI Family 智能体层 的全链路智能应用开发工程。以 八位家人 为认知中枢，统一",
+          repo: 'YYC-Cube/YYC3-CloudPivot-Intelli-Matrix-Dev', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r06', order: 6, cat: 'infra',
+          title: "AI Family Token Console", titleEn: "YYC3-AI-API-Token-Console",
+          diff: 'easy', time: '20 min', icon: '🚀', color: '#f59e0b',
+          desc: "YYC3-AI-API-Token-Console是本地闭环多端推理矩阵数据看盘系统 —— 面向 M4 Max + iMac + NAS 集群的实时监控中枢。涵盖监控中心（数据监控 / 一键跟进 / ",
+          repo: 'YYC-Cube/YYC3-AI-API-Token-Console', site: 'token.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r07', order: 7, cat: 'infra',
+          title: "AI Family Token Console", titleEn: "YYC3-AI-Family-API-Console",
+          diff: 'easy', time: '20 min', icon: '🧱', color: '#ef4444',
+          desc: "YYC³ AI Family Token Console 是 YanYuCloudCube 出品的统一模型网关·可观测·可调试·八智能体协同控制台—— > 一座把多源模型、多端适配、可观测数据、AI ",
+          repo: 'YYC-Cube/YYC3-AI-Family-API-Console', site: 'token.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r10', order: 10, cat: 'infra',
+          title: "Family-IDE-Matrix", titleEn: "YYC3-Family-IDE-Matrix",
+          diff: 'medium', time: '20 min', icon: '🚀', color: '#22c55e',
+          desc: "YYC³ Family IDE Matrix 是 YanYuCloudCube 家族的智能代码开发工作台——从 MCP 协议接入、多 Agent 编排、多文件编辑、实时预览到 Yjs 协作、沙箱化终端",
+          repo: 'YYC-Cube/YYC3-Family-IDE-Matrix', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r15', order: 15, cat: 'infra',
+          title: "Knowledge-Base", titleEn: "YYC3-Knowledge-Base",
+          diff: 'medium', time: '20 min', icon: '🧱', color: '#ef4444',
+          desc: "YYC³ Knowledge Base 是一个面向 NVIDIA AI 全栈生态的下一代智能知识库与技能管理平台。以\"五维驱动\"为核心理念，覆盖从 RAG 检索增强生成、NemoClaw 沙箱安全、D",
+          repo: 'YYC-Cube/YYC3-Knowledge-Base', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r19', order: 19, cat: 'infra',
+          title: "3-Claude Code", titleEn: "YYC3-Claude-Code",
+          diff: 'medium', time: '20 min', icon: '⭐', color: '#ec4899',
+          desc: "YYC3-Claude Code is a cutting-edge AI-powered collaborative development environment implementing the",
+          repo: 'YYC-Cube/YYC3-Claude-Code', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r21', order: 21, cat: 'infra',
+          title: "CLI — 智能应用全文档架构生成引擎 归档", titleEn: "YYC3-CLI",
+          diff: 'medium', time: '20 min', icon: '🧠', color: '#06b6d4',
+          desc: "YYC³-CLI 是一个基于「五高五标五化五维」核心机制构建的智能化企业级文档全生命周期生成引擎。它不仅仅是一个命令行工具，更是 YYC³（YanYuCloudCube）智能应用链中负责文档自动化生成",
+          repo: 'YYC-Cube/YYC3-CLI', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r23', order: 23, cat: 'infra',
+          title: "NAS-ECS 企业级智能管理平台", titleEn: "YYC3-NAS-ECS",
+          diff: 'medium', time: '20 min', icon: '📋', color: '#22c55e',
+          desc: "基于现代化技术栈构建的企业级智能管理平台，专为NAS（网络附加存储）和ECS（云服务器）环境设计。平台集成了实时监控、邮箱服务、内网穿透配置、日志管理、AI智能助手等核心功能，提供统一的管理界面和AP",
+          repo: 'YYC-Cube/YYC3-NAS-ECS', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r27', order: 27, cat: 'infra',
+          title: "NemoClaw", titleEn: "YYC3-NemoClaw",
+          diff: 'easy', time: '20 min', icon: '🚀', color: '#ec4899',
+          desc: "NVIDIA NemoClaw is an open source reference stack for running always-on AI agents more safely inside",
+          repo: 'YYC-Cube/YYC3-NemoClaw', site: 'claw.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r29', order: 29, cat: 'infra',
+          title: "AI Code · Family", titleEn: "YYC3-AI-Code-FAmily",
+          diff: 'easy', time: '20 min', icon: '🧱', color: '#ec4899',
+          desc: "YYC³ AI Code 是一款基于 Front-End-Only Full-Stack FEFS 模式的桌面级 AI 辅助低代码开发平台。它将设计师的视觉设计直接转化为生产级代码，提供实时预览、多面",
+          repo: 'YYC-Cube/YYC3-AI-Code-FAmily', site: 'ai-family.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r32', order: 32, cat: 'infra',
+          title: "Brain Computer System", titleEn: "YYC3-Brain-Compute-System",
+          diff: 'easy', time: '20 min', icon: '🚀', color: '#f59e0b',
+          desc: "YYC³ Brain Computer System 是一个基于 React 18 + Vite 6 + TypeScript + TailwindCSS 4 的本地闭环 DevOps 智能管理平台，",
+          repo: 'YYC-Cube/YYC3-Brain-Compute-System', site: 'brain.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r34', order: 34, cat: 'infra',
+          title: "Agent Builder", titleEn: "YYC3-Agent-Builder",
+          diff: 'easy', time: '20 min', icon: '🌐', color: '#8b5cf6',
+          desc: "YYC³ Agent Builder 是一个基于 Next.js 16 + React 19 + React Flow 构建的可视化 AI 工作流编排平台，支持拖拽式节点编排、实时流式执行、一键代码导",
+          repo: 'YYC-Cube/YYC3-Agent-Builder', site: 'anget.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r39', order: 39, cat: 'infra',
+          title: "MiniMax-H3", titleEn: "YYC3-MiniMax-H3",
+          diff: 'medium', time: '20 min', icon: '🧠', color: '#06b6d4',
+          desc: "YYC3-MiniMax-H3 视频/数字人生成模型在 Apple M4 Max 128GB（MPS）上的完整本地生产线， 由两份源文档整理抽取而来，按「环境部署 → 推理脚本 → 批量迭代 → 提示",
+          repo: 'YYC-Cube/YYC3-MiniMax-H3', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r47', order: 47, cat: 'infra',
+          title: "@3/i18n-core", titleEn: "YYC3-i18n-Core",
+          diff: 'easy', time: '20 min', icon: '📈', color: '#06b6d4',
+          desc: "@yyc3/i18n-core 是 YYC³（YanYuCloudCube）智能应用链中的国际化基础设施层，为整个生态提供多语言、AI翻译、MCP协议集成能力。它不仅是一个独立的 i18n 框架，更是",
+          repo: 'YYC-Cube/YYC3-i18n-Core', site: 'i18n.yyc3.vip',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r48', order: 48, cat: 'infra',
+          title: "Skills-standard", titleEn: "YYC3-Skills-standard",
+          diff: 'medium', time: '20 min', icon: '💼', color: '#ec4899',
+          desc: "YYC³ Skills 是支撑家族 8 大 AI coworker 能力复用、标准化交付、可量化迭代的核心技能资产体系，是 Agent 从「人设定义」走向「能力落地」的中间层标准。",
+          repo: 'YYC-Cube/YYC3-Skills-standard', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r66', order: 66, cat: 'infra',
+          title: "KTransformers 技术分析", titleEn: "YYC3-KTransformers",
+          diff: 'medium', time: '20 min', icon: '⭐', color: '#f59e0b',
+          desc: "本项目是 KTransformers 的深度技术分析报告，包含完整的技术栈分析、架构设计、性能评估、复用可行性分析和二次开发建议。",
+          repo: 'YYC-Cube/YYC3-KTransformers', site: null,
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+        {
+          id: 'r78', order: 78, cat: 'infra',
+          title: "AI Code", titleEn: "YYC3-AI-Code",
+          diff: 'easy', time: '20 min', icon: '🧱', color: '#22c55e',
+          desc: "YANYUCLOUD YYC³ 是一个智能多面板可视化 AI 编程应用，采用现代化 IDE 风格设计，提供： - 多面板可调整工作区 - 基于 react-resizable-panels 的灵活布局",
+          repo: 'YYC-Cube/YYC3-AI-Code', site: 'code.yyc3.top',
+          steps: DEPLOY_STEPS.slice(0, 3),
+        },
+      ];
+
+      var CATEGORY_META = {
+        'org-yanyucloudcube': { icon: '🌐', label: 'YanYuCloudCube 主组织', color: '#06b6d4' },
+        'platform': { icon: '⭐', label: '平台矩阵', color: '#8b5cf6' },
+        'ai-app': { icon: '🤖', label: 'AI 应用', color: '#06b6d4' },
+        'admin': { icon: '💼', label: '管理系统', color: '#8b5cf6' },
+        'finance': { icon: '💰', label: '金融财务', color: '#22c55e' },
+        'industry': { icon: '🏙️', label: '行业方案', color: '#f59e0b' },
+        'creative': { icon: '🎨', label: '创意展示', color: '#ec4899' },
+        'infra': { icon: '🧱', label: '工程基建', color: '#06b6d4' },
+      };
+
+      var TOTAL_REPOS = 99; /* 双组织远程仓库总数（同步脚本更新） */
+      var ORG_COUNT = 2;
+      /*DATA_END*/
+
+      /* ══════════════════════════════════════════════════
+         交互逻辑层 — 设计指导文档 §5 交互功能矩阵
+         localStorage key 统一前缀 yc3hub-
+         ══════════════════════════════════════════════════ */
+      var currentGuide = null;
+      var currentFilter = 'all';
+      var searchQuery = '';
+
+      function lsGet(key) {
+        try {
+          return localStorage.getItem('yc3hub-' + key);
+        } catch (e) {
+          return null;
+        }
+      }
+      function lsSet(key, val) {
+        try {
+          localStorage.setItem('yc3hub-' + key, val);
+        } catch (e) {}
+      }
+
+      /* ═══ 主题切换 ═══ */
+      function toggleTheme() {
+        var isLight = document.documentElement.classList.toggle('light');
+        lsSet('theme', isLight ? 'light' : 'dark');
+        updateThemeIcon();
+      }
+      function updateThemeIcon() {
+        var icon = document.getElementById('themeIcon');
+        if (!icon) return;
+        icon.innerHTML = document.documentElement.classList.contains('light')
+          ? '<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>'
+          : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+      }
+
+      /* ═══ 侧边栏折叠（移动端抽屉） ═══ */
+      function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('hidden');
+        document.getElementById('main').classList.toggle('expanded');
+        document.getElementById('sbOverlay').classList.toggle('show');
+      }
+
+      /* ═══ 智能搜索 — §5.2 全/半角归一化 + 顺序匹配 ═══ */
+      function smartMatch(text, query) {
+        if (!query) return true;
+        var norm = function (s) {
+          return s
+            .replace(/[\uff01-\uff5e]/g, function (c) {
+              return String.fromCharCode(c.charCodeAt(0) - 0xfee0);
+            })
+            .replace(/\u3000/g, ' ')
+            .toLowerCase();
+        };
+        var tn = norm(String(text));
+        var qn = norm(query);
+        var pos = 0;
+        for (var i = 0; i < qn.length; i++) {
+          var ch = qn[i];
+          var idx = tn.indexOf(ch, pos);
+          if (idx === -1) {
+            if (tn.indexOf(ch) === -1) return false;
+            continue;
+          }
+          pos = idx + 1;
+        }
+        return true;
+      }
+      function guideMatches(g, q) {
+        if (!q) return true;
+        var hay = [g.title, g.titleEn, g.desc, g.repo, (CATEGORY_META[g.cat] || {}).label || ''].join(' ');
+        return smartMatch(hay, q);
+      }
+
+      /* ═══ 难度标签 ═══ */
+      var DIFF_LABEL = { easy: '⭐ 简单', medium: '⭐⭐ 中等', hard: '⭐⭐⭐ 高' };
+      function diffLabel(d) {
+        return DIFF_LABEL[d] || d;
+      }
+
+      /* ═══ 侧边栏渲染（分组 + 状态点） ═══ */
+      function buildSidebar() {
+        var groups = {};
+        GUIDES.forEach(function (g) {
+          (groups[g.cat] = groups[g.cat] || []).push(g);
+        });
+        var html = '';
+        Object.keys(CATEGORY_META).forEach(function (cat) {
+          var list = groups[cat];
+          if (!list || !list.length) return;
+          var meta = CATEGORY_META[cat];
+          html +=
+            '<div class="sb-group" data-cat="' +
+            cat +
+            '"><div class="sb-group-title">' +
+            meta.icon +
+            ' ' +
+            meta.label +
+            '</div>';
+          list
+            .sort(function (a, b) {
+              return a.order - b.order;
+            })
+            .forEach(function (g) {
+              var done = lsGet('guide-done-' + g.id) === '1';
+              html +=
+                '<a class="sb-item" data-id="' +
+                g.id +
+                '" onclick="showGuide(\'' +
+                g.id +
+                '\')" title="' +
+                escHtml(g.title) +
+                '">' +
+                '<span class="sb-dot' +
+                (done ? ' done' : '') +
+                '"></span>' +
+                '<span class="sb-label">' +
+                escHtml(g.title) +
+                '</span>' +
+                '<span class="sb-order">' +
+                g.order +
+                '</span></a>';
+            });
+          html += '</div>';
+        });
+        document.getElementById('sbNav').innerHTML = html;
+      }
+      function filterSidebar(q) {
+        document.querySelectorAll('#sbNav .sb-item').forEach(function (el) {
+          el.style.display = smartMatch(el.textContent, q) ? '' : 'none';
+        });
+      }
+      function topbarSearch(val) {
+        document.getElementById('sbSearchInput').value = val;
+        applyFilters(val);
+      }
+
+      /* ═══ 实时时钟 ═══ */
+      function updateClock() {
+        var d = new Date();
+        var p = function (n) {
+          return String(n).padStart(2, '0');
+        };
+        var el = document.getElementById('clockDisplay');
+        if (el) el.textContent = p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+      }
+
+      /* ═══ 分享页面 — §5.1 navigator.share / 剪贴板降级 ═══ */
+      function sharePage() {
+        var data = { title: 'YYC³ Cube Hub', text: 'YYC³ 仓库矩阵操作中心', url: location.href };
+        if (navigator.share) {
+          navigator.share(data).catch(function () {});
+        } else if (navigator.clipboard) {
+          navigator.clipboard.writeText(location.href).then(function () {
+            alert('链接已复制到剪贴板');
+          });
+        }
+      }
+
+      /* ═══ 视图切换 ═══ */
+      function showDashboard() {
+        currentGuide = null;
+        document.getElementById('guideDetail').classList.remove('active');
+        document.getElementById('dashboardView').style.display = '';
+        document.getElementById('topbarTitle').textContent = 'YYC³ Cube Hub';
+        document.getElementById('topbarSubtitle').textContent = '仓库矩阵操作中心';
+        if (location.hash) history.pushState(null, '', location.pathname);
+        document.querySelectorAll('#sbNav .sb-item.active').forEach(function (el) {
+          el.classList.remove('active');
+        });
+        window.scrollTo(0, 0);
+      }
+
+      /* ═══ 统计卡片 ═══ */
+      function renderStats() {
+        var done = GUIDES.filter(function (g) {
+          return lsGet('guide-done-' + g.id) === '1';
+        }).length;
+        var stats = [
+          { icon: '📦', num: TOTAL_REPOS, label: '仓库总量' },
+          { icon: '🌐', num: ORG_COUNT, label: '组织数' },
+          { icon: '🗂️', num: GUIDES.length, label: '收录指南' },
+          { icon: '✅', num: done, label: '已完成' },
+        ];
+        document.getElementById('dashStats').innerHTML = stats
+          .map(function (s) {
+            return (
+              '<div class="stat-card"><span class="stat-icon">' +
+              s.icon +
+              '</span><div><div class="stat-num">' +
+              s.num +
+              '</div><div class="stat-label">' +
+              s.label +
+              '</div></div></div>'
+            );
+          })
+          .join('');
+      }
+
+      /* ═══ 筛选按钮 ═══ */
+      function renderFilterBar() {
+        var bar = document.getElementById('filterBar');
+        var btns = [{ key: 'all', icon: '🗂️', label: '全部' }].concat(
+          Object.keys(CATEGORY_META).map(function (k) {
+            return { key: k, icon: CATEGORY_META[k].icon, label: CATEGORY_META[k].label };
+          })
+        );
+        bar.innerHTML = btns
+          .map(function (b) {
+            return (
+              '<button class="filter-btn' +
+              (currentFilter === b.key ? ' active' : '') +
+              '" data-cat="' +
+              b.key +
+              '" onclick="filterByCategory(\'' +
+              b.key +
+              '\', this)">' +
+              b.icon +
+              ' ' +
+              b.label +
+              '</button>'
+            );
+          })
+          .join('');
+      }
+      function filterByCategory(cat, btn) {
+        currentFilter = cat;
+        document.querySelectorAll('.filter-btn').forEach(function (b) {
+          b.classList.remove('active');
+        });
+        if (btn) btn.classList.add('active');
+        applyFilters(searchQuery);
+      }
+
+      /* ═══ 仪表盘渲染（分类分区 + 卡片网格） ═══ */
+      function renderDashboard() {
+        var groups = {};
+        GUIDES.forEach(function (g) {
+          (groups[g.cat] = groups[g.cat] || []).push(g);
+        });
+        var html = '';
+        Object.keys(CATEGORY_META).forEach(function (cat) {
+          var list = (groups[cat] || []).sort(function (a, b) {
+            return a.order - b.order;
+          });
+          if (!list.length) return;
+          var meta = CATEGORY_META[cat];
+          html +=
+            '<div class="cat-section" data-cat="' +
+            cat +
+            '"><div class="cat-header"><span class="cat-icon">' +
+            meta.icon +
+            '</span><span class="cat-name">' +
+            meta.label +
+            '</span><span class="cat-count">' +
+            list.length +
+            ' 项</span><span class="cat-line"></span></div><div class="card-grid">';
+          list.forEach(function (g, i) {
+            var done = lsGet('guide-done-' + g.id) === '1';
+            var stepCount = g.steps.length;
+            html +=
+              '<div class="guide-card" data-id="' +
+              g.id +
+              '" style="animation-delay:' +
+              Math.min(i * 40, 400) +
+              'ms" onclick="showGuide(\'' +
+              g.id +
+              '\')">' +
+              '<div class="gc-bar" style="background:linear-gradient(90deg,' +
+              g.color +
+              ',transparent)"></div>' +
+              '<div class="gc-head"><div class="gc-icon" style="background:' +
+              g.color +
+              '22">' +
+              g.icon +
+              '</div>' +
+              '<div class="gc-info"><div class="gc-title">' +
+              escHtml(g.title) +
+              '</div><div class="gc-title-en">' +
+              escHtml(g.titleEn) +
+              '</div>' +
+              '<div class="gc-meta"><span class="gc-tag ' +
+              g.diff +
+              '">' +
+              diffLabel(g.diff) +
+              '</span><span class="gc-time">⏱ ' +
+              g.time +
+              '</span><span class="gc-time">▶ ' +
+              stepCount +
+              ' 步</span></div></div></div>' +
+              '<div class="gc-desc">' +
+              escHtml(g.desc) +
+              '</div>' +
+              '<div class="gc-tags"><span>' +
+              escHtml(g.repo) +
+              '</span>' +
+              (g.site ? '<span>🔗 ' + escHtml(g.site) + '</span>' : '') +
+              '</div>' +
+              '<div class="gc-check' +
+              (done ? ' done' : '') +
+              '" onclick="event.stopPropagation(); toggleDone(\'' +
+              g.id +
+              '\')" title="标记完成"></div>' +
+              '</div>';
+          });
+          html += '</div></div>';
+        });
+        document.getElementById('dashboardContent').innerHTML =
+          html || '<div class="empty-state"><div class="es-icon">🔍</div><p>没有匹配的仓库</p></div>';
+        document.getElementById('guideCount').textContent =
+          '仓库矩阵 · ' + GUIDES.length + ' 项收录 / ' + TOTAL_REPOS + ' 仓库';
+      }
+
+      /* ═══ 过滤：分类 × 搜索词 ═══ */
+      function applyFilters(q) {
+        searchQuery = q || '';
+        var anyVisible = false;
+        document.querySelectorAll('#dashboardContent .guide-card').forEach(function (card) {
+          var g = GUIDES.find(function (x) {
+            return x.id === card.getAttribute('data-id');
+          });
+          var show = (currentFilter === 'all' || g.cat === currentFilter) && guideMatches(g, searchQuery);
+          card.classList.toggle('hidden', !show);
+          if (show) anyVisible = true;
+        });
+        document.querySelectorAll('#dashboardContent .cat-section').forEach(function (sec) {
+          var visible = sec.querySelectorAll('.guide-card:not(.hidden)').length;
+          sec.style.display = visible ? '' : 'none';
+        });
+        var empty = document.getElementById('dashboardContent').querySelector('.empty-state');
+        if (!anyVisible && !empty) {
+          document.getElementById('dashboardContent').innerHTML =
+            '<div class="empty-state"><div class="es-icon">🔍</div><p>没有匹配的仓库</p></div>';
+        } else if (anyVisible && empty) {
+          empty.remove();
+        }
+      }
+
+      /* ═══ 完成 / 进度追踪 ═══ */
+      function toggleDone(id) {
+        var done = lsGet('guide-done-' + id) === '1';
+        lsSet('guide-done-' + id, done ? '0' : '1');
+        var card = document.querySelector('.guide-card[data-id="' + id + '"] .gc-check');
+        if (card) card.classList.toggle('done', !done);
+        updateSidebarDots();
+        updateSidebarProgress();
+        renderStats();
+      }
+      function updateSidebarDots() {
+        GUIDES.forEach(function (g) {
+          var item = document.querySelector('#sbNav .sb-item[data-id="' + g.id + '"] .sb-dot');
+          if (item) item.classList.toggle('done', lsGet('guide-done-' + g.id) === '1');
+        });
+      }
+      function updateSidebarProgress() {
+        var done = GUIDES.filter(function (g) {
+          return lsGet('guide-done-' + g.id) === '1';
+        }).length;
+        var pct = GUIDES.length ? Math.round((done / GUIDES.length) * 100) : 0;
+        document.getElementById('sbProgressPct').textContent = pct + '%';
+        document.getElementById('sbProgressFill').style.width = pct + '%';
+        document.getElementById('sbProgressCount').textContent = done + ' / ' + GUIDES.length + ' 已完成';
+      }
+
+      /* ═══ 指南详情 + Hash 路由 #guide-{id} ═══ */
+      function showGuide(id, stepN) {
+        var g = GUIDES.find(function (x) {
+          return x.id === id;
+        });
+        if (!g) return;
+        currentGuide = g;
+        document.getElementById('dashboardView').style.display = 'none';
+        var detail = document.getElementById('guideDetail');
+        detail.classList.add('active');
+        document.getElementById('topbarTitle').textContent = g.title;
+        document.getElementById('topbarSubtitle').textContent = g.titleEn;
+        document.querySelectorAll('#sbNav .sb-item').forEach(function (el) {
+          el.classList.toggle('active', el.getAttribute('data-id') === id);
+        });
+        var doneCount = g.steps.filter(function (s) {
+          return lsGet('step-done-' + g.id + '-' + s.n) === '1';
+        }).length;
+        var pct = Math.round((doneCount / g.steps.length) * 100);
+        var html =
+          '<button class="gd-back" onclick="showDashboard()">← 返回操作中心</button>' +
+          '<div class="gd-hero"><div class="gd-hero-top"><div class="gd-hero-icon" style="background:' +
+          g.color +
+          '22">' +
+          g.icon +
+          '</div><div>' +
+          '<div class="gd-hero-title">' +
+          escHtml(g.title) +
+          '</div><div class="gd-hero-titleEn">' +
+          escHtml(g.titleEn) +
+          '</div>' +
+          '<div class="gd-hero-desc">' +
+          escHtml(g.desc) +
+          '</div></div></div>' +
+          '<div class="gd-hero-meta"><span>📂 ' +
+          escHtml((CATEGORY_META[g.cat] || {}).label || g.cat) +
+          '</span><span>' +
+          diffLabel(g.diff) +
+          '</span><span>⏱ ' +
+          g.time +
+          '</span>' +
+          '<span>📦 ' +
+          escHtml(g.repo) +
+          '</span>' +
+          (g.site
+            ? '<span>🔗 <a href="https://' +
+              escHtml(g.site) +
+              '" target="_blank" rel="noopener">' +
+              escHtml(g.site) +
+              '</a></span>'
+            : '') +
+          '<span>🔗 <a href="https://github.com/' +
+          escHtml(g.repo) +
+          '" target="_blank" rel="noopener">GitHub</a></span></div></div>' +
+          '<div class="gd-progress active"><span class="gd-progress-text">📊 进度</span><div class="gd-progress-bar"><div class="gd-progress-fill" style="width:' +
+          pct +
+          '%"></div></div><span class="gd-progress-text">' +
+          doneCount +
+          '/' +
+          g.steps.length +
+          ' 步 (' +
+          pct +
+          '%)</span></div>' +
+          '<div class="gd-prereq"><div class="gd-prereq-title">📋 操作步骤 · 点击编号标记完成 / 点击标题折叠</div><ul>';
+        g.steps.forEach(function (s) {
+          var open = lsGet('step-open-' + g.id + '-' + s.n) !== '0';
+          var done = lsGet('step-done-' + g.id + '-' + s.n) === '1';
+          html +=
+            '<div class="step' +
+            (open ? ' open' : '') +
+            '" data-n="' +
+            s.n +
+            '">' +
+            '<div class="step-head" onclick="toggleStep(\'' +
+            g.id +
+            "'," +
+            s.n +
+            ')">' +
+            '<div class="step-num' +
+            (done ? ' done' : '') +
+            '" onclick="event.stopPropagation(); toggleStepDone(\'' +
+            g.id +
+            "'," +
+            s.n +
+            ')">' +
+            s.n +
+            '</div>' +
+            '<div class="step-info"><div class="step-title">' +
+            escHtml(s.title) +
+            '</div>' +
+            (s.time ? '<div class="step-time">⏱ ' + s.time + '</div>' : '') +
+            '</div>' +
+            '<span class="step-arrow">▶</span></div><div class="step-body"><p>' +
+            escHtml(s.content) +
+            '</p>';
+          (s.code || []).forEach(function (c) {
+            html +=
+              '<div class="code-block"><div class="code-hdr"><span>' +
+              escHtml(c[0]) +
+              '</span><button class="copy-btn" onclick="copyCode(this, this.closest(\'.code-block\').querySelector(\'pre\').textContent)">📋 复制</button></div><pre>' +
+              escHtml(c[1]) +
+              '</pre></div>';
+          });
+          if (s.warning) html += '<div class="step-warning">⚠️ ' + escHtml(s.warning) + '</div>';
+          if (s.tip) html += '<div class="step-tip">💡 ' + escHtml(s.tip) + '</div>';
+          html += '</div></div>';
+        });
+        html += '</div>';
+        detail.innerHTML = html;
+        if (stepN) {
+          var el = detail.querySelector('.step[data-n="' + stepN + '"]');
+          if (el) {
+            el.classList.add('open');
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
+        if (location.hash !== '#guide-' + id) history.pushState(null, '', '#guide-' + id);
+        window.scrollTo(0, 0);
+      }
+
+      /* ═══ 步骤折叠 / 步骤完成 ═══ */
+      function toggleStep(id, n) {
+        var el = document.querySelector('#guideDetail .step[data-n="' + n + '"]');
+        var open = !el.classList.contains('open');
+        el.classList.toggle('open', open);
+        lsSet('step-open-' + id + '-' + n, open ? '1' : '0');
+      }
+      function toggleStepDone(id, n) {
+        var done = lsGet('step-done-' + id + '-' + n) === '1';
+        lsSet('step-done-' + id + '-' + n, done ? '0' : '1');
+        var num = document.querySelector('#guideDetail .step[data-n="' + n + '"] .step-num');
+        if (num) num.classList.toggle('done', !done);
+        var g = GUIDES.find(function (x) {
+          return x.id === id;
+        });
+        var doneCount = g.steps.filter(function (s) {
+          return lsGet('step-done-' + id + '-' + s.n) === '1';
+        }).length;
+        var pct = Math.round((doneCount / g.steps.length) * 100);
+        var bar = document.querySelector('#guideDetail .gd-progress-fill');
+        var txt = document.querySelectorAll('#guideDetail .gd-progress-text')[1];
+        if (bar) bar.style.width = pct + '%';
+        if (txt) txt.textContent = doneCount + '/' + g.steps.length + ' 步 (' + pct + '%)';
+        if (doneCount === g.steps.length && !done) toggleDone(id);
+      }
+
+      /* ═══ 步骤预览弹窗 ═══ */
+      function openPreviewModal(id) {
+        var g = GUIDES.find(function (x) {
+          return x.id === id;
+        });
+        if (!g) return;
+        document.getElementById('previewModalTitle').textContent = g.title + ' · 全部 ' + g.steps.length + ' 步';
+        document.getElementById('previewModalBody').innerHTML =
+          '<ol>' +
+          g.steps
+            .map(function (s) {
+              return (
+                '<li><strong>' + escHtml(s.title) + '</strong>' + (s.time ? ' <em>(' + s.time + ')</em>' : '') + '</li>'
+              );
+            })
+            .join('') +
+          '</ol>';
+        document.getElementById('previewModal').classList.add('active');
+      }
+      function closePreviewModal() {
+        document.getElementById('previewModal').classList.remove('active');
+      }
+
+      /* ═══ 进度导出 / 导入 / 重置 ═══ */
+      function exportProgress() {
+        var data = { app: 'YYC3-Cube-Hub', exportedAt: new Date().toISOString(), progress: {} };
+        GUIDES.forEach(function (g) {
+          var rec = {};
+          if (lsGet('guide-done-' + g.id) === '1') rec.done = 1;
+          g.steps.forEach(function (s) {
+            if (lsGet('step-done-' + g.id + '-' + s.n) === '1') (rec.steps = rec.steps || []).push(s.n);
+          });
+          if (rec.done || rec.steps) data.progress[g.id] = rec;
+        });
+        var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'yc3hub-progress-' + new Date().toISOString().slice(0, 10) + '.json';
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }
+      function importProgress() {
+        var input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'application/json';
+        input.onchange = function () {
+          var reader = new FileReader();
+          reader.onload = function () {
+            try {
+              var data = JSON.parse(reader.result);
+              Object.keys(data.progress || {}).forEach(function (id) {
+                var rec = data.progress[id];
+                lsSet('guide-done-' + id, rec.done ? '1' : '0');
+                (rec.steps || []).forEach(function (n) {
+                  lsSet('step-done-' + id + '-' + n, '1');
+                });
+              });
+              refreshAll();
+              alert('进度导入成功');
+            } catch (e) {
+              alert('导入失败：无效的 JSON 文件');
+            }
+          };
+          reader.readAsText(input.files[0]);
+        };
+        input.click();
+      }
+      function resetProgress() {
+        if (!confirm('确定要重置全部进度吗？此操作不可恢复。')) return;
+        var keys = [];
+        for (var i = 0; i < localStorage.length; i++) {
+          var k = localStorage.key(i);
+          if (k && k.indexOf('yc3hub-') === 0 && k !== 'yc3hub-theme') keys.push(k);
+        }
+        keys.forEach(function (k) {
+          localStorage.removeItem(k);
+        });
+        refreshAll();
+      }
+
+      /* ═══ 代码复制 ═══ */
+      function copyCode(btn, code) {
+        navigator.clipboard.writeText(code).then(function () {
+          btn.textContent = '✅ 已复制';
+          setTimeout(function () {
+            btn.textContent = '📋 复制';
+          }, 2000);
+        });
+      }
+
+      /* ═══ 工具函数 ═══ */
+      function escHtml(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+      function parseGuideHash(hash) {
+        var m = /^#guide-([\w-]+)(?:-step-(\d+))?$/.exec(hash || '');
+        return m ? { id: m[1], step: m[2] ? parseInt(m[2], 10) : null } : null;
+      }
+      function refreshAll() {
+        renderStats();
+        renderDashboard();
+        buildSidebar();
+        updateSidebarDots();
+        updateSidebarProgress();
+      }
+
+      /* ═══ 初始化 ═══ */
+      function init() {
+        updateThemeIcon();
+        buildSidebar();
+        renderStats();
+        renderFilterBar();
+        renderDashboard();
+        updateSidebarDots();
+        updateSidebarProgress();
+        updateClock();
+        setInterval(updateClock, 1000);
+        var h = parseGuideHash(location.hash);
+        if (
+          h &&
+          GUIDES.some(function (g) {
+            return g.id === h.id;
+          })
+        )
+          showGuide(h.id, h.step);
+        window.addEventListener('hashchange', function () {
+          var p = parseGuideHash(location.hash);
+          if (
+            p &&
+            GUIDES.some(function (g) {
+              return g.id === p.id;
+            })
+          )
+            showGuide(p.id, p.step);
+          else if (!location.hash) showDashboard();
+        });
+      }
+      init();
+    </script>
+  </body>
+</html>
