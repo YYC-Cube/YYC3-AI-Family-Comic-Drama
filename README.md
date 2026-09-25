@@ -25,7 +25,7 @@
 [![ComfyUI](https://img.shields.io/badge/ComfyUI-SDXL%2FFlux-FF6B6B?style=flat-square)](docs/YYC3-05-AI漫剧开源生态与自研路径.md)
 [![DGX Spark](https://img.shields.io/badge/DGX_Spark-GB10×2-76B900?style=flat-square&logo=nvidia&logoColor=white)](docs/YYC3-04-AI漫剧本地硬件部署方案.md)
 [![Mac M4](https://img.shields.io/badge/Mac_M4-128GB-000000?style=flat-square&logo=apple&logoColor=white)](docs/YYC3-04-AI漫剧本地硬件部署方案.md)
-[![License](https://img.shields.io/badge/©-2025--2026_YYC³-lightgrey?style=flat-square)](#)
+![License](https://img.shields.io/badge/©-2025--2026_YYC³-lightgrey?style=flat-square)
 
 </div>
 
