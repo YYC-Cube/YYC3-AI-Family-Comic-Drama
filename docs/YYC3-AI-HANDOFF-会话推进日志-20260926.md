@@ -35,15 +35,22 @@ related_docs: YYC3-AI-HANDOFF-会话推进日志-20260924.md,YYC3-07-大数据�
 | 6 | .gitignore 落地 | 密钥零入库（.env）+ 二进制资产红线（模型/成片不落仓库）+ 运行时产物 | ✅ |
 | 7 | 四仓库实现度审计 | 确认脚手架结构完整（110目录/242文件），**后端代码实现度 0%**（所有 .py/.ts/.yaml 为 0 字节空占位），Agent prompt 已就绪 | ✅ |
 | 8 | 落地架构与实现策略总览 | 新建 [YYC3-08](YYC3-08-项目落地架构与模块实现策略总览.md)：实现度审计矩阵 + 开源vs自研决策矩阵 + P0~P3 优先级 + 开源拉取清单 + 完整文档架构索引 | ✅ |
+| 9 | 上游核心代码拉取 | 从 3 个 YYC-Cube 上游仓库拉取真实核心代码（提交 5accbc1）：**YYC3-0379-World@6c4c873**（8大Agent实现+网关API chat.py 812行/A2A/RAG/MCP/proxy，20→174文件）、**YYC3-MiniMax-H3@5ef6e81**（h3_agent引擎+Next.js控制台+20份部署文档，9→154文件）、**YYC3-AI-Agent-Archive@3b98287**（11个编排核心包 sparse 按需拉取，26→183文件） | ✅ |
+| 10 | 上游自动同步体系 | [sync-upstreams.sh](../scripts/sync-upstreams.sh) + [upstreams.tsv](../scripts/upstreams.tsv) 映射清单（保护规则：本地README/.gitignore/.env.example不被覆盖）+ [sync-upstreams.yml](../.github/workflows/sync-upstreams.yml)（每日02:00定时同步，变更自动开PR）+ [同步报告](../scripts/upstream-sync-report.md) | ✅ |
+| 11 | 前端完整架构自建 | manju-studio/frontend **53 文件约 3600 行真实代码**：Next.js 16.3.6 + React 19.3.0 实测安装；StoryboardV1 顶层/Shot 双 12 字段类型+四类校验；API层带 mock 降级（withFallback）；Zustand 三store；SSE 任务流；SVG 六阶段流水线/Canvas 时间线/成本红线面板等 17 组件；9 业务页全可独立渲染 | ✅ |
+| 12 | 前端验证 | `pnpm typecheck` **0 error**；`pnpm build` **成功**（12 路由静态生成 + Middleware 注册）；dev 端口 20300（对齐前端 2xxxx 端口红线） | ✅ |
 
 ## 二、当前项目状态快照
 
 | 维度 | 状态 |
 | ---- | ---- |
-| 远程仓库 | main 分支已推送，与本地同步（4 次提交） |
+| 远程仓库 | main 分支已推送，与本地同步 |
 | 可行性论证 | YYC3-07 已入库，结论：有条件通过（88.4/100） |
 | 落地策略 | YYC3-08 已入库：大模型/工具链开源拉取，网关/编排/一致性引擎自研 |
 | 工程结构 | 四仓库脚手架结构完整，后端代码 0% 待实现 |
+| **上游核心代码** | **三仓库核心已拉取落位：网关 Agent/API 实现、H3 引擎+控制台、11 编排包（合计 511 文件）** |
+| **前端工作台** | **架构+核心代码已就绪（build 通过，mock 降级可独立开发），后端联通待 G1** |
+| 自动化 | 上游每日定时同步（Actions PR 流）+ 本地手动 sync 脚本就绪 |
 | 当前门禁 | **G1（底座通电）仍为最前沿**，TC-G1-001~006 待执行 |
 
 ## 三、下次会话启动指南 🚀

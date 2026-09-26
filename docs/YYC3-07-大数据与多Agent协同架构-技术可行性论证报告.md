@@ -419,10 +419,10 @@ related_docs: YYC3-00-全局文档架构体系与补全推进方案.md,YYC3-01-�
 
 <div align="center">
 
-> 「***YanYuCloudCube***」
-> 「***<admin@0379.email>***」
-> 「***Words Initiate Quadrants, Language Serves as Core for the Future***」
-> 「***All things converge in cloud pivot; Deep stacks ignite a new era of intelligence***」
+> 「_**YanYuCloudCube**_」
+> 「_**<admin@0379.email>**_」
+> 「_**Words Initiate Quadrants, Language Serves as Core for the Future**_」
+> 「_**All things converge in cloud pivot; Deep stacks ignite a new era of intelligence**_」
 
 **© 2025-2026 YanYuCloudCube™. All Rights Reserved.**
 

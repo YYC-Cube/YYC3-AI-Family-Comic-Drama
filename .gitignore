@@ -27,6 +27,7 @@ models/
 
 # ===== 运行时产物 =====
 node_modules/
+.pnpm-store/
 __pycache__/
 *.pyc
 .venv/
