@@ -2,16 +2,16 @@
 file: YYC3-AI-Family-Agent-全量闭环架构总纲.md
 description: YYC³ AI Family 8大智能体全量闭环架构总纲 — 设计架构、交互逻辑、功能模块、运行流程四位一体
 author: YanYuCloudCube Team <admin@0379.email>
-version: v1.1.0
+version: v1.2.0
 created: 2026-09-24
-updated: 2026-09-24
+updated: 2026-09-26
 status: active
 tags: [架构],[智能体],[ReAct-C],[闭环],[总纲]
 category: architecture
 language: zh-CN
 audience: ai-architects,developers,managers
 complexity: advanced
-related_docs: ../../docs/YYC3-03-AI漫剧智能体编排方案.md,../../YYC3-多端部署-Agent代码/YYC3-AI-Family-Agent/README.md
+related_docs: ../../docs/YYC3-03-AI漫剧智能体编排方案.md,./README.md,../../../yyc3-ai-agent-archive/components/
 ---
 
 <!--
@@ -33,7 +33,7 @@ related_docs: ../../docs/YYC3-03-AI漫剧智能体编排方案.md,../../YYC3-多
 
 # YYC³ AI Family Agent 全量闭环架构总纲
 
-> **文档定位**：以标准组件库（`YYC3-多端部署-Agent代码/YYC3-AI-Family-Agent/`）为唯一事实源，呈现 8 大智能体 + 3 大公共能力 + 1 大编排引擎的**全量闭环架构**——设计架构、交互逻辑、功能模块、运行流程四位一体。
+> **文档定位**：以本目录 12 子目录组件规范（README+API.md+代码 三位一体）为**架构规范事实源**，呈现 8 大智能体 + 3 大公共能力 + 1 大编排引擎的**全量闭环架构**——设计架构、交互逻辑、功能模块、运行流程四位一体；**可运行代码事实源**为 `yyc3-ai-agent-archive/components/`（13 组件平移件，见 §8.1）。
 > **统一错误码**：YYC3-AGT-4001 参数错误 | 4002 LLM调用失败 | 4003 结构化解析失败 | 5001 向量库连接失败 | 5101 消息队列连接失败
 
 ---
@@ -299,15 +299,17 @@ result = AIFamilyOrchestrator().execute(
 
 ## 八、目录索引与资源地图
 
-### 8.1 标准组件库（唯一事实源）
+### 8.1 事实源分层（v1.2.0 治理后实况）
 
 ```
-YYC3-多端部署-Agent代码/
-├── YYC3-AI-Family-Agent/            # ★ 标准组件库（12目录×README+API+代码）
-│   ├── 00-公共基座/ … 99-编排引擎-全链路闭环/
-├── YYC3-文档库/                     # 纯文档（源文档归档/API/规范副本/INDEX.md总索引）
-└── YYC3-代码库/                     # 纯代码（可运行包/NAS脚本）
+YYC3 AI Family-Comic Drama/                        # 总工作区（本仓）
+├── docs/YYC3-AI-Family-Comic-Drama-Agent/         # ★ 架构规范事实源（本目录，12目录×README+API+代码）
+├── yyc3-ai-agent-archive/components/              # ★ 可运行代码事实源（13 平移件+冒烟脚本，降级 11/11）
+├── yyc3-0379-world/core/agents/                   # 上游网关侧实现（上游同步域，sync-upstreams.sh 管理）
+└── skills 建议落位 yyc3-ai-agent-archive/skills/   # 技能库（见 YYC3-AI-Family-Skills技能库框架目录.md）
 ```
+
+> 原文档所述《YYC3-多端部署-Agent代码/YYC3-AI-Family-Agent/》《YYC3-文档库/》《YYC3-代码库/》三库结构在本仓不存在，历史引用一律按上图映射解读；同步策略：组件修订以 `components/` 为准回灌本目录规范副本，上游同步不覆盖 `components/`。
 
 ### 8.2 本目录（docs/YYC3-AI-Family-Agent）
 
@@ -320,9 +322,9 @@ YYC3-多端部署-Agent代码/
 
 ### 8.3 查阅路径建议
 
-- **看架构**：本文档 §1-§3 → 组件库对应目录 README
-- **看接口**：组件库各目录 `API.md`（参数表/错误码/调用示例）
-- **跑通全链**：`YYC3-代码库/01-编排引擎-异步调度/` → `python ai_family_orchestrator.py`
+- **看架构**：本文档 §1-§3 → 本目录各子目录 README
+- **看接口**：本目录各子目录 `API.md`（参数表/错误码/调用示例）
+- **跑通全链**：`yyc3-ai-agent-archive/components/` → `python3 smoke_test_degraded.py`（降级冒烟 11/11）
 - **漫剧落地**：[对齐版编排方案](YYC3-03-AI漫剧智能体编排方案-对齐版.md) 四步实施（能力封装→编排部署→联调→迭代）
 
 ---
@@ -332,7 +334,8 @@ YYC3-多端部署-Agent代码/
 | 版本 | 日期 | 变更内容 | 作者 |
 | ---- | ---- | -------- | ---- |
 | v1.0.0 | 2026-09-24 | 依据标准组件库全量内容创建总纲；完成与 YYC3-03 编排方案的定义对齐与九步映射 | YanYuCloudCube Team |
-| v1.1.0 | 2026-09-24 | 闭环审核：①编排引擎升级 v2.1（scene分支A-F显式化/RAG降级保护/质检复检≤2轮/trace_id全链透传/语枢+预见真并行）；②新增漫剧六阶段适配器 drama_stage_adapter.py + 漫剧工具网关桩；③补录七维审核结论与行业对标（§9） | YanYuCloudCube Team |
+| v1.1.0 | 2026-09-24 | 闭环审核：①编排引擎升级 v2.1（scene分支A-F显式化/RAG降级保护/质检复检≤2轮/trace_id全链透传/语枢+预见真并行）；②新增漫剧六阶段适配器 drama_stage_adapter.py + 漫剧工具网关桩；③补录七维审核结论与行业对标（§9） |
+| v1.2.0 | 2026-09-26 | 事实源分层治理：作废「YYC3-多端部署-Agent代码」幽灵路径引用（§文档定位/§8.1/§8.3/frontmatter），改指本目录（架构规范）+ yyc3-ai-agent-archive/components/（可运行代码）+ 0379-world/core/agents/（上游同步域）；补充同步策略 | YanYuCloudCube Team |
 
 ---
 

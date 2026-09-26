@@ -2,9 +2,9 @@
 file: YYC3-06-AI漫剧开发者文档-多维闭环版.md
 description: YYC³ AI漫剧开发者文档（多维闭环版）— 五维驱动 · 五层闭环 · 开源优势整合 · 全链路落地手册
 author: YanYuCloudCube Team <admin@0379.email>
-version: v1.0.0
+version: v1.2.0
 created: 2026-09-24
-updated: 2026-09-24
+updated: 2026-09-26
 status: active
 tags: [技术文档],[开发者],[多维闭环],[漫剧生产],[开源生态]
 category: technical
@@ -325,15 +325,15 @@ pnpm i && pnpm start
 
 # ④ 业务层（manju-studio）
 cd yyc3-ai-manju-studio
-cd frontend && pnpm i && pnpm dev          # http://localhost:3030 起
+cd frontend && pnpm i && pnpm dev          # http://localhost:20300 起（2xxxx 前端红线）
 cd ../backend && pip install -r requirements.txt
-uvicorn main.py:app --reload --port 8001
+uvicorn main:app --reload --port 25200     # 25xxx 后端红线（前端 client.ts 默认指向 25200）
 celery -A celery_worker.celery_app worker -Q image,video,render -c 4
 ```
 
 > 启动顺序图标语义：①→④ 为依赖驱动序（序号即启动次序）；与 3.1 节架构图层级一一对应（底座→算力→编排→业务）。
 
-> 开发服务器端口遵循团队规范：**3030 起步**；业务后端 8001、H3 服务 8002、网关 8000。
+> 开发服务器端口遵循 [YYC3-07 §八 A11](YYC3-07-大数据与多Agent协同架构-技术可行性论证报告.md) 全局红线条带：**前端 20000-24999（dev=20300）｜后端/网关 25000-29999（业务后端=25200、网关=25080，G1 验收已按此留证）｜中间件 30000-34999｜AI 服务 40000-44999（H3 服务落此段，具体端口 M3 部署时定）**。v1.1.0 及以前文中 3030/8001/8002/8000 为历史遗留值，已废弃。
 
 ### 6.3 单集验证流程（跑通即入门）
 
@@ -415,7 +415,8 @@ curl -N http://localhost:8001/api/v1/task/stream?project_id=demo-001
 
 | 版本   | 日期       | 变更内容                                                                 | 作者                |
 | ------ | ---------- | ------------------------------------------------------------------------ | ------------------- |
-| v1.1.0 | 2026-09-24 | 补充图标与徽章使用示例：文档状态徽章栏（0.1）、五闭环导航速查（0.2）、闭环图标语义（1.2）、合规徽章列（2.2）、阶段图标（5.1）、Gate 状态徽章（7.2） | YanYuCloudCube Team |
+| v1.1.0 | 2026-09-24 | 补充图标与徽章使用示例：文档状态徽章栏（0.1）、五闭环导航速查（0.2）、闭环图标语义（1.2）、合规徽章列（2.2）、阶段图标（5.1）、Gate 状态徽章（7.2） |
+| v1.2.0 | 2026-09-26 | §6.2 端口规范修正：废弃 3030/8001/8002/8000 历史值，统一对齐 YYC3-07 §八 A11 红线条带与实况（前端 20300/后端 25200/网关 25080，H3 归 4xxxx 段） | YanYuCloudCube Team |
 | v1.0.0 | 2026-09-24 | 综合 01~05 号文档，以五维评估为经、五大闭环为纬整合开源生态优势与 YYC³ 三仓库能力，形成多维闭环版开发者主文档 | YanYuCloudCube Team |
 
 ## 文档追溯信息

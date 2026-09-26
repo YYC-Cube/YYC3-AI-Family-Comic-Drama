@@ -250,3 +250,108 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 - G1-005 鉴权逻辑：10/10 PASS
 - 组件库降级冒烟：11/11 PASS
 - 四仓库 .gitignore 统一校验通过（密钥零入库 + 二进制红线 + yyc3-icons 例外）
+
+---
+
+## 十二、漂移治理 + Skills 技能库建库 + G1 E2E 解锁（2026-09-26 第三轮）
+
+### 12.1 文档漂移治理（全维度对比分析后的 6 项修正）
+
+| # | 治理项 | 处置 |
+| --- | --- | --- |
+| 1 | 幽灵事实源 | INDEX/README/总纲/03 四文件中《YYC3-多端部署-Agent代码》引用全部清零，改为三层声明（本目录=架构规范 / agent-archive/components/=可运行代码 / 0379-world/core/agents/=上游同步域）；§源头资源地图改指实况路径 |
+| 2 | 三份 8-Agent 拷贝 | 实测 docs 包与 components 完全一致（UNSAFE 修复已在两份在位）、0379-world 有等价防误判守卫；同步策略写入总纲 §8.1 与 INDEX |
+| 3 | YYC3-08 §1.1 过期快照 | 修订 v1.1.0：「前后端 0%」→ 上游 511 文件 + 前端完整实现 + 组件冒烟实况，补 G1 验收状态 |
+| 5 | 端口规范冲突 | YYC3-06 §6.2 v1.2.0：废弃 3030/8001/8002/8000，统一 A11 红线条带（前端 20300/后端 25200/网关 25080/H3 归 4xxxx） |
+| 6 | 03 原版/对齐版重复 | 声明 docs 根为唯一活跃版本（v1.2.0），Agent 目录「对齐版」标注为归档副本 |
+
+### 12.2 Skills 技能库建库（yyc3-ai-agent-archive/skills/）
+
+- 框架文档：[YYC3-AI-Family-Skills技能库框架目录.md](YYC3-AI-Family-Comic-Drama-Agent/YYC3-AI-Family-Skills技能库框架目录.md)（13 域 44 技能：P0×27/P1×7/P2×9/P3×1；SKILL.md 契约模板；编号与组件库同构）
+- 骨架落地：44 个 SKILL.md（组件背书技能契约按 components/ 真实签名填充）+ README + INDEX
+- 可执行件：`_matrix/p0_smoke_matrix.py`（P0×27 冒烟矩阵）+ 95 域三件套（gate-runner / gate-report / regression-anchor）
+- **P0 冒烟矩阵：PASS 23 / STUB 4 / FAIL 0**；回归锚点 **3/3**（场景D拦截/RAG降级/质检2轮上限）
+- STUB 登记（转 M2 任务）：storyboard-schema-check（A7 schema 待填充）+ novel-split/episode-plan/storyboard-gen（script_engine 待实现）
+- **矩阵揪出真缺陷并已修复**：智云守护 PII 模式 `\b` 在 CJK 邻接处永不成立（Python3 `\w` 含中日韩字符），手机号「话13800138000请」漏脱敏 → 数字类模式改环视 `(?<!\d)…(?!\d)`，已回灌 docs 副本；另补 yyc3-minimax-h3/.env.example
+
+### 12.3 G1 E2E 解锁（网关本地起服，六用例 3 实测 PASS）
+
+- 启动器 `scripts/run_gateway_local.py`：core/api 以 importlib 别名装载为 `app` 包（免改上游代码）；端口 25080
+- 桩上游 `scripts/stub_upstream.py`（:25290，OpenAI 兼容形状）+ 上游池 `OPENAI_COMPATIBLE_UPSTREAMS` 指向
+- 结果（详见 [G1-底座通电验收记录 v1.1.0](G1-底座通电验收记录-20260926.md)）：
+  - **TC-G1-001 PASS**：/health 200（status=healthy；redis/pg 按设计降级上报，本机 ollama healthy）
+  - **TC-G1-002 PASS（桩上游 E2E）**：Chat 全链贯通，响应头 `x-yyc3-upstream: stub-llm` 命中「上游节点标识」预期
+  - **TC-G1-005 PASS（偏差留证）**：三连发 401/403/200（错误密钥实为 403，拒绝语义成立，建议 YYC3-60 v1.1 修订预期）
+  - TC-G1-004 维持 PARTIAL（path_normalize 在根 app/ v1 设计件，未接线 core/api）；TC-G1-003/006 维持 BLOCKED（硬件前置）
+- 补齐依赖（venv `yyc3-0379-world/.venv`，gitignored）：pgvector、sqlalchemy[asyncio]+greenlet、numpy、aiofiles、jieba、psutil、prometheus-fastapi-instrumentator 等 —— **上游缺 requirements.txt，建议补**
+
+### 12.4 下次会话启动指南（第三轮后）
+
+```bash
+# 1. 复跑技能门禁：cd yyc3-ai-agent-archive && python3 skills/_matrix/p0_smoke_matrix.py
+# 2. 复跑网关 E2E：yyc3-0379-world/.venv/bin/python scripts/stub_upstream.py &（后台）
+#    cd yyc3-0379-world && .venv/bin/python ../scripts/run_gateway_local.py &（后台）
+# 3. G1-002 真实 LLM 版：本机 Ollama（healthy）注册上游池后复验
+# 4. M2 主线：script_engine 三件 + storyboard.v1.json 填充（清 4 个 STUB，转 G2）
+```
+
+**当前优先级 TOP 3**：
+1. **[P0]** M2 编排贯通：填 script_engine 三件 + storyboard Schema（清 4 STUB → TC-G2-007 可执行）
+2. **[P1]** YYC3-60 v1.1 修订：G1-005 预期 401→401/403；G3 用例编写（M3 前 1 周）
+3. **[P1]** 上游仓补 requirements.txt（本轮依赖清单已留证于 G1 记录）
+
+---
+
+## 十三、M2 script_engine 落地 + YYC3-60 v1.1 + G1-002 真实 LLM 版（2026-09-26 第四轮）
+
+### 13.1 M2 主线：script_engine 五件套 + 分镜 Schema（清 4 STUB）
+
+落位 `yyc3-ai-manju-studio/backend/app/modules/script_engine/`（全部 stdlib 规则基线，LLM 增强为后续）：
+
+| 文件 | 能力 | 验证 |
+| --- | --- | --- |
+| splitter.py | 章节拆分（第X章/回标记 + 无标记段落聚合兜底） | 样本文本 2 章正确拆分 |
+| extractor.py | 角色/场景/对话/剧情要素抽取（引号对话 + 说话人回溯 + 场景标记） | 台词 6 条、钩子 4 处 |
+| hook_detector.py | 流量钩子识别（悬念/反转/爽点/冲突/互动五类权重计分 + 单集主钩子） | ep01/ep02 均命中「悬念」 |
+| episode_planner.py | 分集规划（3.5 字/秒语速基线 + 90-120s 窗口 + 跨章聚合） | 2 集，各 90s |
+| storyboard_schema.py | Schema 加载/校验（与前端 validateStoryboard 同规则）/ 规则版草稿生成器 | 草稿 80 镜过校验 |
+| schema/storyboard.v1.json | StoryboardV1 正式 JSON Schema（顶层 12 字段 + Shot 12 字段，**与前端 types/storyboard.ts 严格同构**） | jsonschema 兼容 |
+
+- **TC-G2-007 三条件实测满足**：12 字段全齐、hook_shots 非空且全部 hook_flag=true、单集镜头数 80-120（草稿 80 镜，总时长 89.5s 落 90-120s 窗口）
+- **P0 冒烟矩阵升级为「真实生成→校验」闭环后：27 PASS / 0 STUB / 0 FAIL（满绿）**；回归锚点 3/3
+- 4 个技能状态 stub→degraded-ok（skills INDEX 同步），P1-P3 的 17 个 stub 为既定排期项
+- 规则基线诚实声明：角色/场景抽取与镜头节奏为规则版，LLM 语义精抽/节奏优化为后续增强（接口契约不变）
+
+### 13.2 YYC3-60 v1.1
+
+- TC-G1-005 预期修订：错误密钥 401→**401/403**（未提供=401 / 已提供但无效=403，G1 实测留证）
+- **G3 门禁补齐 9 条完整用例**（TC-G3-001~009：特征库建库/跨镜头一致性 ≥0.85/打回闭环/SyncNet ≥0.75/口型打回闭环/单镜 ≤5min/夜批 ≥200 镜/提示词抽检 ≥90%/风格一致性）；其中 001-005、008、009 可无 DGX 先行验证
+
+### 13.3 G1-002 真实 LLM 版复验（本机 Ollama 上游）
+
+- 上游池注册 `ollama-local → http://localhost:11434`（模型 `yyc3-family-coder:14b-q4`，qwen3 14.8B）
+- **实测 PASS**：真实生成内容返回 + `x-yyc3-upstream: ollama-local` + `system_fingerprint=fp_ollama`；双上游（stub + ollama）按模型名 fnmatch 并存路由
+- G1 现状：**3 项实测 PASS（含真实 LLM 版）+ 1 项逻辑 PASS + 2 项硬件 BLOCKED**（留证：G1 记录 v1.1.0）
+
+### 13.4 变更提交索引（本轮按仓提交）
+
+| 仓库 | 提交内容 |
+| --- | --- |
+| 根仓 | 文档漂移治理（INDEX/README/总纲/03/06/08）+ Skills 框架文档 + G1 验收记录 v1.1.0 + YYC3-60 v1.1.0 + HANDOFF 第三/四轮 + scripts/run_gateway_local.py + scripts/stub_upstream.py |
+| yyc3-ai-agent-archive | Skills 建库（13 域 44 技能 + P0 矩阵 + 95 域三件套）+ 智云守护 PII CJK 边界修复 |
+| yyc3-ai-manju-studio | script_engine 五件套 + storyboard.v1.json Schema（M2 P1-2/P1-3） |
+| yyc3-minimax-h3 | 补齐 .env.example |
+| yyc3-0379-world | 无代码改动（本地 .env/.venv 均已 gitignore，不入库） |
+
+### 13.5 下次会话启动指南（第四轮后）
+
+```bash
+# 1. 技能门禁复跑（应 27P/0S/0F）：cd yyc3-ai-agent-archive && python3 skills/_matrix/p0_smoke_matrix.py
+# 2. TC-G2 用例执行前置已就绪：九步闭环 6 场景 + 分镜 Schema（G2 十用例按 YYC3-60 §四 跑）
+# 3. M3 预研：face_encoder 真实模型（pip install insightface onnxruntime）→ TC-G3-001/002
+```
+
+**当前优先级 TOP 3**：
+1. **[P0]** G2 十用例执行（TC-G2-001~010，分镜 Schema 已就绪；004/005 为回归锚点）
+2. **[P1]** M3 一致性专项预研（TC-G3-001/002 无 DGX 可先行）
+3. **[P1]** 上游仓补 requirements.txt + storyboards LLM 增强（script_engine 规则版 → LLM 精抽）

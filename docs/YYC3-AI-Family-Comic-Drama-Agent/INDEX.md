@@ -2,9 +2,9 @@
 file: INDEX.md
 description: docs/YYC3-AI-Family-Agent 目录总索引 — 全量闭环架构文档查阅入口
 author: YanYuCloudCube Team <admin@0379.email>
-version: v1.0.0
+version: v1.3.0
 created: 2026-09-24
-updated: 2026-09-24
+updated: 2026-09-26
 status: active
 tags: [索引],[导航],[架构]
 category: index
@@ -20,8 +20,11 @@ language: zh-CN
 
 # docs/YYC3-AI-Family-Agent 目录索引
 
-> **唯一事实源**：[YYC3-多端部署-Agent代码/YYC3-AI-Family-Agent/](../../YYC3-多端部署-Agent代码/YYC3-AI-Family-Agent/) 标准组件库（12 目录 × README+API.md+代码 三位一体）。
-> 本目录为**架构呈现层**：面向查阅、评审、漫剧落地衔接。
+> **事实源分层（v1.3.0 治理，原「唯一事实源」声明作废）**：
+> ① **架构规范事实源** = 本目录（12 子目录 × README+API.md+代码 三位一体）；
+> ② **可运行代码事实源** = `../../../yyc3-ai-agent-archive/components/`（13 组件平移件，降级冒烟 11/11 通过）；
+> ③ **上游网关侧实现** = `../../../yyc3-0379-world/core/agents/`（上游同步域，经 scripts/sync-upstreams.sh 管理）。
+> 历史文档中的《YYC3-多端部署-Agent代码/YYC3-AI-Family-Agent》路径在本仓**不存在**，一律按上述映射解读。本目录为**架构呈现层**：面向查阅、评审、漫剧落地衔接。
 
 ## 一、文档清单
 
@@ -29,6 +32,7 @@ language: zh-CN
 | ---- | ---- | ---- | -------- |
 | [YYC3-AI-Family-Agent-全量闭环架构总纲.md](YYC3-AI-Family-Agent-全量闭环架构总纲.md) | v1.0.0 | ★ 核心产出：8Agent 全量闭环架构（设计架构/交互逻辑/功能模块/运行流程四位一体） | 架构师/开发/管理 |
 | [YYC3-03-AI漫剧智能体编排方案-对齐版.md](YYC3-03-AI漫剧智能体编排方案-对齐版.md) | v1.1.0 | 漫剧场景化编排（§2.1 已与组件库对齐：三层定位+标准接口+模型映射+知遇伯乐更名+九步映射） | 漫剧生产团队 |
+| [YYC3-AI-Family-Skills技能库框架目录.md](YYC3-AI-Family-Skills技能库框架目录.md) | v1.0.0 | Skills 技能库框架：13 域 44 技能（编号与组件库同构，SKILL.md 契约模板 + P0 映射表 + 门禁锚点） | 开发/AI Agent |
 | [README.md](README.md) | — | 组件库主 README 副本（总规范：8成员矩阵+ReAct-C九步+目录标准） | 全体 |
 
 ## 一a、Agent 专属子目录索引（12 目录 × 三位一体）
@@ -54,9 +58,9 @@ language: zh-CN
 
 | 资源 | 路径 |
 | ---- | ---- |
-| 标准组件库（唯一事实源） | `../../YYC3-多端部署-Agent代码/YYC3-AI-Family-Agent/` |
-| 文档总索引（三库结构） | `../../YYC3-多端部署-Agent代码/YYC3-文档库/00-标准规范-总纲与索引/INDEX.md` |
-| 可运行全链路代码 | `../../YYC3-多端部署-Agent代码/YYC3-代码库/01-编排引擎-异步调度/` |
+| 组件可运行事实源（13 平移件 + 冒烟脚本） | `../../../yyc3-ai-agent-archive/components/` |
+| 上游网关侧 Agent 实现（上游同步域） | `../../../yyc3-0379-world/core/agents/` |
+| Skills 技能库框架（11→13 域，本目录新篇） | [YYC3-AI-Family-Skills技能库框架目录.md](YYC3-AI-Family-Skills技能库框架目录.md) |
 | 漫剧编排方案（源文档，已更新至 v1.1.0） | `../YYC3-03-AI漫剧智能体编排方案.md` |
 
 ## 三、查阅路径建议
@@ -73,6 +77,7 @@ language: zh-CN
 | v1.0.0 | 2026-09-24 | 建立目录：全量闭环架构总纲 + YYC3-03 对齐版归档 + 组件库 README 副本 |
 | v1.1.0 | 2026-09-24 | 补齐 12 个 Agent 专属子目录（README+API+代码 三位一体），新增子目录索引，本目录升级为自包含架构资料包 |
 | v1.2.0 | 2026-09-24 | 闭环审核：编排引擎升级 v2.1（scene 分支/RAG 降级/质检复检/trace 透传/真并行），99 目录新增 drama_stage_adapter.py（漫剧六阶段状态机+工具网关桩），总纲补录 §9 审核报告与行业对标 |
+| v1.3.0 | 2026-09-26 | 事实源分层治理：作废「唯一事实源」幽灵路径（YYC3-多端部署-Agent代码/ 本仓不存在），改为三层声明（本目录=架构规范 / agent-archive/components/=可运行代码 / 0379-world/core/agents/=上游同步域）；§源头资源地图改指实况路径；新增 YYC3-AI-Family-Skills技能库框架目录.md（13 域 44 技能）；YYC3-03 对齐版标注为 docs 根原版的归档副本 |
 
 ---
 <p align="center">

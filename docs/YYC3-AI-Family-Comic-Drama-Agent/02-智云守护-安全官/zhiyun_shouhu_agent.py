@@ -17,11 +17,13 @@ class ZhiYunShouHuAgent(BaseAgent):
     LEVELS = ("CRITICAL", "HIGH", "MEDIUM", "LOW")
 
     # 敏感信息模式（PII/密钥类，生产环境由 gliner-pii 模型承接）
+    # 注意：Python3 \w 含 CJK 字符，\b 在「汉字+数字」邻接处永不成立，
+    # 数字类模式必须用 (?<!\d)/(?!\d) 环视（skills 冒烟矩阵 2026-09-26 缺陷修复）
     SENSITIVE_PATTERNS = [
-        (re.compile(r"\b\d{17}[\dXx]\b"), "[身份证号已脱敏]"),
-        (re.compile(r"\b1[3-9]\d{9}\b"), "[手机号已脱敏]"),
-        (re.compile(r"\b[\w.+-]+@[\w-]+\.[\w.]+\b"), "[邮箱已脱敏]"),
-        (re.compile(r"\b(?:\d[ -]*?){13,19}\b"), "[卡号已脱敏]"),
+        (re.compile(r"(?<!\d)\d{17}[\dXx](?!\d)"), "[身份证号已脱敏]"),
+        (re.compile(r"(?<!\d)1[3-9]\d{9}(?!\d)"), "[手机号已脱敏]"),
+        (re.compile(r"(?<!\d)(?:\d[ -]*?){13,19}(?!\d)"), "[卡号已脱敏]"),
+        (re.compile(r"[\w.+-]+@[\w-]+\.[\w.]+"), "[邮箱已脱敏]"),
     ]
 
     # 提示词注入/越狱攻击特征（生产环境由 nemoguard-jailbreak-detect 承接）

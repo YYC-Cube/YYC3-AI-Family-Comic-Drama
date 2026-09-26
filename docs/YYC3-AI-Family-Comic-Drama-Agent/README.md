@@ -22,6 +22,8 @@ complexity: advanced
 
 # YYC³ AI FAmily Agent 标准规范
 
+> **事实源分层注记（2026-09-26 治理）**：本 README 为组件库**总规范副本**（架构规范事实源=本目录 12 子目录）；组件**可运行代码事实源**=`yyc3-ai-agent-archive/components/`（13 平移件，降级冒烟 11/11）；`0379-world/core/agents/` 为上游网关侧实现（上游同步域）。文中目录结构为标准形态模板，实际落位以各仓为准。
+
 ## 8位核心成员 + 公共知识库能力 + 完整 ReAct-C 协同工作流闭环落地
 
 > **规范来源**：本规范整理自《AI-FAmily-Agent-拟人化协同架构》《创想灵韵-知遇伯乐代码示例》《YYC3-AI-FAmily-Agent双机DGX-Spark落地模型配置与全链路闭环方案》《Agent-A2A通信协议与消息队列异步调度的实现》《Milvus向量库-Python-检索代码》等工程资产，是可直接并入现有代码工程的标准落地文档。
