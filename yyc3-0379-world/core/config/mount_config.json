@@ -1,0 +1,62 @@
+{
+  "volumes": {
+    "yyc3_data": {
+      "purpose": "应用数据存储",
+      "mount_point": "/app/data",
+      "services": [
+        "gateway"
+      ]
+    },
+    "yyc3_postgres": {
+      "purpose": "PostgreSQL 数据持久化",
+      "mount_point": "/var/lib/postgresql/data",
+      "services": [
+        "postgres"
+      ]
+    },
+    "yyc3_redis": {
+      "purpose": "Redis 数据持久化",
+      "mount_point": "/data",
+      "services": [
+        "redis"
+      ]
+    }
+  },
+  "networks": {
+    "0379-world_backend": {
+      "purpose": "主服务网络",
+      "services": [
+        "gateway",
+        "postgres",
+        "redis",
+        "ollama",
+        "traefik",
+        "grafana",
+        "prometheus"
+      ]
+    },
+    "docker_backend": {
+      "purpose": "Docker Compose 网络",
+      "services": [
+        "gateway",
+        "traefik"
+      ]
+    }
+  },
+  "bind_mounts": {
+    "/app/data": {
+      "host_path": "/Volumes/Development/项目提示词/0379-world/data",
+      "purpose": "应用数据目录",
+      "services": [
+        "gateway"
+      ]
+    },
+    "/app/config": {
+      "host_path": "/Volumes/Development/项目提示词/0379-world/config",
+      "purpose": "配置文件目录",
+      "services": [
+        "gateway"
+      ]
+    }
+  }
+}

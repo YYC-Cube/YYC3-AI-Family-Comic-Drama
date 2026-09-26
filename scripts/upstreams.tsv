@@ -1,0 +1,28 @@
+# YYC³ 上游核心代码同步清单
+# 格式（| 分隔）：上游仓库 | 本地目标目录 | 上游源路径 | 本地目标路径 | 保护文件(逗号分隔,可选) | sparse路径(分号分隔,可选)
+# 规则：保护文件存在时不被覆盖（本地 README/.gitignore/.env.example 为准）；sparse 用于巨型仓库按需拉取
+# YYC3-AI-Agent-Archive 为 3.9 万文件巨型仓库，启用 sparse checkout 仅拉取 packages 核心
+YYC3-0379-World | yyc3-0379-world | core | core | |
+YYC3-0379-World | yyc3-0379-world | agents | agents | |
+YYC3-0379-World | yyc3-0379-world | Dockerfile | Dockerfile | |
+YYC3-0379-World | yyc3-0379-world | Makefile | Makefile | |
+YYC3-0379-World | yyc3-0379-world | CHANGELOG.md | CHANGELOG.md | |
+YYC3-0379-World | yyc3-0379-world | CONTRIBUTING.md | CONTRIBUTING.md | |
+YYC3-MiniMax-H3 | yyc3-minimax-h3 | agent | agent | |
+YYC3-MiniMax-H3 | yyc3-minimax-h3 | apps | apps | |
+YYC3-MiniMax-H3 | yyc3-minimax-h3 | dashboard | dashboard | |
+YYC3-MiniMax-H3 | yyc3-minimax-h3 | docs | docs | |
+YYC3-MiniMax-H3 | yyc3-minimax-h3 | .gitmodules | .gitmodules | |
+YYC3-MiniMax-H3 | yyc3-minimax-h3 | CHANGELOG.md | CHANGELOG.md | |
+YYC3-MiniMax-H3 | yyc3-minimax-h3 | CONTRIBUTING.md | CONTRIBUTING.md | |
+YYC3-AI-Agent-Archive | yyc3-ai-agent-archive | packages/skill-gateway | skill-gateway | | packages
+YYC3-AI-Agent-Archive | yyc3-ai-agent-archive | packages/skill-registry | skill-registry | | packages
+YYC3-AI-Agent-Archive | yyc3-ai-agent-archive | packages/skill-sandbox | skill-sandbox | | packages
+YYC3-AI-Agent-Archive | yyc3-ai-agent-archive | packages/mcp-runtime | mcp-runtime | | packages
+YYC3-AI-Agent-Archive | yyc3-ai-agent-archive | packages/agent-runtime | agent-runtime | | packages
+YYC3-AI-Agent-Archive | yyc3-ai-agent-archive | packages/agent-registry | agent-registry | | packages
+YYC3-AI-Agent-Archive | yyc3-ai-agent-archive | packages/orchestrator | orchestrator | | packages
+YYC3-AI-Agent-Archive | yyc3-ai-agent-archive | packages/conductor | conductor | | packages
+YYC3-AI-Agent-Archive | yyc3-ai-agent-archive | packages/store | store | | packages
+YYC3-AI-Agent-Archive | yyc3-ai-agent-archive | packages/observability | observability | | packages
+YYC3-AI-Agent-Archive | yyc3-ai-agent-archive | packages/plugin-marketplace | plugin-marketplace | | packages

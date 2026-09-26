@@ -1,0 +1,43 @@
+name: Sync Upstreams
+
+# YYC³ 上游核心代码定时同步：每日 02:00 拉取 YYC-Cube 上游核心代码，变更自动开 PR
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync-upstreams
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run upstream sync
+        run: REMOTE_BASE=https://github.com/YYC-Cube bash scripts/sync-upstreams.sh ci
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: chore/upstream-sync
+          delete-branch: true
+          commit-message: "chore(upstream): sync core code from YYC-Cube upstreams"
+          title: "⬆️ Upstream Sync - YYC-Cube 核心代码自动同步"
+          body-path: scripts/upstream-sync-report.md
+          labels: |
+            upstream-sync
+            automated
+          add-paths: |
+            yyc3-0379-world/**
+            yyc3-ai-agent-archive/**
+            yyc3-minimax-h3/**
+            yyc3-ai-manju-studio/**
+            scripts/upstream-sync-report.md

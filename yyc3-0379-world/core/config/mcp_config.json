@@ -1,0 +1,46 @@
+{
+  "mcpServers": {
+    "mcp-filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/app"
+      ]
+    },
+    "mcp-brave-search": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      }
+    },
+    "mcp-postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:${DB_PASSWORD}@127.0.0.1:5432/yyc3_gpt"
+      ]
+    },
+    "mcp-docker": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-v",
+        "/var/run/docker.sock:/var/run/docker.sock",
+        "modelcontextprotocol/server-docker"
+      ],
+      "env": {
+        "DOCKER_HOST": "unix:///var/run/docker.sock"
+      }
+    }
+  },
+  "documentation": {
+    "setupGuide": "MCP-CONFIG-GUIDE.md",
+    "lastUpdated": "2026-03-14",
+    "version": "1.0.0"
+  }
+}

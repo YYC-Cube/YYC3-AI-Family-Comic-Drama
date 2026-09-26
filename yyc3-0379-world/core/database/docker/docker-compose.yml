@@ -1,0 +1,63 @@
+# @file docker-compose.yml
+# @description Docker Compose 配置 - Traefik + Gateway + 数据库
+# @author YanYuCloudCube Team <admin@0379.email>
+# @version v1.0.0
+# @created 2026-03-14
+# @updated 2026-03-14
+# @status stable
+# @license MIT
+# @copyright Copyright (c) 2026 YanYuCloudCube Team
+# @tags docker,compose,traefik,fastapi
+
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v3.0
+    restart: unless-stopped
+    command:
+      - --configFile=/etc/traefik/traefik.yml
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "../traefik/traefik.yml:/etc/traefik/traefik.yml:ro"
+      - "../traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro"
+      - "../traefik/acme.json:/acme.json"
+    environment:
+      - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL:-admin@0379.email}
+    networks:
+      - backend
+
+  gateway:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    restart: always
+    env_file: ../.env
+    ports:
+      - "8000:8000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gateway.rule=Host(`api.0379.world`)"
+      - "traefik.http.routers.gateway.entrypoints=websecure"
+      - "traefik.http.routers.gateway.tls=true"
+      - "traefik.http.routers.gateway.tls.certresolver=cloudflare"
+      - "traefik.http.routers.gateway.middlewares=securityHeaders@file,rateLimiter@file,authBasic@file,circuitBreaker@file,requestLogging@file"
+      - "traefik.http.services.gateway.loadbalancer.server.port=8000"
+    networks:
+      - backend
+    volumes:
+      - ../data:/app/data
+      - ../config/mcp_config.json:/app/config/mcp_config.json:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  data:

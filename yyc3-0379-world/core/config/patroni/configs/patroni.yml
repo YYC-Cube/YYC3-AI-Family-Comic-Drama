@@ -1,0 +1,53 @@
+scope: postgres-cluster
+name: postgres-1
+
+restapi:
+  listen: 0.0.0.0:8008
+  connect_address: 0.0.0.0:8008
+
+bootstrap:
+  dcs:
+    ttl: 30
+    loop_wait: 10
+    retry_timeout: 10
+    maximum_lag_on_failover: 1048576
+
+postgresql:
+  listen: 0.0.0.0:5432
+  connect_address: 0.0.0.0:5432
+  data_dir: /var/lib/postgresql/data
+  bin_dir: /usr/lib/postgresql/14/bin
+  config_dir: /etc/postgresql/14/main
+  pgpass: /tmp/pgpass
+
+  authentication:
+    replication:
+      username: replicator
+      password: replicator_password
+    superuser:
+      username: postgres
+      password: postgres_password
+
+  parameters:
+    max_connections: 200
+    shared_buffers: 256MB
+    effective_cache_size: 1GB
+    maintenance_work_mem: 64MB
+    checkpoint_completion_target: 0.9
+    wal_buffers: 16MB
+    default_statistics_target: 100
+    random_page_cost: 1.1
+    effective_io_concurrency: 200
+    work_mem: 2621kB
+    min_wal_size: 1GB
+    max_wal_size: 4GB
+
+  pg_hba:
+    - host all all 0.0.0.0/0 md5
+    - host replication replicator 0.0.0.0/0 md5
+
+tags:
+  nofailover: false
+  noloadbalance: false
+  clonefrom: false
+  nosync: false

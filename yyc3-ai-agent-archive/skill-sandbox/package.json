@@ -1,0 +1,32 @@
+{
+  "name": "@yyc3/skill-sandbox",
+  "version": "1.0.1",
+  "description": "YYC³ Skill 沙箱执行环境 — 安全隔离执行、资源限制、输入净化、输出捕获",
+  "author": "YanYuCloudCube Team <admin@0379.email>",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint src/",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\""
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "@vitest/coverage-v8": "^4.1.11",
+    "tsup": "8.4.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "^8.70.1",
+    "vitest": "^4.1.11"
+  }
+}

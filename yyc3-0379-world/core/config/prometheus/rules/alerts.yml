@@ -1,0 +1,102 @@
+groups:
+  - name: service_alerts
+    interval: 30s
+    rules:
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: operations
+        annotations:
+          summary: "服务 {{ $labels.instance }} 已下线"
+          description: "服务 {{ $labels.job }} 在 {{ $labels.instance }} 已经下线超过 1 分钟"
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          team: operations
+        annotations:
+          summary: "内存使用率过高"
+          description: "节点 {{ $labels.instance }} 内存使用率超过 90%"
+
+      - alert: HighCPUUsage
+        expr: (100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)) > 80
+        for: 5m
+        labels:
+          severity: warning
+          team: operations
+        annotations:
+          summary: "CPU 使用率过高"
+          description: "节点 {{ $labels.instance }} CPU 使用率超过 80%"
+
+  - name: database_alerts
+    interval: 30s
+    rules:
+      - alert: PostgreSQLDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: database
+        annotations:
+          summary: "PostgreSQL 数据库已下线"
+          description: "PostgreSQL 在 {{ $labels.instance }} 已经下线超过 1 分钟"
+
+      - alert: PostgreSQLSlowQueries
+        expr: rate(pg_stat_statements_calls_total[5m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+          team: database
+        annotations:
+          summary: "PostgreSQL 慢查询过多"
+          description: "PostgreSQL 在 {{ $labels.instance }} 慢查询率超过 100 次/分钟"
+
+  - name: cache_alerts
+    interval: 30s
+    rules:
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: cache
+        annotations:
+          summary: "Redis 缓存已下线"
+          description: "Redis 在 {{ $labels.instance }} 已经下线超过 1 分钟"
+
+      - alert: RedisHighMemoryUsage
+        expr: (redis_memory_used_bytes / redis_memory_max_bytes) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          team: cache
+        annotations:
+          summary: "Redis 内存使用率过高"
+          description: "Redis 在 {{ $labels.instance }} 内存使用率超过 90%"
+
+  - name: api_alerts
+    interval: 30s
+    rules:
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "API 错误率过高"
+          description: "API 在 {{ $labels.instance }} 错误率超过 5%"
+
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "API 响应延迟过高"
+          description: "API 在 {{ $labels.instance }} P95 延迟超过 1 秒"

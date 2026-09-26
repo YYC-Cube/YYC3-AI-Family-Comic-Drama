@@ -1,0 +1,43 @@
+{
+  "name": "@yyc3/mcp-runtime",
+  "version": "1.5.0",
+  "description": "YYC³ 统一 MCP 运行时 — 整合 4 套 MCP 实现 + Skill 桥接 + CowAgent 工具适配",
+  "author": "YanYuCloudCube Team <admin@0379.email>",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint src/",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\""
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.18.0",
+    "@yyc3/skill-registry": "workspace:*",
+    "eventemitter3": "^5.0.0",
+    "hono": "^4.11.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "@vitest/coverage-v8": "^4.1.11",
+    "globals": "^17.12.0",
+    "tsup": "8.4.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "^8.70.1",
+    "vitest": "^4.1.11"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  }
+}

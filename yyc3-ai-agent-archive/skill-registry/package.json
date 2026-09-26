@@ -1,0 +1,54 @@
+{
+  "name": "@yyc3/skill-registry",
+  "version": "1.3.0",
+  "description": "YYC3 统一 Skill 注册中心 — 标准化注册、发现、调度、降级熔断；loader 默认接 validator（P1-3）",
+  "author": "YanYuCloudCube Team <admin@0379.email>",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types.js",
+      "types": "./dist/types.d.ts"
+    },
+    "./frontmatter": {
+      "import": "./dist/frontmatter.js",
+      "types": "./dist/frontmatter.d.ts"
+    },
+    "./validator": {
+      "import": "./dist/validator.js",
+      "types": "./dist/validator.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint src/",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\""
+  },
+  "dependencies": {
+    "@yyc3/skill-sandbox": "workspace:*",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "@vitest/coverage-v8": "^4.1.11",
+    "globals": "^17.12.0",
+    "tsup": "8.4.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "^8.70.1",
+    "vitest": "^4.1.11"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  }
+}

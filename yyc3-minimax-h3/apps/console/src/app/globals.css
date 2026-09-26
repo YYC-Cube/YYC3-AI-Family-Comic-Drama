@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0d1117;
+  --foreground: #e6edf3;
+  --accent: #00d4aa;
+  --muted: #8b949e;
+  --card: #161b22;
+  --border: #30363d;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: ui-sans-serif, system-ui, -apple-system, "PingFang SC", sans-serif;
+}
+
+.mono {
+  font-family: ui-monospace, "JetBrains Mono", "SF Mono", monospace;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+}

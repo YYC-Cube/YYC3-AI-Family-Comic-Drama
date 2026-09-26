@@ -44,3 +44,4 @@ storage/logs/*
 tmp/
 *.tmp
 *.bak
+.upstream-cache/

@@ -1,0 +1,273 @@
+{
+  "model_combinations": {
+    "general_development": {
+      "name": "通用开发场景",
+      "description": "适合日常编码和文档编写",
+      "models": [
+        {
+          "model_name": "glm-4.7-flash",
+          "role": "coding",
+          "capabilities": ["代码生成", "调试", "重构", "代码审查"],
+          "pricing_type": "free"
+        },
+        {
+          "model_name": "glm-4-flash-250414",
+          "role": "general",
+          "capabilities": ["文档编写", "需求分析", "问题解答", "技术写作"],
+          "pricing_type": "free"
+        }
+      ]
+    },
+    "visual_development": {
+      "name": "视觉开发场景",
+      "description": "适合UI/UX设计和前端开发",
+      "models": [
+        {
+          "model_name": "glm-4.6v-flash",
+          "role": "multimodal",
+          "capabilities": ["UI设计分析", "截图理解", "跨模态任务"],
+          "pricing_type": "free"
+        },
+        {
+          "model_name": "glm-4v-flash",
+          "role": "vision",
+          "capabilities": ["图像识别", "OCR", "视觉问答"],
+          "pricing_type": "free"
+        },
+        {
+          "model_name": "cogview-3-flash",
+          "role": "image_generation",
+          "capabilities": ["原型图生成", "设计素材创建"],
+          "pricing_type": "free"
+        }
+      ]
+    },
+    "full_stack_development": {
+      "name": "全栈开发场景",
+      "description": "适合前后端一体化开发",
+      "models": [
+        {
+          "model_name": "glm-4.7-flash",
+          "role": "coding",
+          "capabilities": ["后端开发", "API设计", "数据库设计"],
+          "pricing_type": "free"
+        },
+        {
+          "model_name": "glm-4.6v-flash",
+          "role": "multimodal",
+          "capabilities": ["前端开发", "UI/UX分析", "组件设计"],
+          "pricing_type": "free"
+        },
+        {
+          "model_name": "glm-4.1v-thinking-flash",
+          "role": "reasoning",
+          "capabilities": ["复杂问题分析", "架构设计", "技术方案评估"],
+          "pricing_type": "free"
+        }
+      ]
+    },
+    "multimedia_development": {
+      "name": "多媒体开发场景",
+      "description": "适合视频、图像等多媒体内容创作",
+      "models": [
+        {
+          "model_name": "cogvideox-flash",
+          "role": "video_generation",
+          "capabilities": ["演示视频制作", "动画生成"],
+          "pricing_type": "free"
+        },
+        {
+          "model_name": "cogview-3-flash",
+          "role": "image_generation",
+          "capabilities": ["视觉素材创建", "插图生成"],
+          "pricing_type": "free"
+        },
+        {
+          "model_name": "glm-4.6v-flash",
+          "role": "multimodal",
+          "capabilities": ["跨模态内容理解", "多媒体分析"],
+          "pricing_type": "free"
+        }
+      ]
+    },
+    "premium_development": {
+      "name": "高级开发场景（付费）",
+      "description": "适合高质量、复杂任务开发",
+      "models": [
+        {
+          "model_name": "glm-5",
+          "role": "advanced_coding",
+          "capabilities": ["高级代码生成", "复杂架构设计", "性能优化"],
+          "pricing_type": "paid"
+        },
+        {
+          "model_name": "glm-5-turbo",
+          "role": "fast_coding",
+          "capabilities": ["快速代码生成", "实时调试", "敏捷开发"],
+          "pricing_type": "paid"
+        },
+        {
+          "model_name": "glm-4.7-max",
+          "role": "premium_coding",
+          "capabilities": ["高质量代码生成", "深度代码审查", "复杂问题解决"],
+          "pricing_type": "paid"
+        },
+        {
+          "model_name": "glm-4.6-max",
+          "role": "premium_coding",
+          "capabilities": ["高质量代码生成", "深度代码审查", "复杂问题解决"],
+          "pricing_type": "paid"
+        }
+      ]
+    }
+  },
+  "free_models": {
+    "glm-4.7-flash": {
+      "type": "coding",
+      "description": "编码模型，专为代码生成和优化设计",
+      "max_tokens": 128000,
+      "endpoint": "/v1/chat/completions",
+      "pricing_type": "free",
+      "supports_stream": true,
+      "supports_vision": false,
+      "supports_function_calling": false
+    },
+    "glm-4.6v-flash": {
+      "type": "multimodal",
+      "description": "多模态模型，支持文本和图像输入",
+      "max_tokens": 128000,
+      "endpoint": "/v1/chat/completions",
+      "pricing_type": "free",
+      "supports_stream": true,
+      "supports_vision": true,
+      "supports_function_calling": false
+    },
+    "glm-4.1v-thinking-flash": {
+      "type": "reasoning",
+      "description": "视觉推理模型，具备深度思考能力",
+      "max_tokens": 128000,
+      "endpoint": "/v1/chat/completions",
+      "pricing_type": "free",
+      "supports_stream": true,
+      "supports_vision": true,
+      "supports_function_calling": false
+    },
+    "glm-4-flash-250414": {
+      "type": "general",
+      "description": "通用语言模型，适合文本处理和对话",
+      "max_tokens": 128000,
+      "endpoint": "/v1/chat/completions",
+      "pricing_type": "free",
+      "supports_stream": true,
+      "supports_vision": false,
+      "supports_function_calling": false
+    },
+    "glm-4v-flash": {
+      "type": "vision",
+      "description": "视觉模型，专注于图像理解",
+      "max_tokens": 128000,
+      "endpoint": "/v1/chat/completions",
+      "pricing_type": "free",
+      "supports_stream": true,
+      "supports_vision": true,
+      "supports_function_calling": false
+    },
+    "cogview-3-flash": {
+      "type": "image_generation",
+      "description": "图像生成模型，快速生成高质量图像",
+      "endpoint": "/v1/images/generations",
+      "pricing_type": "free",
+      "supports_stream": false,
+      "supports_vision": false,
+      "supports_function_calling": false
+    },
+    "cogvideox-flash": {
+      "type": "video_generation",
+      "description": "视频生成模型，支持短视频创作",
+      "endpoint": "/v1/videos/generations",
+      "pricing_type": "free",
+      "supports_stream": false,
+      "supports_vision": false,
+      "supports_function_calling": false
+    }
+  },
+  "paid_models": {
+    "glm-4.7": {
+      "type": "chat",
+      "description": "智谱 GLM-4.7 标准版本，最新高质量对话模型",
+      "max_tokens": 128000,
+      "endpoint": "/v1/chat/completions",
+      "pricing_type": "paid",
+      "supports_stream": true,
+      "supports_vision": false,
+      "supports_function_calling": true,
+      "cost_per_1k_usd": 0.001
+    },
+    "glm-4.7-max": {
+      "type": "chat",
+      "description": "智谱 GLM-4.7 Max 套餐版本，最新最高性能模型",
+      "max_tokens": 128000,
+      "endpoint": "/v1/chat/completions",
+      "pricing_type": "paid",
+      "supports_stream": true,
+      "supports_vision": false,
+      "supports_function_calling": true,
+      "cost_per_1k_usd": 0.002
+    },
+    "glm-4.6": {
+      "type": "chat",
+      "description": "智谱 GLM-4.6 标准版本，高质量对话模型",
+      "max_tokens": 128000,
+      "endpoint": "/v1/chat/completions",
+      "pricing_type": "paid",
+      "supports_stream": true,
+      "supports_vision": false,
+      "supports_function_calling": true,
+      "cost_per_1k_usd": 0.001
+    },
+    "glm-4.6-max": {
+      "type": "chat",
+      "description": "智谱 GLM-4.6 Max 套餐版本，最高性能模型",
+      "max_tokens": 128000,
+      "endpoint": "/v1/chat/completions",
+      "pricing_type": "paid",
+      "supports_stream": true,
+      "supports_vision": false,
+      "supports_function_calling": true,
+      "cost_per_1k_usd": 0.002
+    },
+    "glm-4.5": {
+      "type": "chat",
+      "description": "智谱 GLM-4.5 标准版本，高质量对话模型",
+      "max_tokens": 128000,
+      "endpoint": "/v1/chat/completions",
+      "pricing_type": "paid",
+      "supports_stream": true,
+      "supports_vision": false,
+      "supports_function_calling": true,
+      "cost_per_1k_usd": 0.001
+    },
+    "glm-5": {
+      "type": "chat",
+      "description": "GLM-5 最新版本，最高质量对话模型",
+      "max_tokens": 128000,
+      "endpoint": "/v1/chat/completions",
+      "pricing_type": "paid",
+      "supports_stream": true,
+      "supports_vision": false,
+      "supports_function_calling": true,
+      "cost_per_1k_usd": 0.002
+    },
+    "glm-5-turbo": {
+      "type": "chat",
+      "description": "GLM-5 Turbo 版本，快速响应对话模型",
+      "max_tokens": 128000,
+      "endpoint": "/v1/chat/completions",
+      "pricing_type": "paid",
+      "supports_stream": true,
+      "supports_vision": false,
+      "supports_function_calling": true,
+      "cost_per_1k_usd": 0.0015
+    }
+  }
+}
