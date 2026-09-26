@@ -388,8 +388,44 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 
 **当前优先级 TOP 3**：
 1. **[P0]** M2 收尾：prompt 装载运行时 + A2A 埋点（清 TC-G2-008/009 PARTIAL）
-2. **[P1]** 真实 LLM 全链（Ollama 上游）→ TC-G2-010 并行收益 + TC-G2-005 复检达标复验
+2. **[P1]** 真实 LLM 全链（Ollama 上游已验证）→ TC-G2-010 并行收益 + TC-G2-005 复检达标复验
 3. **[P1]** TC-G3-001/002 一致性预研（insightface 512 维）
+
+---
+
+## 十五、M3 一致性专项预研（TC-G3-001/002 真实 512 维全通 · 2026-09-27 第五轮追加）
+
+### 15.1 预研结果（详见 [G3-一致性预研记录](G3-一致性预研记录-20260927.md)）
+
+- **TC-G3-001 建库 🟢 PASS**：insightface buffalo_l 真实模型（CPU），manifest mode=insightface、dim=512、同图 cos=1.0、三件套齐
+- **TC-G3-002 跨镜头比对 🟢 PASS**：同角色跨镜头最低 **0.8921**（hero 0.9643 / villain 0.8921，阈值 ≥0.85）、跨角色最高 **0.0119**（区分度 margin 0.88）、逐帧提取模式 `insightface×4`（零哈希降级）
+- **一致性 ≥80%/0.85 门禁的技术可行性在本地 CPU 全实证**——最大技术风险（YYC3-07 风险 T1）预研对冲完成
+
+### 15.2 环境障碍突破（沉淀为经验）
+
+1. GitHub release 直连被重置 → **gh-proxy.com 镜像**下载 buffalo_l（275MB）；模型须手动解压至 `~/.insightface/models/buffalo_l/`（insightface 不认裸 zip）
+2. 首轮 hero 相似度 ≈0 的根因是**固定裁剪把脸裁出检测框 → 静默哈希降级**——face_encoder 已加 `last_mode` 逐帧留证 + 无人脸检出显式告警（降级红线可审计）
+3. 素材方法论：randomuser 人像 + **人脸感知裁剪**（检测框外扩 1.8× 取景）构造跨镜头变体，保证变体帧必然可检出
+
+### 15.3 工程变更
+
+| 仓库 | 变更 |
+| --- | --- |
+| yyc3-ai-manju-studio | face_encoder last_mode 留证 + .venv（gitignored）；face_library_g3 预研库（本地，gitignored） |
+| 根仓 | scripts/run_g3_cases.py 执行器 + G3-一致性预研记录 |
+
+### 15.4 下次会话启动指南
+
+```bash
+# 复跑 G3 预研：yyc3-ai-manju-studio/.venv/bin/python scripts/run_g3_cases.py
+# 素材重建（如 /tmp 清空）：见 G3 记录 §环境障碍 #3 方法论
+# M3 主体：真实角色图入库 → anchor_guard 三段锚定 → TC-G3-003 打回闭环
+```
+
+**当前优先级 TOP 3**（更新）：
+1. **[P0]** M2 收尾：prompt 装载运行时 + A2A 埋点（清 TC-G2-008/009 PARTIAL）
+2. **[P1]** M3 主体：真实角色图入库 + anchor_guard 三段锚定联调（预研已实证可行性）
+3. **[P1]** 真实 LLM 全链 → TC-G2-010 并行收益复验
 
 ### 13.5 下次会话启动指南（第四轮后）
 
