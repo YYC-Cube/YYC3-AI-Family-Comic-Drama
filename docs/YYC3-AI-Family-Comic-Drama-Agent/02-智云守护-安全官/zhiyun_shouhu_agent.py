@@ -73,7 +73,8 @@ class ZhiYunShouHuAgent(BaseAgent):
                 f"请判断以下用户输入是否合规（无违法、无有害、无滥用），"
                 f"只回答 SAFE 或 UNSAFE：\n{user_input}"
             )
-            llm_unsafe = "UNSAFE" in verdict.upper()
+            # 收紧：仅当模型以 UNSAFE 开头才判违规（避免 mock/提示词回显含 "UNSAFE" 字样误判）
+            llm_unsafe = verdict.strip().upper().startswith("UNSAFE")
         except Exception:
             llm_unsafe = False
 
@@ -105,7 +106,7 @@ class ZhiYunShouHuAgent(BaseAgent):
                 f"请审查以下输出内容是否合规（无敏感泄露、无违规有害信息），"
                 f"只回答 SAFE 或 UNSAFE：\n{desensitized}"
             )
-            safe = "UNSAFE" not in verdict.upper()
+            safe = not verdict.strip().upper().startswith("UNSAFE")
             if not safe:
                 findings.append("内容未通过合规审查")
         except Exception:
