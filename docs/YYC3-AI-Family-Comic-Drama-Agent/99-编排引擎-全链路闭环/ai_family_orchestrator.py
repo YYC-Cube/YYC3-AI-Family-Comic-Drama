@@ -16,6 +16,8 @@
 # ==============================================================
 from concurrent.futures import ThreadPoolExecutor
 
+import json
+
 from base_agent import BaseAgent
 from yuanqi_tianshu_agent import YuanQiTianShuAgent
 from zhiyun_shouhu_agent import ZhiYunShouHuAgent
@@ -168,10 +170,9 @@ class AIFamilyOrchestrator:
                 core_for_polish, style="商务正式", audience="管理层",
                 knowledge_context=knowledge)
 
-        # ========== Step6：元启·天枢 全局汇总（A已含；B/C/F裁剪） ==========
-        if scene == "B" and "polished_report" in outputs:
-            outputs["yuanqi_summary"] = self.yuanqi.synthesize(
-                user_input, outputs)
+        # ========== Step6：元启·天枢 全局汇总（A 已含；B/C/F 裁剪） ==========
+        # G2-002 修订（2026-09-27）：B 场景按总纲 §五「裁剪 6」不再产出
+        # yuanqi_summary（此前代码与注释/规格矛盾，由 YYC3-60 G2 首跑发现）
 
         # ========== Step7：格物·宗师 质量校验与事实核查（F3 闭环复检） ==========
         print("\n[Step7] 格物·宗师 质量校验...")
@@ -179,6 +180,10 @@ class AIFamilyOrchestrator:
                         or outputs.get("polished_report")
                         or outputs.get("yushu_analysis")
                         or outputs.get("creative_ideas", ""))
+        if not isinstance(core_content, str):
+            # G2-006 首跑发现：场景C 的 creative_ideas 为结构化列表（JSON 数组契约），
+            # 质检/审计要求 str——统一次序化后再进入 Step7/8
+            core_content = json.dumps(core_content, ensure_ascii=False)
         quality_result = self.gewu.validate(core_content, knowledge)
         qc_rounds = 1
         # F3：不达标→二次优化→复检，直至达标或达轮次上限

@@ -27,9 +27,12 @@ class ZhiYunShouHuAgent(BaseAgent):
     ]
 
     # 提示词注入/越狱攻击特征（生产环境由 nemoguard-jailbreak-detect 承接）
+    # G2-003 修订（2026-09-27）：补「忽略之前…」「输出系统提示词」等用例短语变体
     INJECTION_PATTERNS = [
-        "忽略以上所有指令", "ignore previous instructions", "reveal your prompt",
-        "泄露系统提示词", "越狱", "jailbreak", "你现在是", "扮演没有限制的",
+        "忽略以上所有指令", "忽略之前所有指令", "忽略以上所有内容", "忽略之前所有内容",
+        "ignore previous instructions", "reveal your prompt",
+        "泄露系统提示词", "输出系统提示词", "打印系统提示词",
+        "越狱", "jailbreak", "你现在是", "扮演没有限制的",
     ]
 
     def __init__(self):

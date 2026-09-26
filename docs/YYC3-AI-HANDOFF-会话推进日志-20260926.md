@@ -350,6 +350,47 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 - 自测留证：G1-005 单测 10/10 回归通过；SSRF 全场景（回环放行/链路本地拦/私网默认拦+显式放行/协议限制）通过；P0 矩阵 27/0/0 + 回归锚点 3/3 全程保持
 - 遗留：3 个低危（不安全随机）已随 0379-world 修复清零；扫描器提示部分覆盖（library_source/callgraph partial），勿据此宣称项目整体安全，后续按需跑完整审计
 
+---
+
+## 十四、G2 十用例首跑 + 门禁回归修复 + 五仓推送（2026-09-27 第五轮）
+
+### 14.1 G2 编排贯通十用例执行（YYC3-60 §四）
+
+- 执行器落位：`scripts/run_g2_cases.py`（可复跑，证据 JSON 全量输出）
+- 首跑即抓出 3 处真问题并全部修复（详见 [G2 验收记录](G2-编排贯通验收记录-20260927.md)）：
+  1. 场景 B 违反总纲 §五「裁剪 6」产出 yuanqi_summary → 编排引擎两份拷贝修复
+  2. 注入短语覆盖缺口（忽略之前…/输出系统提示词）→ 智云规则库补 4 变体，拦截 4/4 回归
+  3. 场景 C 的 creative_ideas（list 契约）未序列化进审计正则 → Step7 入口统一 json.dumps
+- 用例侧修订（YYC3-60 v1.2）：TC-G2-002 预期对齐实现语义（C 产出集合含质检产物；user_id=default_user）
+- **终跑结果：PASS 7 / PARTIAL 3 / FAIL 0**（001~007 全过；008 prompt 运行时、009 事件流、010 真实模型计时三项 PARTIAL，解锁条件均为 M2 收尾项）
+- 回归保障：修复后 P0 矩阵 27/0/0 + 回归锚点 3/3 + 注入拦截 4/4 保持满绿
+
+### 14.2 五仓推送远程 main
+
+| 仓库 | 远程 | 推送内容 |
+| --- | --- | --- |
+| YYC3-AI-Family-Comic-Drama | YYC-Cube/YYC3-AI-Family-Comic-Drama | faa487a~本轮（治理+G1 留证+G2 记录+YYC3-60 v1.2+执行器） |
+| YYC3-Comic-ai-agent-archive | YYC-Cube/YYC3-Comic-ai-agent-archive | Skills 建库 + 编排引擎/智云修复 + skill-gateway 安全修复 |
+| YYC3-Comic-ai-manju-studio | YYC-Cube/YYC3-Comic-ai-manju-studio | script_engine 五件套 + Schema |
+| YYC3-Comic-minimax-h3 | YYC-Cube/YYC3-Comic-minimax-h3 | .env.example + 安全修复 |
+| YYC3-Comic-0379-world | YYC-Cube/YYC3-Comic-0379-world | 安全修复 e71b0ef |
+
+### 14.3 下次会话启动指南（第五轮后）
+
+```bash
+# 1. 复跑 G2：yyc3-0379-world/.venv/bin/python scripts/run_g2_cases.py
+# 2. M2 收尾三项（清 G2 的 PARTIAL）：
+#    a. prompt 装载运行时（agents/*/prompt.md → system_prompt，TC-G2-008 复验）
+#    b. 编排引擎向 91-A2A 事件流埋点（TC-G2-009 复验）
+#    c. 真实 LLM 接入（Ollama 上游已验证）→ TC-G2-010 并行收益复验
+# 3. M3 预研：TC-G3-001/002 特征库与一致性（insightface 真实模型）
+```
+
+**当前优先级 TOP 3**：
+1. **[P0]** M2 收尾：prompt 装载运行时 + A2A 埋点（清 TC-G2-008/009 PARTIAL）
+2. **[P1]** 真实 LLM 全链（Ollama 上游）→ TC-G2-010 并行收益 + TC-G2-005 复检达标复验
+3. **[P1]** TC-G3-001/002 一致性预研（insightface 512 维）
+
 ### 13.5 下次会话启动指南（第四轮后）
 
 ```bash
