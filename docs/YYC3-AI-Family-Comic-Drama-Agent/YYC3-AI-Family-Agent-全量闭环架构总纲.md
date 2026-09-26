@@ -304,7 +304,7 @@ result = AIFamilyOrchestrator().execute(
 ```
 YYC3 AI Family-Comic Drama/                        # 总工作区（本仓）
 ├── docs/YYC3-AI-Family-Comic-Drama-Agent/         # ★ 架构规范事实源（本目录，12目录×README+API+代码）
-├── yyc3-ai-agent-archive/components/              # ★ 可运行代码事实源（13 平移件+冒烟脚本，降级 11/11）
+├── yyc3-ai-agent-archive/components/              # ★ 可运行代码事实源（15 组件=13平移件+prompt运行时+事件埋点，降级 11/11）
 ├── yyc3-0379-world/core/agents/                   # 上游网关侧实现（上游同步域，sync-upstreams.sh 管理）
 └── skills 建议落位 yyc3-ai-agent-archive/skills/   # 技能库（见 YYC3-AI-Family-Skills技能库框架目录.md）
 ```

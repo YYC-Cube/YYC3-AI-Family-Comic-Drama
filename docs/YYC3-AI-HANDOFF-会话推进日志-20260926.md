@@ -427,6 +427,46 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 2. **[P1]** M3 主体：真实角色图入库 + anchor_guard 三段锚定联调（预研已实证可行性）
 3. **[P1]** 真实 LLM 全链 → TC-G2-010 并行收益复验
 
+---
+
+## 十六、M2 收尾 + M3 主体并行完成（2026-09-27 第六轮）
+
+### 16.1 M2 收尾（G2 记录 v1.1：8 PASS / 2 PARTIAL / 0 FAIL）
+
+| 交付 | 结果 |
+| --- | --- |
+| `components/prompt_runtime.py` | prompt.md 装载运行时（frontmatter+双 text 围栏+输出契约提取+实例构建）；8 Agent 全量注入（675~1150 字） |
+| `components/orchestrator_events.py` | 步骤事件埋点（redis Stream→自动降级 JSONL，`replay(trace_id)` 取证入口） |
+| 编排引擎 5 步埋点接入 | **TC-G2-009 转正 PASS**（B 场景事件序列完整/同 trace_id/untraced 拦截留痕） |
+| **TC-G2-008 复验** | 结构面 8/8 + 真实 LLM 契约 **7/8**（Ollama 14B 真实推理；语枢 1 例超时回退 Mock=非契约缺陷）→ 维持 PARTIAL（仅差语枢单例复验） |
+| BaseAgent 加固 | 补 `LLM_TIMEOUT`（挂死防线，openai 客户端默认无超时——实测暴露）与 `LLM_MAX_TOKENS`（思考模式长生成防线）；两份拷贝同步 |
+| 门禁拦截的自伤 bug | 埋点首跑即拦出「trace_id 赋值前引用」（UnboundLocalError），修正后两份拷贝同步——收口执行器的回归价值 |
+
+### 16.2 M3 主体（G3 记录 v1.1：TC-G3-001/002/003 全 PASS）
+
+- `backend/app/modules/consistency_engine/anchor_guard.py`：三段锚定（pre_anchor 锚定+未建库 BLOCKED / during_constraint 桩态约束 / post_check 打回闭环）
+- **TC-G3-003 实测 11/11**：错人帧 -0.0013→REDRAW、同人帧 0.9643→ACCEPT、超限→ESCALATE、全程真实模型特征（降级帧拒判红线生效）
+- 执行器 `scripts/run_m3_anchor.py`（生产兜底库 face_library 进程内重建，gitignored）
+
+### 16.3 回归与治理
+
+- 埋点/超时改造后回归：P0 矩阵 27/0/0 + 回归锚点 3/3 满绿
+- `agent-archive/.gitignore` 补 `events/`、`face_library*/`（运行时产物零入库）
+- INDEX v1.4 / 总纲 §8.1：components 事实源 13→15 件（+prompt_runtime+orchestrator_events）
+
+### 16.4 下次会话启动指南
+
+```bash
+# 1. 复跑：run_m2_closure.py（008 语枢复验）/ run_m3_anchor.py（11/11）
+# 2. M3 视听产能：DramaToolGateway 桩→实（ComfyUI 文生图）→ TC-G3-008 提示词抽检
+# 3. M2 残尾：TC-G2-010 真实模型并行计时（Ollama 双路并发）
+```
+
+**当前优先级 TOP 3**（更新）：
+1. **[P0]** M3 视听产能：DramaToolGateway 桩→实（ComfyUI 文生图接入，anchor_guard 真实进生成链）
+2. **[P1]** TC-G2-008 语枢复验 + TC-G2-010 真实模型并行计时（清 G2 双 PARTIAL）
+3. **[P1]** 真实多机位角色素材标定（anchor_guard 阈值 0.85 在真实素材上复标）
+
 ### 13.5 下次会话启动指南（第四轮后）
 
 ```bash

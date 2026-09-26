@@ -22,7 +22,7 @@ language: zh-CN
 
 > **事实源分层（v1.3.0 治理，原「唯一事实源」声明作废）**：
 > ① **架构规范事实源** = 本目录（12 子目录 × README+API.md+代码 三位一体）；
-> ② **可运行代码事实源** = `../../../yyc3-ai-agent-archive/components/`（13 组件平移件，降级冒烟 11/11 通过）；
+> ② **可运行代码事实源** = `../../../yyc3-ai-agent-archive/components/`（15 组件：13 平移件 + prompt_runtime 装载运行时 + orchestrator_events 事件埋点；降级冒烟 11/11 通过）；
 > ③ **上游网关侧实现** = `../../../yyc3-0379-world/core/agents/`（上游同步域，经 scripts/sync-upstreams.sh 管理）。
 > 历史文档中的《YYC3-多端部署-Agent代码/YYC3-AI-Family-Agent》路径在本仓**不存在**，一律按上述映射解读。本目录为**架构呈现层**：面向查阅、评审、漫剧落地衔接。
 
@@ -78,6 +78,7 @@ language: zh-CN
 | v1.1.0 | 2026-09-24 | 补齐 12 个 Agent 专属子目录（README+API+代码 三位一体），新增子目录索引，本目录升级为自包含架构资料包 |
 | v1.2.0 | 2026-09-24 | 闭环审核：编排引擎升级 v2.1（scene 分支/RAG 降级/质检复检/trace 透传/真并行），99 目录新增 drama_stage_adapter.py（漫剧六阶段状态机+工具网关桩），总纲补录 §9 审核报告与行业对标 |
 | v1.3.0 | 2026-09-26 | 事实源分层治理：作废「唯一事实源」幽灵路径（YYC3-多端部署-Agent代码/ 本仓不存在），改为三层声明（本目录=架构规范 / agent-archive/components/=可运行代码 / 0379-world/core/agents/=上游同步域）；§源头资源地图改指实况路径；新增 YYC3-AI-Family-Skills技能库框架目录.md（13 域 44 技能）；YYC3-03 对齐版标注为 docs 根原版的归档副本 |
+| v1.4.0 | 2026-09-27 | M2 收尾组件入库：components 新增 prompt_runtime.py（prompt.md 装载运行时，TC-G2-008）与 orchestrator_events.py（步骤事件埋点，TC-G2-009），平移件计 13→15；编排引擎接入每步埋点（redis 不可达自动降级 JSONL，两份拷贝同步） |
 
 ---
 <p align="center">

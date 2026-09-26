@@ -27,7 +27,9 @@ class BaseAgent:
             self._client = OpenAI(
                 base_url=os.getenv("LLM_BASE_URL", "http://localhost:8000/v1"),
                 api_key=os.getenv("LLM_API_KEY", "nim-local-dummy"),
+                timeout=float(os.getenv("LLM_TIMEOUT", "60")),  # 挂死请求防线（M2 收口实测补充）
             )
+            self._max_tokens = int(os.getenv("LLM_MAX_TOKENS", "512"))  # 思考模式长生成防线
         return self._client
 
     def run(self, prompt: str, context: str = "") -> str:
@@ -46,6 +48,7 @@ class BaseAgent:
                     {"role": "user", "content": user_content},
                 ],
                 temperature=float(os.getenv("LLM_TEMPERATURE", "0.3")),
+                max_tokens=self._max_tokens,
             )
             return response.choices[0].message.content
         except Exception as e:

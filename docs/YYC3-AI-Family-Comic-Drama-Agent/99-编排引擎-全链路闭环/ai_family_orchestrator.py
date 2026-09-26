@@ -53,6 +53,21 @@ class AIFamilyOrchestrator:
         # ===== 公共能力 =====
         self.retriever = MilvusRetriever()           # 知识库检索
 
+        # ===== M2 收尾（TC-G2-009）：步骤事件埋点，redis 不可达自动降级 JSONL =====
+        try:
+            from orchestrator_events import StepEventEmitter
+            self.events = StepEventEmitter()
+        except Exception:  # noqa: BLE001  埋点组件缺失不阻断主链路
+            self.events = None
+
+    def _emit_step(self, step: str, trace_id, payload=None, status: str = "ok"):
+        """单步事件埋点（发射失败静默——埋点不得阻断九步闭环）"""
+        if self.events is not None:
+            try:
+                self.events.emit(step, trace_id, payload, status)
+            except Exception:  # noqa: BLE001
+                pass
+
     def _get_knowledge(self, query: str, top_k: int = 5, category: str = None) -> tuple:
         """统一知识检索入口（Step3，带降级保护）
 
@@ -96,6 +111,9 @@ class AIFamilyOrchestrator:
         print("\n[Step1] 输入安全三级过滤...")
         safety_check = self.zhiyun.check_input(user_input)
         result["steps"].append({"step": "input_safety", "result": safety_check})
+        self._emit_step("input_safety", None,
+                        {"safe": safety_check["safe"]},
+                        status="blocked" if not safety_check["safe"] else "ok")
         if not safety_check["safe"]:
             result["status"] = "blocked"
             result["final_output"] = f"请求已拦截：{safety_check['risk']}"
@@ -110,6 +128,8 @@ class AIFamilyOrchestrator:
         need_rag = route_result["need_rag"]
         trace_id = route_result["trace_id"]
         result["trace_id"] = trace_id  # F6：全链路追踪标识上浮到结果顶层
+        self._emit_step("intent_routing", trace_id,
+                        {"intent": intent, "complexity": complexity})
 
         # ========== Step3：公共RAG 知识检索与上下文注入（F2 降级保护） ==========
         knowledge, rag_degraded = ([], False)
@@ -119,6 +139,9 @@ class AIFamilyOrchestrator:
             result["steps"].append({"step": "rag_retrieve",
                                     "result_count": len(knowledge),
                                     "degraded": rag_degraded})
+            self._emit_step("rag_retrieve", trace_id,
+                            {"degraded": rag_degraded, "count": len(knowledge)},
+                            status="degraded" if rag_degraded else "ok")
 
         # ========== Step4：分场景任务执行（F5 语枢+预见真并行） ==========
         print("\n[Step4] 任务执行...")
@@ -199,11 +222,18 @@ class AIFamilyOrchestrator:
         result["steps"].append({"step": "quality_check",
                                 "result": quality_result,
                                 "qc_rounds": qc_rounds})
+        self._emit_step("quality_check", trace_id,
+                        {"score": quality_result.get("score"),
+                         "passed": quality_result.get("passed"),
+                         "qc_rounds": qc_rounds},
+                        status="ok" if quality_result.get("passed") else "rework")
 
         # ========== Step8：智云·守护 输出审计与脱敏 ==========
         print("\n[Step8] 输出安全审计...")
         audit_result = self.zhiyun.audit(core_content)
         result["steps"].append({"step": "output_audit", "result": audit_result})
+        self._emit_step("output_audit", trace_id, {"safe": audit_result["safe"]},
+                        status="blocked" if not audit_result["safe"] else "ok")
 
         if not audit_result["safe"]:
             result["status"] = "blocked"
