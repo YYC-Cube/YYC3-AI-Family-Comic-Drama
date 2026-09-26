@@ -339,8 +339,8 @@ class YYC3TemplateEngine:
                 "updated": meta.updated,
             }
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        with open(self.registry_path, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
+        self.registry_path.write_text(
+            json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
 
     def _load_registry(self) -> None:
         try:
@@ -402,8 +402,7 @@ class YYC3TemplateEngine:
                     return True
                 self._archive_version(path, metadata)
 
-            with open(path, 'w', encoding='utf-8') as f:
-                f.write(content)
+            path.write_text(content, encoding='utf-8')
 
             if metadata:
                 metadata.checksum = self.generate_checksum(content)
