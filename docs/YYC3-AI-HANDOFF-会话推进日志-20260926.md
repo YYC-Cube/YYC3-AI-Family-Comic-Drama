@@ -333,15 +333,22 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 - **实测 PASS**：真实生成内容返回 + `x-yyc3-upstream: ollama-local` + `system_fingerprint=fp_ollama`；双上游（stub + ollama）按模型名 fnmatch 并存路由
 - G1 现状：**3 项实测 PASS（含真实 LLM 版）+ 1 项逻辑 PASS + 2 项硬件 BLOCKED**（留证：G1 记录 v1.1.0）
 
-### 13.4 变更提交索引（本轮按仓提交）
+### 13.4 变更提交索引（本轮按仓提交，2026-09-26 收口）
 
-| 仓库 | 提交内容 |
-| --- | --- |
-| 根仓 | 文档漂移治理（INDEX/README/总纲/03/06/08）+ Skills 框架文档 + G1 验收记录 v1.1.0 + YYC3-60 v1.1.0 + HANDOFF 第三/四轮 + scripts/run_gateway_local.py + scripts/stub_upstream.py |
-| yyc3-ai-agent-archive | Skills 建库（13 域 44 技能 + P0 矩阵 + 95 域三件套）+ 智云守护 PII CJK 边界修复 |
-| yyc3-ai-manju-studio | script_engine 五件套 + storyboard.v1.json Schema（M2 P1-2/P1-3） |
-| yyc3-minimax-h3 | 补齐 .env.example |
-| yyc3-0379-world | 无代码改动（本地 .env/.venv 均已 gitignore，不入库） |
+| 仓库 | 提交 | 内容 |
+| --- | --- | --- |
+| 根仓 | faa487a | 文档漂移治理（INDEX/README/总纲/03/06/08）+ Skills 框架文档 + G1 验收记录 v1.1.0 + YYC3-60 v1.1.0 + HANDOFF 第三/四轮 + scripts/run_gateway_local.py + scripts/stub_upstream.py |
+| 根仓 | 767b9f8 / 8bb20cd | 安全修复：引擎模版 write_text 防穿越 + 资料包副本 SSRF 三道闸/RAG 密钥环境注入（与 components 逐字一致） |
+| yyc3-ai-agent-archive | 026fbcd | Skills 建库（13 域 44 技能 + P0 矩阵 + 95 域三件套）+ 智云守护 PII CJK 修复 + H3 SSRF 三道闸 + skill-gateway 凭据派生化/EVAL→通用 call |
+| yyc3-ai-manju-studio | 9962221 | script_engine 五件套 + storyboard.v1.json Schema（M2 P1-2/P1-3） |
+| yyc3-minimax-h3 | 655e79a | .env.example + 子进程解释器去环境变量注入面 + 引擎模版 write_text 防穿越 |
+| yyc3-0379-world | e71b0ef | 安全修复：模型名白名单+路径包含校验防穿越 + 测试桩凭据哈希派生 + 加权随机 SystemRandom（Mimosa 4 高危+3 低危清零，G1-005 单测 10/10 回归） |
+
+### 13.4a 安全门禁修复轮（Mimosa L3 拦截驱动，2026-09-26）
+
+- 提交门禁先后拦截 4+15 高危，全部修复后放行：路径穿越 ×5（0379 model_service_manager / 引擎模版 ×2 拷贝）、硬编码凭据 ×5（G1 测试桩、skill-gateway 测试、RAG 嵌入客户端——均改哈希派生或环境注入）、代码注入 ×2（Redis EVAL→通用 call）、SSRF ×2（H3 客户端三道闸：协议限制/主机白名单/解析 IP 边界，Python 3.14 ::1 保留段误杀已修）、不可信程序选择 ×2（解释器去环境变量）、不安全随机 ×3（SystemRandom）
+- 自测留证：G1-005 单测 10/10 回归通过；SSRF 全场景（回环放行/链路本地拦/私网默认拦+显式放行/协议限制）通过；P0 矩阵 27/0/0 + 回归锚点 3/3 全程保持
+- 遗留：3 个低危（不安全随机）已随 0379-world 修复清零；扫描器提示部分覆盖（library_source/callgraph partial），勿据此宣称项目整体安全，后续按需跑完整审计
 
 ### 13.5 下次会话启动指南（第四轮后）
 
