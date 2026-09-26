@@ -200,3 +200,53 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 - 分镜页、资产页增加 `ui/dialog` 用于详情查看/编辑
 - 接入 `ui/tabs` 优化剧本编辑器（原文/结构化/分镜三标签切换）
 - 数据库层就绪后，将 mock 数据替换为真实 API 调用（API 层已预留降级路径）
+
+---
+
+## 十一、GitHub Pages 自动部署 + 品牌 Logo 全局引用（2026-09-26）
+
+### 11.1 Pages CI 单通道部署（已上线）
+
+- **远程配置**：`build_type=workflow`，CNAME=`agent.yyc3.top`，HTTPS 强制，证书已签发
+- **Workflow**：`.github/workflows/deploy-pages.yml`
+  - 触发：push main（仅 public/、index.html、workflow 变更）+ workflow_dispatch
+  - 步骤：checkout → configure-pages → 组装 `_site/`（public/ + index.html + 404 回退）→ upload-pages-artifact → deploy-pages
+- **单通道原则**：远程已设为 workflow 模式，无分支自动部署，杜绝双通道重复发布
+- **部署结果**：build 8s + deploy 8s，`https://agent.yyc3.top/` HTTP 200，页面正确引用 `/yyc3-icons/logo.svg`
+
+### 11.2 品牌 Logo 资产（public/yyc3-icons/）
+
+| 文件 | 用途 |
+| --- | --- |
+| logo.svg | YYC³ 文字品牌主标识（矢量） |
+| logo.png / logo-1024.png | 位图 logo（多尺寸） |
+| favicon-16/32.png | 浏览器标签图标 |
+| apple-touch-icon.png | iOS 主屏图标 |
+| icon-192/512.png | Android/PWA 图标 |
+| manifest.json | PWA 清单 |
+
+### 11.3 全局引用点
+
+- **根门户页** `index.html`：header logo + favicon + apple-touch + manifest + og:image
+- **前端 sidebar**：品牌区替换为 `/yyc3-icons/logo.svg`（深色反色）
+- **前端 layout**：metadata.icons + manifest
+- **README**：`public/yyc3-family.png` 横幅
+
+### 11.4 .gitignore 品牌 Logo 例外
+
+统一 .gitignore 中 `*.png`（二进制资产红线）会误伤 logo，新增例外：
+
+```
+!**/yyc3-icons/*.png
+!**/yyc3-icons/*.jpg
+!**/yyc3-icons/*.jpeg
+```
+
+仅放行 yyc3-icons 目录下的小尺寸品牌图标，模型/成片二进制仍落 NAS 不入仓。
+
+### 11.5 G1 + 组件库复验留证（二次执行）
+
+- G1-004 路径归一：6/6 PASS
+- G1-005 鉴权逻辑：10/10 PASS
+- 组件库降级冒烟：11/11 PASS
+- 四仓库 .gitignore 统一校验通过（密钥零入库 + 二进制红线 + yyc3-icons 例外）
