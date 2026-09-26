@@ -499,9 +499,48 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 ```
 
 **当前优先级 TOP 3**（更新）：
-1. **[P0]** 真实 ComfyUI 部署（本机 SDXL 或 DGX 接入）→ Mock 生成本体替换 + anchor_guard 打回闭环真图复验
+1. **[P0]** 真实 ComfyUI 部署（本机 SDXL 或 DGX）→ Mock 生成本体替换 + anchor_guard 打回闭环真图复验
 2. **[P1]** DGX/NAS 硬件推进（G1-003/006 解锁 + vLLM 并发复跑 TC-G2-010）
 3. **[P1]** M4 前置：TTS/sync_score 工具接入（DramaToolGateway 余桩）+ 真实角色 IP 素材集
+
+---
+
+## 十八、三项 TOP 完成：真实 SD 全链 + 010 转正 G2 满贯 + 漂移实证（2026-09-27 第八轮）
+
+### 18.1 真实 ComfyUI 部署与真图闭环（G3 记录 v1.3 · 3/3）
+
+- **部署**：`/Users/yanyu/YYC-Cube/tools/ComfyUI`（gh-proxy 克隆 @79be670；独立 venv；**torch 2.14.0 MPS 可用**；模型 DreamShaper_8_pruned 2.13GB 经 **hf-mirror** 下载——Lykon/DreamShaper 仓库，hf-mirror API 查文件清单再 resolve）；服务 :41888
+- **真图打回闭环 3/3**：锁定重生成 sim=**1.000** ACCEPT（同 seed 确定性 + ComfyUI 同参缓存 ≈1s）→ 漂移种子 sim=**0.4418** REDRAW（真实 SD 漂移被检出）→ 锁定重绘 sim=**1.000** ACCEPT 收束
+- **修复留证**：新版 ComfyUI SaveImage 必填 `filename_prefix`（400 由真实服务暴露，Mock 测不出——桩→实的价值）；客户端加 seed 参数（身份锁定重生成接口）
+- **TC-G3-006 真实基线**：Mac 预览路由单镜 **422-486s**（512×512/25 步，超 ≤120s 目标，记录为硬件基线）；DGX NF4 ≤300s 待硬件；锁定重绘走缓存 ≈1s
+
+### 18.2 TC-G2-010 转正 → **G2 十用例全 PASS（v1.3 满贯）**
+
+- 双模型双进程并发（yyc3-family-coder + qwen3-coder-30b，DGX 双节点语义）：串行 59.7s vs 并行中位 23.1s → **ratio=0.386 ≤0.8**（执行器 `scripts/run_g2_010_dual.py`，httpx 模型随载荷无 env 竞争）
+- G2 终态：**10 PASS / 0 PARTIAL / 0 FAIL**；DGX vLLM 终值复验列硬件日动作
+
+### 18.3 SD 漂移实证与生产策略（③核心产出）
+
+- 无 LoRA 同提示词跨种子漂移分布 **0.4418-0.5687**（均值 ≈0.52）——行业返工率 70% 根因的量化实证
+- 生产策略三则：①无 LoRA 跨镜头不可用（anchor_guard 会全打回，正是职责）；②**seed-lock 为 M3 现行合法策略**（确定性 1.0 + 缓存近零成本）；③**LoRA/IPAdapter 是 M3 视听产能必要条件**（0.85 达成依赖训练而非调阈值）
+
+### 18.4 TTS/sync_score 处置（M4 前置，诚实归档）
+
+- 本机无 TTS 服务/SyncNet 模型/音视频资产 → **列 M4 服务/硬件前置**（同 G1-003/006 性质）
+- macOS `say` 为潜在本地方案，但 subprocess 形态受安全门禁约束 → 后续以独立 TTS 服务进程（OpenAI 兼容 /v1/audio/speech 端点）形态接入；`.env.example` 预留位
+
+### 18.5 下次会话启动指南
+
+```bash
+# ComfyUI 服务：cd /Users/yanyu/YYC-Cube/tools/ComfyUI && .venv/bin/python main.py --port 41888 --listen 127.0.0.1
+# 真图闭环复跑：COMFYUI_MODEL=DreamShaper_8_pruned.safetensors yyc3-ai-manju-studio/.venv/bin/python scripts/run_comfy_real.py
+# 010 复跑：yyc3-0379-world/.venv/bin/python scripts/run_g2_010_dual.py
+```
+
+**当前优先级 TOP 3**（更新）：
+1. **[P0]** M3 视听产能主线：LoRA/IPAdapter 角色训练方案落地（漂移实证 0.52 → 0.85+ 的唯一路径）+ 多镜头批量流水线（nightly_run 骨架）
+2. **[P1]** DGX/NAS 硬件日动作清单执行（G1-003/006 解锁 + vLLM 010 终值 + TC-G3-006 DGX 基线）
+3. **[P1]** M4：TTS 独立服务接入（OpenAI 兼容端点）+ SyncNet 部署 + 真实 IP 素材集入库 NAS
 
 ### 13.5 下次会话启动指南（第四轮后）
 

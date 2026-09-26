@@ -231,11 +231,12 @@ class ComfyUIClient:
                 raise PermissionError(f"SSRF 防护：解析地址 {ip} 不可用（链路本地/组播/保留段）")
 
     def _workflow(self, prompt: str, negative: str, width: int = 1024,
-                  height: int = 1024) -> dict:
+                  height: int = 1024, seed: int = None) -> dict:
         """标准 SD API 最小工作流（真实 ComfyUI 可直接执行）"""
         return {
             "3": {"class_type": "KSampler", "inputs": {
-                "seed": int(time.time()) % (2 ** 31), "steps": 25, "cfg": 7.0,
+                "seed": seed if seed is not None else int(time.time()) % (2 ** 31),
+                "steps": 25, "cfg": 7.0,
                 "sampler_name": "euler", "scheduler": "normal", "denoise": 1.0,
                 "model": ["4", 0], "positive": ["6", 0],
                 "negative": ["7", 0], "latent_image": ["5", 0]}},
@@ -248,12 +249,17 @@ class ComfyUIClient:
                 "text": negative or "低质量、变形、多余手指、水印", "clip": ["4", 1]}},
             "8": {"class_type": "VAEDecode", "inputs": {
                 "samples": ["3", 0], "vae": ["4", 2]}},
-            "9": {"class_type": "SaveImage", "inputs": {"images": ["8", 0]}},
+            "9": {"class_type": "SaveImage", "inputs": {
+                "images": ["8", 0], "filename_prefix": "yyc3/shot"}},
         }
 
     def generate_image(self, prompt: str, out_path: str,
-                       negative: str = "", width: int = 1024, height: int = 1024) -> dict:
-        """提交文生图任务并轮询取回产物（bytes 落 out_path）"""
+                       negative: str = "", width: int = 1024, height: int = 1024,
+                       seed: int = None) -> dict:
+        """提交文生图任务并轮询取回产物（bytes 落 out_path）
+
+        :param seed: 固定种子（身份锁定重生成用）；缺省按时间随机
+        """
         import json as _json
         import urllib.parse as _parse
         import urllib.request as _rq
@@ -265,7 +271,7 @@ class ComfyUIClient:
         assert (u.hostname or "").lower() in self._allowed_hosts, "SSRF 防护：主机不在白名单"
 
         client_id = _uuid.uuid4().hex
-        body = _json.dumps({"prompt": self._workflow(prompt, negative, width, height),
+        body = _json.dumps({"prompt": self._workflow(prompt, negative, width, height, seed),
                             "client_id": client_id}).encode()
         req = _rq.Request(f"{self.base}/prompt", data=body,
                           headers={"Content-Type": "application/json"})
@@ -309,10 +315,11 @@ class DramaToolGateway:
         self.comfy = ComfyUIClient()
 
     def text_to_image(self, prompt: str, ref_assets: list = None,
-                      out_path: str = None) -> dict:
+                      out_path: str = None, seed: int = None) -> dict:
         """文生图（关键帧生成；ComfyUI/SDXL，经网关标签路由 preview/quality）
 
         :param out_path: 产物落盘路径（缺省 /tmp/yyc3_t2i_<ts>.png）
+        :param seed: 固定种子（身份锁定重生成；缺省随机）
         :return: {"status": "ok|stub|stub_fallback", "image_path"(ok 时), ...}
         """
         base = {"task_type": "text_to_image",
@@ -321,7 +328,7 @@ class DramaToolGateway:
             try:
                 if not out_path:
                     out_path = f"/tmp/yyc3_t2i_{int(time.time() * 1000)}.png"
-                result = self.comfy.generate_image(prompt, out_path)
+                result = self.comfy.generate_image(prompt, out_path, seed=seed)
                 result.update(base)
                 return result
             except Exception as e:  # noqa: BLE001  生成失败回落桩（永不断流）
