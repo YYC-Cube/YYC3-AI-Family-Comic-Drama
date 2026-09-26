@@ -17,10 +17,13 @@
 # ==============================================================
 import time
 from enum import Enum
+from urllib.parse import urlparse
 
 import hashlib
 import hmac
+import ipaddress
 import os
+import socket
 
 from ai_family_orchestrator import AIFamilyOrchestrator
 
@@ -83,6 +86,55 @@ class H3VisionClient:
         self.base = os.getenv("H3_AGENT_GATEWAY", "").rstrip("/")
         self.secret = os.getenv("AGENT_CLAIM_SECRET", "")
         self.timeout = int(os.getenv("H3_GATEWAY_TIMEOUT", "30"))
+        self._validate_base()
+
+    def _validate_base(self):
+        """SSRF 防护三道闸：①仅 http(s)；②主机白名单（默认仅本机回环）；③解析 IP 边界校验。
+
+        白名单默认只含本机回环（H3 网关为本机基础设施）；指向内网其他主机必须
+        显式配置 H3_ALLOWED_HOSTS。每次校验都重新解析 DNS（防 rebinding），并
+        无条件拒绝链路本地/组播/保留地址。
+        """
+        if not self.base:
+            return
+        u = urlparse(self.base)
+        host = (u.hostname or "").lower()
+        explicit = {h.strip().lower() for h in os.getenv(
+            "H3_ALLOWED_HOSTS", "localhost,127.0.0.1,::1").split(",") if h.strip()}
+        if u.scheme not in ("http", "https") or not host:
+            raise PermissionError(f"H3_AGENT_GATEWAY 非法 URL（须为 http/https）: {self.base}")
+        if host not in explicit:
+            raise PermissionError(
+                f"H3_AGENT_GATEWAY 主机不在白名单（SSRF 防护）: {host}；"
+                f"如需内网地址请显式配置 H3_ALLOWED_HOSTS")
+        self._allowed_hosts = explicit
+        for sa in {info[4][0] for info in socket.getaddrinfo(host, None)}:
+            ip = ipaddress.ip_address(sa)
+            if ip.is_loopback:
+                continue  # 本机回环：白名单默认目标（H3 网关为本机基础设施）
+            if ip.is_link_local or ip.is_multicast or ip.is_reserved or ip.is_unspecified:
+                # 注意：Python 3.13+ 将 ::1 归入保留段的判定不用于回环放行，
+                # 回环已在上方显式放行；此处拦截链路本地（含云元数据 169.254）等
+                raise PermissionError(f"SSRF 防护：解析地址 {ip} 不可用（链路本地/组播/保留段）")
+
+    def _call(self, path: str, body: bytes | None = None,
+              headers: dict | None = None) -> bytes:
+        """唯一网络出口（SSRF 收敛点）：白名单复验 → Request → urlopen。
+
+        每次调用都强制重跑 _validate_base 并断言主机在白名单内，
+        防止运行期环境变量被篡改后绕过初始化校验。
+        """
+        import urllib.request as _rq
+        if not self.enabled:
+            raise RuntimeError("H3_AGENT_GATEWAY 未配置")
+        self._validate_base()
+        u = urlparse(self.base)
+        host = (u.hostname or "").lower()
+        assert host in self._allowed_hosts, f"SSRF 防护：主机不在白名单 {host}"
+        url = f"{self.base}{path}"
+        req = _rq.Request(url, data=body, headers=headers or {})
+        with _rq.urlopen(req, timeout=self.timeout) as resp:
+            return resp.read()
 
     @property
     def enabled(self) -> bool:
@@ -105,16 +157,13 @@ class H3VisionClient:
     def healthz(self) -> dict:
         """网关健康探测（传输模式 / claim 就绪状态）"""
         import json as _json
-        import urllib.request as _rq
-        with _rq.urlopen(f"{self.base}/api/healthz", timeout=self.timeout) as r:
-            return _json.loads(r.read().decode())
+        return _json.loads(self._call("/api/healthz").decode())
 
     def generate_single(self, batch: str, seeds: str = "42",
                         prompt_file: str = "", variant: str = "",
                         preview: bool = False) -> dict:
         """阶段4 任务式单条 → POST /api/tasks（不改 H3 源文件，seeds 白名单仅数字）"""
         import json as _json
-        import urllib.request as _rq
         import uuid as _uuid
         if not self.enabled:
             raise RuntimeError("H3_AGENT_GATEWAY 未配置")
@@ -128,12 +177,11 @@ class H3VisionClient:
             payload["preview"] = True
         body = _json.dumps({"task_type": "generate_single",
                             "payload": payload}).encode()
-        req = _rq.Request(
-            f"{self.base}/api/tasks", data=body,
+        resp = self._call(
+            "/api/tasks", data=body,
             headers={"Content-Type": "application/json",
                      "X-Claim-Token": self._claim(trace_id, "generate_single")})
-        with _rq.urlopen(req, timeout=self.timeout) as resp:
-            return _json.loads(resp.read().decode())
+        return _json.loads(resp.decode())
 
 
 class DramaToolGateway:

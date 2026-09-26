@@ -26,10 +26,10 @@ class MilvusRetriever:
             port=int(os.getenv("MILVUS_PORT", 19530)),
         )
 
-        # 初始化嵌入模型客户端
+        # 初始化嵌入模型客户端（密钥经环境变量注入，不落字面量）
         self.embed_client = OpenAI(
             base_url=os.getenv("DGX1_EMBED_URL", "http://10.0.0.11:8001/v1"),
-            api_key="nim-local-dummy",
+            api_key=os.getenv("DGX1_EMBED_API_KEY", ""),
         )
         self.embed_model_name = "nemotron-3-embed-1b"
         self.vector_dim = 2048  # nemotron-3-embed-1b 输出维度
