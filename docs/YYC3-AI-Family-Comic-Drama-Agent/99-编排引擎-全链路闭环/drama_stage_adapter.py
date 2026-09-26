@@ -184,22 +184,153 @@ class H3VisionClient:
         return _json.loads(resp.decode())
 
 
+class ComfyUIClient:
+    """ComfyUI 文生图客户端 v1.0（M3 视听产能 · DramaToolGateway 桩→实）
+
+    - 端点：POST {COMFYUI_URL}/prompt（API 工作流）→ 轮询 /history/{prompt_id}
+      → GET /view 拉取产物图
+    - 工作流：标准 SD API 格式最小图（Loader→CLIP×2→KSampler→VAEDecode→Save），
+      模型名经 COMFYUI_MODEL 配置（默认 SDXL base）
+    - 高可用：未配置/不可达/超时 → 调用方回落 stub（status=stub_fallback）
+    - SSRF 防护三道闸与 H3VisionClient 同构（协议/主机白名单/解析 IP 边界）
+    - 依赖：仅标准库（urllib/json/time/uuid）
+    """
+
+    def __init__(self):
+        self.base = os.getenv("COMFYUI_URL", "").rstrip("/")
+        self.model = os.getenv("COMFYUI_MODEL", "sd_xl_base_1.0.safetensors")
+        self.timeout = int(os.getenv("COMFYUI_TIMEOUT", "300"))
+        self.poll_interval = float(os.getenv("COMFYUI_POLL_INTERVAL", "1.0"))
+        self._allowed_hosts = set()
+        self._validate_base()
+
+    @property
+    def enabled(self) -> bool:
+        return bool(self.base)
+
+    def _validate_base(self):
+        """SSRF 防护：仅 http(s) + 主机白名单（默认本机回环）+ 解析 IP 边界"""
+        if not self.base:
+            return
+        u = urlparse(self.base)
+        host = (u.hostname or "").lower()
+        explicit = {h.strip().lower() for h in os.getenv(
+            "COMFY_ALLOWED_HOSTS", "localhost,127.0.0.1,::1").split(",") if h.strip()}
+        if u.scheme not in ("http", "https") or not host:
+            raise PermissionError(f"COMFYUI_URL 非法 URL（须为 http/https）: {self.base}")
+        if host not in explicit:
+            raise PermissionError(
+                f"COMFYUI_URL 主机不在白名单（SSRF 防护）: {host}；"
+                f"如需内网地址请显式配置 COMFY_ALLOWED_HOSTS")
+        self._allowed_hosts = explicit
+        for sa in {info[4][0] for info in socket.getaddrinfo(host, None)}:
+            ip = ipaddress.ip_address(sa)
+            if ip.is_loopback:
+                continue
+            if ip.is_link_local or ip.is_multicast or ip.is_reserved or ip.is_unspecified:
+                raise PermissionError(f"SSRF 防护：解析地址 {ip} 不可用（链路本地/组播/保留段）")
+
+    def _workflow(self, prompt: str, negative: str, width: int = 1024,
+                  height: int = 1024) -> dict:
+        """标准 SD API 最小工作流（真实 ComfyUI 可直接执行）"""
+        return {
+            "3": {"class_type": "KSampler", "inputs": {
+                "seed": int(time.time()) % (2 ** 31), "steps": 25, "cfg": 7.0,
+                "sampler_name": "euler", "scheduler": "normal", "denoise": 1.0,
+                "model": ["4", 0], "positive": ["6", 0],
+                "negative": ["7", 0], "latent_image": ["5", 0]}},
+            "4": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": self.model}},
+            "5": {"class_type": "EmptyLatentImage", "inputs": {
+                "width": width, "height": height, "batch_size": 1}},
+            "6": {"class_type": "CLIPTextEncode", "inputs": {
+                "text": prompt, "clip": ["4", 1]}},
+            "7": {"class_type": "CLIPTextEncode", "inputs": {
+                "text": negative or "低质量、变形、多余手指、水印", "clip": ["4", 1]}},
+            "8": {"class_type": "VAEDecode", "inputs": {
+                "samples": ["3", 0], "vae": ["4", 2]}},
+            "9": {"class_type": "SaveImage", "inputs": {"images": ["8", 0]}},
+        }
+
+    def generate_image(self, prompt: str, out_path: str,
+                       negative: str = "", width: int = 1024, height: int = 1024) -> dict:
+        """提交文生图任务并轮询取回产物（bytes 落 out_path）"""
+        import json as _json
+        import urllib.parse as _parse
+        import urllib.request as _rq
+        import uuid as _uuid
+        if not self.enabled:
+            raise RuntimeError("COMFYUI_URL 未配置")
+        self._validate_base()
+        u = urlparse(self.base)
+        assert (u.hostname or "").lower() in self._allowed_hosts, "SSRF 防护：主机不在白名单"
+
+        client_id = _uuid.uuid4().hex
+        body = _json.dumps({"prompt": self._workflow(prompt, negative, width, height),
+                            "client_id": client_id}).encode()
+        req = _rq.Request(f"{self.base}/prompt", data=body,
+                          headers={"Content-Type": "application/json"})
+        with _rq.urlopen(req, timeout=30) as resp:
+            submit = _json.loads(resp.read().decode())
+        prompt_id = submit["prompt_id"]
+
+        deadline = time.time() + self.timeout
+        while time.time() < deadline:
+            with _rq.urlopen(f"{self.base}/history/{prompt_id}", timeout=30) as resp:
+                history = _json.loads(resp.read().decode())
+            entry = history.get(prompt_id)
+            if entry and entry.get("status", {}).get("completed", False):
+                for _node, out in (entry.get("outputs") or {}).items():
+                    for img in out.get("images", []):
+                        q = _parse.urlencode({"filename": img["filename"],
+                                              "subfolder": img.get("subfolder", ""),
+                                              "type": img.get("type", "output")})
+                        with _rq.urlopen(f"{self.base}/view?{q}", timeout=60) as r:
+                            data = r.read()
+                        from pathlib import Path as _P
+                        _P(out_path).write_bytes(data)
+                        return {"status": "ok", "prompt_id": prompt_id,
+                                "image_path": str(out_path), "bytes": len(data)}
+            time.sleep(self.poll_interval)
+        raise TimeoutError(f"ComfyUI 任务 {prompt_id} 超时（{self.timeout}s）")
+
+
 class DramaToolGateway:
-    """漫剧工具网关（v1.1：image_to_video 已对接 H3 agent 网关）
+    """漫剧工具网关（v1.2：text_to_image 已对接 ComfyUI；image_to_video 已对接 H3）
 
     生产环境经 0379-World 网关 /v1/mcp 代理调用（统一鉴权审计）；
-    H3 视听生成走 YYC3-MiniMax-H3 agent 网关（H3_AGENT_GATEWAY）；
-    其余工具当前仍为接口桩：真实接入时替换各 method 内部实现即可，签名不变。
+    文生图走 ComfyUI（COMFYUI_URL）；图生视频走 H3 agent 网关（H3_AGENT_GATEWAY）；
+    tts/sync_score/compose 仍为接口桩（M3 后续接入，签名不变）。
+    未配置/不可达一律回落 stub（本地调试链路永不断流，五高-高可用）。
     对标：AniME「每个 Specialist Agent 绑定专属 MCP 工具集」模式。
     """
 
     def __init__(self):
         self.h3 = H3VisionClient()
+        self.comfy = ComfyUIClient()
 
-    def text_to_image(self, prompt: str, ref_assets: list = None) -> dict:
-        """文生图（关键帧生成；生产对接 ComfyUI/SDXL，经网关标签路由 preview/quality）"""
-        return {"task_type": "text_to_image", "status": "stub",
+    def text_to_image(self, prompt: str, ref_assets: list = None,
+                      out_path: str = None) -> dict:
+        """文生图（关键帧生成；ComfyUI/SDXL，经网关标签路由 preview/quality）
+
+        :param out_path: 产物落盘路径（缺省 /tmp/yyc3_t2i_<ts>.png）
+        :return: {"status": "ok|stub|stub_fallback", "image_path"(ok 时), ...}
+        """
+        base = {"task_type": "text_to_image",
                 "prompt": prompt, "ref_count": len(ref_assets or [])}
+        if self.comfy.enabled:
+            try:
+                if not out_path:
+                    out_path = f"/tmp/yyc3_t2i_{int(time.time() * 1000)}.png"
+                result = self.comfy.generate_image(prompt, out_path)
+                result.update(base)
+                return result
+            except Exception as e:  # noqa: BLE001  生成失败回落桩（永不断流）
+                print(f"[DramaToolGateway] ComfyUI 文生图失败，回落 stub：{e}")
+                base["status"] = "stub_fallback"
+                base["error"] = str(e)[:120]
+                return base
+        base["status"] = "stub"
+        return base
 
     def image_to_video(self, image_ref: str, motion_prompt: str = "") -> dict:
         """图生视频（对接 MiniMax-H3：Mac剪枝版预览 / DGX NF4批量）

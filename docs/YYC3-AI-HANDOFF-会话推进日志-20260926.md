@@ -467,6 +467,42 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 2. **[P1]** TC-G2-008 语枢复验 + TC-G2-010 真实模型并行计时（清 G2 双 PARTIAL）
 3. **[P1]** 真实多机位角色素材标定（anchor_guard 阈值 0.85 在真实素材上复标）
 
+---
+
+## 十七、三项 TOP 全部完成：M3 视听首件 + G2 清尾 + 阈值复标（2026-09-27 第七轮）
+
+### 17.1 M3 视听产能首件（G3 记录 v1.2 · 🟢 10/10）
+
+- **DramaToolGateway 桩→实（v1.2，两份拷贝同步）**：ComfyUIClient——标准 SD API 工作流（/prompt→/history 轮询→/view 取图）、SSRF 三道闸同构、未配置/失败回落 stub 永不断流；env 入 agent-archive/.env.example（原为 0 字节，已补全模板）
+- **anchor_guard 真实进生成链**（Mock ComfyUI :41888 联调，诚实边界：生成本体为预设人脸图非扩散模型）：pre_anchor → HTTP 生成 → 首帧身份漂移 REDRAW → 重绘 ACCEPT（0.9643）两轮收束 ✓；未配置回落 stub ✓
+- **TC-G3-008 🟢**：20 镜三要素比例 **100%**；storyboard_schema 钩头加「【钩子镜头】」可区分标记（非钩头无污染）
+
+### 17.2 G2 清尾（G2 记录 v1.2 · **9 PASS / 1 PARTIAL / 0 FAIL**）
+
+- **TC-G2-008 转正**：语枢真实 LLM 契约复验通过（四段式报告真实输出）→ 真实契约 **8/8**
+- **TC-G2-010 维持 PARTIAL（证据升级）**：真实计时 serial 161.2s vs parallel 271.4s（ratio 1.684）——**单实例 Ollama 串行化并发请求的环境边界**（并行墙钟>串行恰证引擎 ThreadPool 并发派发生效）；YYC3-60 v1.2.1 已补前置（须 vLLM 连续批处理），DGX 部署后复跑即闭环
+
+### 17.3 阈值复标（G3 记录 v1.2 · 0.85 维持）
+
+- 强变换族 8×2（翻/旋/色温/压缩/裁剪/明度/去饱和）：同角色最低 **0.9536**、跨角色最高 **0.0249**、margin **0.9287** → **DEFAULT_THRESHOLD=0.85 维持**（余量充足）；A_crop60 检出失败走 escalate 兜底；真实风险域（SD 生成身份漂移）留待产线样本持续标定
+
+### 17.4 回归与依赖
+
+- 全程回归：P0 矩阵 27/0/0 + 锚点 3/3 + adapter 双拷贝 diff 一致
+- manju venv 补 python-dotenv/openai（pymilvus 2.4.5 在 Py3.14 无 grpcio wheel，runner 用降级桩，同冒烟矩阵模式）
+
+### 17.5 下次会话启动指南
+
+```bash
+# 复跑：scripts/run_m3_av.py（10/10）/ run_g2_final.py（008 PASS+010 计时）/ run_threshold_calibration.py
+# M3 续：真实 ComfyUI 部署（本机装 SDXL 或接 DGX）替换 Mock 生成本体 → TC-G3-006 单镜耗时基线
+```
+
+**当前优先级 TOP 3**（更新）：
+1. **[P0]** 真实 ComfyUI 部署（本机 SDXL 或 DGX 接入）→ Mock 生成本体替换 + anchor_guard 打回闭环真图复验
+2. **[P1]** DGX/NAS 硬件推进（G1-003/006 解锁 + vLLM 并发复跑 TC-G2-010）
+3. **[P1]** M4 前置：TTS/sync_score 工具接入（DramaToolGateway 余桩）+ 真实角色 IP 素材集
+
 ### 13.5 下次会话启动指南（第四轮后）
 
 ```bash
