@@ -3,7 +3,7 @@ name: Sync Upstreams
 # YYC³ 上游核心代码定时同步：每日 02:00 拉取 YYC-Cube 上游核心代码，变更自动开 PR
 on:
   schedule:
-    - cron: "0 2 * * *"
+    - cron: '0 2 * * *'
   workflow_dispatch:
 
 permissions:
@@ -29,8 +29,8 @@ jobs:
         with:
           branch: chore/upstream-sync
           delete-branch: true
-          commit-message: "chore(upstream): sync core code from YYC-Cube upstreams"
-          title: "⬆️ Upstream Sync - YYC-Cube 核心代码自动同步"
+          commit-message: 'chore(upstream): sync core code from YYC-Cube upstreams'
+          title: '⬆️ Upstream Sync - YYC-Cube 核心代码自动同步'
           body-path: scripts/upstream-sync-report.md
           labels: |
             upstream-sync

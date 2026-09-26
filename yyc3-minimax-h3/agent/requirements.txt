@@ -1,9 +1,0 @@
-# YYC3 MiniMax-H3 多Agent 框架依赖（agent/requirements.txt）
-# 核心传输：Redis Streams（未安装/不可达自动降级 InMemory，不阻断）
-redis>=5.0
-# 网关（仅 gateway.py 需要）
-fastapi>=0.110
-uvicorn>=0.29
-pydantic>=2.6
-# 环境变量（可选：.env 加载；.secrets/ 由 config 直读）
-python-dotenv>=1.0

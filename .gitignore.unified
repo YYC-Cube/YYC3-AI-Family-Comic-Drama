@@ -1,0 +1,80 @@
+# ══════════════════════════════════════════════════════════════
+# YYC³ 统一 .gitignore（四仓库通用 · 覆盖 Python/Node/密钥/二进制资产）
+# 红线：密钥零入库；模型/成片二进制落 NAS 不入仓库
+# ══════════════════════════════════════════════════════════════
+
+# ── 密钥零入库（红线）──
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.cert
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# ── Node / 前端 ──
+node_modules/
+.pnpm-store/
+.next/
+.out/
+dist/
+build/
+*.tsbuildinfo
+.turbo/
+
+# ── 二进制资产（落 NAS，不入仓库）──
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+*.bin
+*.gguf
+*.onnx
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.wav
+*.mp3
+*.flac
+*.png
+*.jpg
+*.jpeg
+models/
+!**/models/**/.gitkeep
+
+# ── IDE / 系统 ──
+.vscode/
+!.vscode/settings.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# ── 运行时 / 日志 ──
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.bak
+.upstream-cache/
+storage/temp/*
+storage/logs/*
+!storage/temp/.gitkeep
+!storage/logs/.gitkeep
+
+# ── 测试 / 覆盖率 ──
+.coverage
+htmlcov/
+coverage/
