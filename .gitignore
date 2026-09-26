@@ -35,6 +35,7 @@ venv/
 dist/
 build/
 .next/
+*.tsbuildinfo
 *.log
 storage/temp/*
 storage/logs/*
