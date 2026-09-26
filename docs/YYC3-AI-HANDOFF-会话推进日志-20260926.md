@@ -151,3 +151,52 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 1. **[P0]** 部署网关 compose + 挂载 NAS → 解锁 G1-001/002/003 E2E
 2. **[P1]** 安装 insightface → face_encoder 真实 512 维特征提取
 3. **[P1]** 接入 DGX vLLM 推理池 → G1-006 首 token 验收
+
+---
+
+## 十、前端完整架构实现完善（2026-09-26 追加）
+
+### 10.1 数据库迁移整合：标记留后
+
+- 用户决策：数据库迁移与整合（Dexie 本地库 + NAS PG14 私服后端）正在规划中，本项目相关内容**标记留后**，本轮不涉及数据库层改动。
+- 参考文档：`05-本地数据库替代方案分析.md`（Dexie Phase A~C + PG14 Phase D 路线已定）。
+
+### 10.2 前端架构现状审计
+
+前端 `yyc3-ai-manju-studio/frontend/` 已是**完整独立实现**（非引用外部模板）：
+
+| 维度 | 实现情况 |
+| --- | --- |
+| 技术栈 | Next.js 16.3.6 + React 19.3.0 + TypeScript 5.6 + Tailwind 3.4 + Zustand 5 |
+| 页面 | 10 个功能页全部实现（生产监控/成本/运营/项目/剧本/分镜/资产/时间线/任务）+ 根重定向 |
+| UI 组件 | shadcn 风格：badge/button/card/input/progress/separator/table/textarea + 本轮新增 label/tabs/select/dialog/toast |
+| 状态管理 | Zustand：use-project-store / use-storyboard-store / use-task-store |
+| API 层 | client.ts（统一请求 + mock 降级）+ project/script/storyboard/task 四域 |
+| Hooks | use-task-stream（SSE 实时流）、use-api-fallback |
+| 数据降级 | mock-data.ts + mock-operations.ts，后端不可达时自动降级演示数据 |
+| 端口 | dev 20300（符合前端 2xxxx 红线） |
+
+### 10.3 本轮前端完善项
+
+1. **清理冗余路由**：删除 `(dashboard)/` 占位目录（仅含 .gitkeep，实际页面在根级路由）
+2. **补全 shadcn 框架核心 UI 原语**（独立实现，无 Radix 依赖）：
+   - `label.tsx` — 表单标签
+   - `tabs.tsx` — 受控标签页（Tabs/TabsList/TabsTrigger/TabsContent）
+   - `select.tsx` — 下拉选择（Select/Trigger/Value/Content/Item，点击外部关闭）
+   - `dialog.tsx` — 模态框（Portal + ESC + 遮罩关闭 + 滚动锁定）
+   - `toast.tsx` — 通知提示（useToast + ToastProvider + Toaster，success/warning/error 语义）
+3. **全局 Provider 接入**：`providers.tsx` 客户端包装器，ToastProvider 包裹全站
+4. **剧本编辑器接入 toast**：生成剧本/提取分镜完成后弹出通知
+
+### 10.4 验证结果
+
+- `tsc --noEmit`：0 错误
+- `next build`：成功，12 页面静态生成
+- dev 服务器 HTTP 探测：10 个页面全部 200，根路径 307 → /production
+
+### 10.5 前端下一步建议
+
+- 将顶栏原生 `<select>` 替换为 `ui/select` 组件（风格统一）
+- 分镜页、资产页增加 `ui/dialog` 用于详情查看/编辑
+- 接入 `ui/tabs` 优化剧本编辑器（原文/结构化/分镜三标签切换）
+- 数据库层就绪后，将 mock 数据替换为真实 API 调用（API 层已预留降级路径）
