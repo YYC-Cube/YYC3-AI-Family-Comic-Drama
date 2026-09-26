@@ -90,3 +90,64 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 🌹 **YYC³ AI Family** · 人从众曌众从人 · 亦师亦友亦伯乐 · 一言一语一协同
 
 </div>
+
+---
+
+## 九、本轮追加推进（G1 验收 · 四仓拆分 · 组件库冒烟 · face_encoder 建库）
+
+### 9.1 四仓库拆分为独立 Git 仓库（已推送）
+
+| 仓库 | 远程 | 说明 |
+| --- | --- | --- |
+| yyc3-ai-manju-studio | YYC-Cube/YYC3-Comic-ai-manju-studio | 前端 Next.js + 后端 |
+| yyc3-0379-world | YYC-Cube/YYC3-Comic-0379-world | 网关 + 8 Agent |
+| yyc3-ai-agent-archive | YYC-Cube/YYC3-Comic-ai-agent-archive | 编排包 + 组件库 |
+| yyc3-minimax-h3 | YYC-Cube/YYC3-Comic-minimax-h3 | H3 协议引擎 |
+
+- 统一 `.gitignore`（`.gitignore.unified` 模板）：密钥零入库、二进制资产（safetensors/ckpt/pt/bin/mp4/wav/png）落 NAS 不入仓、`face_library/` 不入仓
+- 根仓库仅纳管 docs/scripts/.github，四目录加入根 `.gitignore`
+
+### 9.2 G1 底座通电六用例验收（详见 `docs/G1-底座通电验收记录-20260926.md`）
+
+| 用例 | 结果 | 说明 |
+| --- | --- | --- |
+| G1-001 网关健康 | BLOCKED | 网关 compose 未部署 |
+| G1-002 Chat 连通 | BLOCKED | DGX vLLM 未注册 |
+| G1-003 NAS 三端互写 | BLOCKED | /mnt/nas 未挂载 |
+| G1-004 路径归一 | PARTIAL PASS | 逻辑单测 8/8 PASS（实现 `app/api/middleware/path_normalize.py`） |
+| G1-005 鉴权三连发 | PARTIAL PASS | 逻辑单测 10/10 PASS（桩注入 jwt/fastapi） |
+| G1-006 DGX 首 token | BLOCKED | 无 DGX 硬件 |
+
+**解锁条件**：NAS 挂载 + 网关 compose 部署 + 安装 jwt/fastapi/passlib + 接入 DGX 推理池。
+
+### 9.3 组件库平移 + 降级模式冒烟（11/11 PASS）
+
+- 13 个组件实现从 `docs/YYC3-AI-Family-Comic-Drama-Agent/` 平移至 `yyc3-ai-agent-archive/components/`
+- 冒烟脚本 `smoke_test_degraded.py`：stub milvus_retriever 触发 RAG 降级，LLM 由 base_agent `_mock_run` 兜底
+- 修复：智云守护 L3 合规判定 `"UNSAFE" in verdict` 收紧为 `startswith("UNSAFE")`（解决 mock 回显含 "UNSAFE" 字样误拦截）
+- 场景B（数据分析）：status=success、trace_id 非空、rag_retrieve.degraded=True、含 yushu_analysis+polished_report、qc_rounds<=2
+- 场景D（注入攻击）：status=blocked、Step1 即拦截
+
+### 9.4 face_encoder 512 维特征库建库（P1-C，3/3 PASS）
+
+- 实现 `yyc3-ai-manju-studio/backend/app/modules/consistency_engine/face_encoder.py`
+  - 优先 insightface（512d）→ face_recognition（128d pad 512d）→ 哈希降级（SHA-512+SHAKE256 派生确定性 512d 向量）
+- 建库脚本 `scripts/build_face_library.py`：扫描角色图 → feature.npy + manifest.json + index.json
+- 校验：dim=512、同图二次编码余弦相似度=1.0、mode=degraded 标记
+- 特征库路径：`/mnt/nas/assets/characters/`（NAS 挂载后），本地兜底 `backend/face_library/`（已 gitignore）
+
+### 9.5 下次会话启动指南
+
+```bash
+# 1. 部署网关 + 挂载 NAS，重跑 G1-001/002/003/006 及 004/005 E2E
+# 2. 安装网关依赖：pip install fastapi uvicorn pyjwt passlib[bcrypt] python-multipart
+# 3. 组件库冒烟复跑：cd yyc3-ai-agent-archive/components && python3 smoke_test_degraded.py
+# 4. face_encoder 真实模型：pip install insightface onnxruntime && 放置角色图到 assets/characters/
+# 5. 查看 G1 留证：docs/G1-底座通电验收记录-20260926.md
+```
+
+**当前优先级 TOP 3**：
+
+1. **[P0]** 部署网关 compose + 挂载 NAS → 解锁 G1-001/002/003 E2E
+2. **[P1]** 安装 insightface → face_encoder 真实 512 维特征提取
+3. **[P1]** 接入 DGX vLLM 推理池 → G1-006 首 token 验收
