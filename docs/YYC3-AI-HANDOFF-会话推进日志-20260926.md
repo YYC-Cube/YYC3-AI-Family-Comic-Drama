@@ -649,6 +649,41 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 
 ---
 
+## 二十三、LoRA 本机 kohya 攻坚 + 看板真实指标落地（2026-09-27 第十三轮）
+
+### 23.1 kohya 本机攻坚（① · 工具链打通，训练受阻于版本断层——precise 清单已录）
+
+- **打通项**：sd-scripts 完整导入链在本机 ComfyUI venv 全通（`train_network.py --help` 正常输出）——依赖逐项补齐：toml/albumentations/voluptuous/ftfy/einops（easygui 需 tkinter，CLI 链路不引用可跳过）；加速器兼容补丁（新版 accelerate 移除 `logging_dir` 形参→inspect 探测条件传参）；参数名修正（`--min/max_bucket_reso`）；数据集组装脚本 `run_kohya_lora.py prep`（4 图+caption→标准 `<dir>/10_hero/` 布局）
+- **精确阻断点**：训练启动即崩于 accelerate 1.x `has_compiled_regions`——**该版 sd-scripts（commit 6721028）需 accelerate≈0.15 + diffusers≈0.10-0.15 + Python≤3.11 的 pin 环境**；ComfyUI venv（accelerate 1.x + diffusers 0.33 + Py3.14）无法共存，Homebrew Py3.14 也无旧 torch wheel。**结论：需独立 venv（pyenv 3.10/3.11 + requirements.txt 原样安装）→ DGX 或本机 pyenv 皆可，本机单 venv 不可行**
+- 工具链价值：kohya CLI 路径全通意味着 DGX 环境就绪后可直接跑（命令已验证到训练启动前最后一步）
+
+### 23.2 Token-Console 看板对接真实指标（③ · ✅）
+
+- 网关 CORS 放行看板源（`.env` ALLOWED_ORIGINS：localhost:3030/20300 + token.yyc3.vip，本地配置不入库）；**E2E 验证**：`access-control-allow-origin: http://localhost:3030` 正确返回
+- `FamilyDrama.tsx` 新增网关实时指标卡：`/health` 30s 轮询，展示运行状态/版本/在线时长/累计请求/缓存命中率——**看板首次消费生产服务真实数据**（此前为探针状态）
+- 验证：typecheck 0 错、build 通过、1966/1966；提交 Token-Console 575e287
+
+### 23.3 H3 现状核验（② · 阻断点=权重下载）
+
+- `server/api.py` 为空占位；真实引擎在 `agent/h3_agent/`（2.4k 行，orchestrator/gateway/protocol 齐全，六阶段闭环标 stable）；模型权重未下载（.gitkeep，~30GB 级经 hf-mirror 可得）
+- **链路命令已就绪**：权重到位后 server 起服 → 网关注册 h3 上游 → 编排端 DramaToolGateway.image_to_video 自动路由（已实现）→ 产物过 SyncNet 门禁（:42218 服务已就绪）
+
+### 23.4 下次会话启动指南
+
+```bash
+# kohya DGX/独立 venv：pyenv install 3.10 → python -m venv .venv → pip install -r sd-scripts/requirements.txt（原样 pin）
+# 训练命令（本机已验证到启动前）：见 /tmp/kohya_train.log 头部或 HANDOFF §23.1
+# 训后评测：ComfyUI.venv/bin/python scripts/run_kohya_lora.py eval --lora /tmp/kohya_out/sd-hero.safetensors
+# H3 权重下载：hf-mirror 搜 MiniMax-H3 权重仓 → models/h3/ → server 起服
+```
+
+**当前优先级 TOP 3**（更新）：
+1. **[P0]** kohya 独立 pin venv 构建（pyenv 3.10 本机或 DGX）→ 160 步训练 + kohya_eval.json 复测
+2. **[P1]** H3 权重下载（~30GB hf-mirror）→ server 起服 → 动态镜头 → SyncNet ≥0.75 达标验证
+3. **[P1]** 硬件日执行（run_hardware_day.sh 一键清单就绪）
+
+---
+
 ## 二十一、LoRA 对照定论 + 单集成片交付 + SyncNet 本地落地（2026-09-27 第十一轮）
 
 ### 21.1 三项 TOP 全部达成
