@@ -611,9 +611,41 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 ```
 
 **当前优先级 TOP 3**（更新）：
-1. **[P0]** LoRA 配方修正（触发词改标准词（如 "sdxl-tuned"）/ kohya sd-scripts 直接用/peft 推理路径核查）→ 复测冲 0.85+
-2. **[P1]** 多镜头全链成片：run_batch_shots（真 ComfyUI）→ run_clip_compose 串联 → 单集 demo 交付
-3. **[P1]** 硬件日执行 + SyncNet（素材链就绪后模型侧攻坚）
+1. **[P0]** kohya sd-scripts 部署（DGX 或本机 CPU 冒烟）→ 真 LoRA 0.85+ 复测（手工循环已弃用）
+2. **[P1]** DramaToolGateway.sync_score 真实对接（包装器封装进网关，静态打回→图生视频达标链路）
+3. **[P1]** 硬件日执行（清单就绪）+ 单集 demo 升级（图生视频动态镜头 → SyncNet 达标验证）
+
+---
+
+## 二十二、sync_score 服务化对接 + Token-Console 生产看板层落地（2026-09-27 第十二轮）
+
+### 22.1 TOP3 执行（①②完成，③硬件待实物）
+
+- **① kohya 部署**：`tools/kohya_ss` + sd-scripts/train_network.py 入口就绪（注意：仓库名下划线 `kohya_ss`；sd-scripts 是子模块需单独 clone）。依赖正式安装列 DGX（kohya 生态 pin 旧 Python，本机 3.14 兼容风险）。
+- **② sync_score 真实对接 ✅**：`scripts/syncnet_service.py`（FastAPI 封装 SyncNetInstance.evaluate，`POST /v1/sync/score` :42218，纯 import 零 subprocess，跑 ComfyUI venv——自带 torch/insightface）；`DramaToolGateway.sync_score` 桩→真客户端。**E2E 实测**：demo 裁切轨 conf=0.2275 → 打回(<0.75)；空参回落 stub。SSRF 三道闸复检补齐（解析 IP 边界，白名单外拦截实测）。提交：根仓 ced03e9 / agent-archive 4dd0933。
+- **③ 硬件日**：清单待实物；demo 升级（图生视频）随硬件推进。
+
+### 22.2 Token-Console 生产看板层落地（YYC3-AI-API-Token-Console 2535aa2）
+
+分析结论落地：Token-Console（纯前端 SPA，token.yyc3.vip）定位为**两项目共用的运营看板层**，三层体系 = Token-Console（看板）→ manju-studio 工作台 / H3 console（生产操作）→ 网关+服务群（执行）。
+
+- **① 零代码注册**：`builtin-providers.json` 追加 5 个本地生产 provider——yyc3-gateway(:25080)/comfyui(:41888)/syncnet(:42218)/tts(:42118)/h3(:8002)，/models 页即时生效（provider 数 9→14）
+- **② 轻扩展**：新增 `ai-family-sub/drama` 只读子页 `FamilyDrama.tsx`（5 服务健康探针 fetch 超时降级 + 六环节链路展示 + 分层边界声明）；四同步完成（lazyMap/routes 兼容路径/zh+en i18n/Sidebar/BottomNav）
+- **验证**：typecheck 0 错误、build 通过、**测试 1966/1966**（provider 断言 9→14 + 新增 yyc3-* 服务群断言）
+- 顺带修复：工作区 `settings/shared.tsx` 注释意外破坏（shared→sared）已恢复
+
+### 22.3 下次会话启动指南
+
+```bash
+# 看板验证：Token-Console pnpm dev → /ai-family-drama（服务在线时探针全绿）
+# SyncNet 服务：ComfyUI.venv/bin/python scripts/syncnet_service.py（:42218）
+# TTS 服务：yyc3-ai-manju-studio/.venv/bin/python scripts/tts_service.py（:42118）
+```
+
+**当前优先级 TOP 3**（更新）：
+1. **[P0]** kohya sd-scripts 正式训练（DGX）：LoRA 后跨种子复测冲 0.85+
+2. **[P1]** 图生视频接入（H3 服务起服）→ 动态镜头 → SyncNet 达标链路验证
+3. **[P1]** 硬件日执行 + Token-Console 看板对接真实指标（网关 /metrics WS 桥）
 
 ---
 
