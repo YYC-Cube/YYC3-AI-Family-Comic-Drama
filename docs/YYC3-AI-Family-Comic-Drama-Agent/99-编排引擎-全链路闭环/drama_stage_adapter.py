@@ -462,10 +462,39 @@ class DramaToolGateway:
                 "trace_id": result.get("trace_id"),
                 "result": result.get("result")}
 
-    def sync_score(self, clip_ref: str) -> dict:
-        """口型同步评分（对接 SyncNet 双后端；<0.75 打回重生成）"""
-        return {"task_type": "sync_score", "status": "stub", "clip_ref": clip_ref,
-                "threshold": 0.75}
+    def sync_score(self, clip_dir: str = "") -> dict:
+        """口型同步评分（对接 syncnet_service :42218；<0.75 打回重生成）
+
+        :param clip_dir: 裁切轨目录（run_pipeline 产脸裁切输出，含 *.avi）
+        :return: {"status": "ok|stub|stub_fallback", "passed", "results"...}
+        """
+        import json as _json
+        import urllib.request as _rq
+        base = os.getenv("SYNCNET_API_URL", "").rstrip("/")
+        if not base or not clip_dir:
+            return {"task_type": "sync_score", "status": "stub",
+                    "clip_ref": clip_dir, "threshold": 0.75}
+        try:
+            # SSRF 白名单复用 TTS 闸模式
+            from urllib.parse import urlparse as _up
+            u = _up(base)
+            host = (u.hostname or "").lower()
+            allowed = {h.strip().lower() for h in os.getenv(
+                "SYNCNET_ALLOWED_HOSTS", "localhost,127.0.0.1,::1").split(",")
+                if h.strip()}
+            if u.scheme not in ("http", "https") or host not in allowed:
+                raise PermissionError(f"SYNCNET_API_URL 主机不在白名单: {host}")
+            body = _json.dumps({"clip_dir": clip_dir}).encode()
+            req = _rq.Request(f"{base}/v1/sync/score", data=body,
+                              headers={"Content-Type": "application/json"})
+            with _rq.urlopen(req, timeout=int(os.getenv("SYNCNET_TIMEOUT", "600"))) as r:
+                result = _json.loads(r.read().decode())
+            result.update(task_type="sync_score", clip_ref=clip_dir, threshold=0.75)
+            return result
+        except Exception as e:  # noqa: BLE001  服务不可达回落 stub（永不断流）
+            return {"task_type": "sync_score", "status": "stub_fallback",
+                    "clip_ref": clip_dir, "threshold": 0.75,
+                    "error": str(e)[:120]}
 
     def compose(self, timeline: list) -> dict:
         """后期合成（Mac Media Engine VideoToolbox 硬件加速）"""
