@@ -26,7 +26,8 @@ HERO = "/tmp/comfy_out/hero_base.png"
 OUT_LORA = Path("/tmp/lora_sdhero")
 OUT_KOHYA = Path("/Users/yanyu/YYC-Cube/tools/ComfyUI/models/loras/sd-hero_smoke.safetensors")
 
-TRIGGER = "<sd-hero>"
+TRIGGER = ""  # 配方修正(v1.6)：不用生造触发词（<sd-hero> 不在 CLIP 词表，
+              # 子词切分歧义是检不出脸的疑似根因之一）——纯描述性 caption
 PROMPT_T = ("portrait of a young chinese wuxia heroine, delicate face, "
             "ancient hanfu, ink wash background, upper body, highly detailed")
 DRIFT_SUFFIX = ", smiling, night lantern lighting, different angle"
@@ -71,6 +72,7 @@ def load_pipe():
 
 
 def train(pipe, dataset, steps, lr):
+    """训练后 merge_and_unload 回原生平铺 unet（消除 peft 包装推理路径疑点）"""
     from peft import LoraConfig, get_peft_model
 
     unet = pipe.unet
@@ -86,7 +88,7 @@ def train(pipe, dataset, steps, lr):
     from diffusers import DDPMScheduler
     sched = DDPMScheduler.from_config(pipe.scheduler.config)
     opt = torch.optim.AdamW(trainable, lr=lr)
-    prompts = [f"{TRIGGER}, {PROMPT_T}"] * len(dataset)
+    prompts = [f"{TRIGGER}, {PROMPT_T}" if TRIGGER else PROMPT_T] * len(dataset)
     imgs = [np.array(Image.open(p).convert("RGB")).astype(np.float32) / 127.5 - 1
             for p in dataset]
     imgs = torch.from_numpy(np.stack(imgs)).permute(0, 3, 1, 2)  # N,3,512,512
@@ -118,11 +120,15 @@ def train(pipe, dataset, steps, lr):
             print(f"[train] step {step}/{steps} loss={loss.item():.4f} "
                   f"elapsed={time.time() - t0:.0f}s")
     unet.eval()
-    pipe.unet = unet
-    return pipe
+    # v1.7 修正：kohya 导出必须在 merge 之前（merge 后 lora 键已并入原生命名）
+    n_kohya = export_kohya(pipe)
+    # 配方修正(v1.6)：LoRA 权重合并回原 unet，pipe 推理走完全原生路径
+    unet_merged = unet.merge_and_unload()
+    pipe.unet = unet_merged
+    return pipe, n_kohya
 
 
-def eval_sims(pipe):
+def eval_sims(pipe, tag="lora"):
     from PIL import Image
     enc = FaceEncoder(library_root="/tmp/lora_lib")
     ref = enc.extract_feature(HERO)
@@ -130,14 +136,14 @@ def eval_sims(pipe):
     rows = []
     for s in SEEDS:
         g = torch.Generator().manual_seed(s)
-        img = pipe(f"{TRIGGER}, {PROMPT_T}{DRIFT_SUFFIX}", num_inference_steps=20,
+        img = pipe(f"{PROMPT_T}{DRIFT_SUFFIX}", num_inference_steps=20,
                    guidance_scale=7.0, generator=g,
                    height=512, width=512).images[0]
-        p = OUT_LORA / f"lora_{s}.png"
+        p = OUT_LORA / f"{tag}_{s}.png"
         img.save(p, "JPEG", quality=92)
         f = enc.extract_feature(str(p))
         rows.append(round(float(ref @ f), 4))
-        print(f"[eval] seed={s} sim={rows[-1]} mode={enc.last_mode}")
+        print(f"[eval:{tag}] seed={s} sim={rows[-1]} mode={enc.last_mode}")
     return rows
 
 
@@ -171,12 +177,18 @@ def main():
 
     dataset = build_dataset()
     pipe = load_pipe()
-    pipe = train(pipe, dataset, args.steps, args.lr)
-    n_kohya = export_kohya(pipe)
-    rows = eval_sims(pipe)
+
+    # 对照组（v1.6）：同种子集基线（diffusers 原生、无 LoRA）——判别"检不出脸"
+    # 究竟是 LoRA 造成还是 diffusers 推理本身与 ComfyUI 的差异
+    control = eval_sims(pipe, tag="control")
+    print(f"[control] 无 LoRA 基线：{control}")
+
+    pipe, n_kohya = train(pipe, dataset, args.steps, args.lr)
+    rows = eval_sims(pipe, tag="lora")
 
     report = {
         "steps": args.steps, "lr": args.lr,
+        "control_rows": control,
         "rows": rows,
         "lora_min": min(rows), "lora_max": max(rows),
         "lora_mean": round(sum(rows) / len(rows), 4),

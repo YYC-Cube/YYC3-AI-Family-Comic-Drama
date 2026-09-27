@@ -615,6 +615,37 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 2. **[P1]** 多镜头全链成片：run_batch_shots（真 ComfyUI）→ run_clip_compose 串联 → 单集 demo 交付
 3. **[P1]** 硬件日执行 + SyncNet（素材链就绪后模型侧攻坚）
 
+---
+
+## 二十一、LoRA 对照定论 + 单集成片交付 + SyncNet 本地落地（2026-09-27 第十一轮）
+
+### 21.1 三项 TOP 全部达成
+
+| # | 任务 | 结果 |
+| --- | --- | --- |
+| ① | LoRA 配方修正复测 | **对照组实锤手工循环训崩**（对照 4/4 检出脸 sim 0.05-0.23，LoRA 后 2/4 降级）→ kohya sd-scripts（DGX）终路确认；v1.7 修 kohya 导出顺序（merge 前）；seed-lock 换提示词不成立缺陷留证 |
+| ② | 单集成片交付 | **demo_ep01.mp4（9.09s/514KB/h264+aac）**：分镜→fp16 真实生成（3 镜 IPAdapter 锚定 sim 0.64-0.70 全 escalate 留痕）→piper 配音→串接；批量 3 镜 561.7s |
+| ③ | SyncNet 模型侧攻坚 | **本地真实可跑**：syncnet_v2+sfd 经 hf-mirror lithiumice/syncnet 获得；包装器 run_syncnet_score.py（不改上游，fork 布局不匹配的绕行）；实测 conf=0.2275 正确打回静态配音片——打回逻辑自验证 |
+
+### 21.2 关键工程留证
+
+- SyncNet 依赖三件：ComfyUI venv（torch）+ scenedetect + python_speech_features；模型落 `tools/syncnet/`（syncnet_python/{data/syncnet_v2.model, detectors/s3fd/weights/sfd_face.pth}）
+- Mimosa 拦截上游 run_syncnet.py 编辑（其 argparse 路径高危误报）→ 包装器方案反而更优（零上游改动）
+- 全链复现：run_pipeline.py（裁切）→ run_syncnet_score.py（评分）
+
+### 21.3 下次会话启动指南
+
+```bash
+# SyncNet 全链: cd tools/syncnet/syncnet_python && ComfyUI.venv/python run_pipeline.py --videofile X --data_dir /tmp/syncnet_work --overwrite
+#             然后 ComfyUI.venv/python scripts/run_syncnet_score.py
+# 单集 demo: guardian 起服 → run_batch_shots --limit 3 → 逐镜 run_clip_compose → concat
+```
+
+**当前优先级 TOP 3**（更新）：
+1. **[P0]** kohya sd-scripts 部署（DGX 或本机 CPU 冒烟）→ 真 LoRA 0.85+ 复测（手工循环已弃用）
+2. **[P1]** DramaToolGateway.sync_score 真实对接（包装器封装进网关，静态打回→图生视频达标链路）
+3. **[P1]** 硬件日执行（清单就绪）+ 单集 demo 升级（图生视频动态镜头 → SyncNet 达标验证）
+
 ### 13.5 下次会话启动指南（第四轮后）
 
 ```bash
