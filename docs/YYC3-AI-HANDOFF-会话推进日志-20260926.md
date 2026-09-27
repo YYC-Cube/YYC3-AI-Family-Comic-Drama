@@ -684,6 +684,43 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 
 ---
 
+## 二十四、kohya macOS 定论 + H3 网关验证 + 收尾（2026-09-27 第十四轮）
+
+### 24.1 TOP 3 执行结果
+
+| # | 任务 | 结果 |
+| --- | --- | --- |
+| ① | kohya pin venv 构建 | **macOS 不可行（定论）**：Py3.10 scipy .so Mach-O 与 macOS dyld 二进制不兼容（force-reinstall/scipy 1.15/1.17 均无法解）；Py3.11 diffusers 版本三角死结（transformers 4.26 ↔ hub 0.13 ↔ diffusers 0.15 ↔ accelerate 0.15 互斥）；LoRA 创建在 diffusers 0.15 下 duplicated lora name（模型遍历结构变化）→ **kohya LoRA 训练必须 DGX Linux** |
+| ② | H3 网关起服 | ✅ **agent/h3_agent/gateway.py :8300 healthz ok**（inmemory 传输、3 Agent 注册：智云安全哨/织影生产官/格物质检官）；server/api.py 0 字节占位（真代码在 agent/h3_agent/）；权重 ~30GB 待 hf-mirror 下载 |
+| ③ | 看板真实指标 | ✅ **CORS 放行 + FamilyDrama /health 30s 轮询指标卡**（网关 E2E 验证：access-control-allow-origin 正确返回）；硬件日清单维持待实物 |
+
+### 24.2 kohya macOS 不可行定论（precise 阻断链）
+
+| 尝试 | 结果 |
+| --- | --- |
+| ComfyUI venv（Py3.14 + 最新包） | 导入链通 → accelerate `logging_dir` 已兼容补丁 → **训练启动崩**（accelerate 1.x `has_compiled_regions` 与 diffusers 0.33 结构不兼容） |
+| Py3.10 venv + unpinned deps | **scipy .so Mach-O 二进制与 macOS dyld 不兼容**（`__DATA/__thread_bss` 段错误；force-reinstall/升级均不解） |
+| Py3.11 venv + unpinned deps | scipy 1.17 sparse OK ✓ → diffusers 0.40 模块路径不兼容（unet_2d_condition 移位）→ 降 0.33/0.15 均有 API 断层 → **duplicated lora name**（diffusers 0.15 模型遍历结构变化） |
+| 最终 pin 全组（tf4.26+diff0.15+acc0.15+hub0.13） | pip 依赖三角仍不可全满足 |
+
+**结论**：本 vintage sd-scripts 需 diffusers 0.10.2 + accelerate 0.15 + hub 0.12 世代，macOS ARM 无法构建该环境（二进制 wheel 限制）。**必须 DGX Linux + Docker/conda**。工具链本身（argparse/dataset/bucketing/accelerate 构造）在本机已验证可达训练启动前最后一步。
+
+### 24.3 下次会话启动指南
+
+```bash
+# DGX kohya: cd tools/kohya_ss/sd-scripts && conda create -n kohya python=3.10 && pip install -r requirements.txt
+# 训练（DGX GPU）: python train_network.py [同 §23.1 命令但 mixed_precision=fp16]
+# 训后评测（Mac 或 DGX）: run_kohya_lora.py eval --lora <输出路径>
+# H3 权重: hf-mirror 搜 MiniMax-H3 → models/h3/ → ComfyUI.venv python -m uvicorn agent.h3_agent.gateway:app --port 8300
+```
+
+**当前优先级 TOP 3**（更新）：
+1. **[P0]** DGX 环境：kohya conda venv + 训练执行（macOS 已定论不可行，本轮留证完整）
+2. **[P1]** H3 权重下载 + server 起服（网关已验证 :8300 可用）
+3. **[P1]** 硬件日一键清单执行（run_hardware_day.sh）
+
+---
+
 ## 二十一、LoRA 对照定论 + 单集成片交付 + SyncNet 本地落地（2026-09-27 第十一轮）
 
 ### 21.1 三项 TOP 全部达成
