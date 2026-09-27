@@ -580,6 +580,41 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 2. **[P1]** ComfyUI 服务稳定性（MPS 高负载被杀——加 --force-fp16 / 降 steps / 自动重启守护）
 3. **[P1]** 硬件日执行 + M4 SyncNet（音画对齐链路，需 TTS 音轨+视频合成先行）
 
+---
+
+## 二十、LoRA 冒烟 + 守护化 + 合成链全通（2026-09-27 第十轮）
+
+### 20.1 LoRA 训练冒烟（① · 链路通，科学目标移交 DGX）
+
+- 依赖攻坚留证：transformers 5 移除 CLIPFeatureExtractor → **钉 4.57**；diffusers 0.40↔hub1.x↔transformers4 三角死结 → **换代际对齐 diffusers 0.33 + hub 0.36**；`add_noise` 返回单张量（非元组）
+- **训练链路 ✅**：240 步 6 分钟（MPS），loss 0.13→0.005；r=8/attn 四模块 1.19M 参数；**kohya 键位导出 192 张量**（ComfyUI models/loras/sd-hero_smoke.safetensors）
+- **复测未达（诚实归档）**：4 漂移种子生成图有内容但 insightface 检不出人脸（degraded×4）→ 疑因触发词不在 CLIP 词表/peft 包装推理路径/4 图过拟合；**0.85+ 验证移交 DGX 正式训练**（dgx_prod 预设）
+- 另留证：ComfyUI venv 需补 onnxruntime（insightface 运行时依赖，装包不自动带）
+
+### 20.2 ComfyUI 守护化（②）
+
+- `scripts/comfyui_guardian.sh`：**--force-fp16** 启动（第九轮 MPS 被杀缓解）+ 退出 5s 自动重启 + 退出日志 /tmp/comfyui_guardian.log
+- 验证：守护模式起服 ✓、IPAdapter 节点 200 ✓、fp16 真实生成验证执行中（G3 v1.5 补录）
+
+### 20.3 视频合成链 + 硬件日演练（③）
+
+- **`scripts/run_clip_compose.sh` 全通**：IPAdapter 帧 + 台词 → piper TTS 287KB WAV → **ffmpeg MP4（h264+aac 6.51s，时长=音轨）**——M4 compose 服务化前身
+- 硬件日演练：无硬件模式 3 BLOCKED 正确留证（脚本可用性验证通过）；SyncNet 维持 M4 硬件/资产前置（音画素材链已就绪，模型源 Google Drive + dlib 编译受阻）
+
+### 20.4 下次会话启动指南
+
+```bash
+# ComfyUI（守护）: bash scripts/comfyui_guardian.sh 41888
+# LoRA 冒烟复跑: /Users/yanyu/YYC-Cube/tools/ComfyUI/.venv/bin/python scripts/run_lora_train_eval.py --steps 240
+# 合成链: bash scripts/run_clip_compose.sh <png> "台词" <mp4>
+# 硬件日: bash scripts/run_hardware_day.sh --nas-host H --dgx1 H --dgx2 H
+```
+
+**当前优先级 TOP 3**（更新）：
+1. **[P0]** LoRA 配方修正（触发词改标准词（如 "sdxl-tuned"）/ kohya sd-scripts 直接用/peft 推理路径核查）→ 复测冲 0.85+
+2. **[P1]** 多镜头全链成片：run_batch_shots（真 ComfyUI）→ run_clip_compose 串联 → 单集 demo 交付
+3. **[P1]** 硬件日执行 + SyncNet（素材链就绪后模型侧攻坚）
+
 ### 13.5 下次会话启动指南（第四轮后）
 
 ```bash
