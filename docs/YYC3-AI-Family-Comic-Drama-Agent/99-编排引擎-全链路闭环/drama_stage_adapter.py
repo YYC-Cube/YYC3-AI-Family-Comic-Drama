@@ -475,15 +475,25 @@ class DramaToolGateway:
             return {"task_type": "sync_score", "status": "stub",
                     "clip_ref": clip_dir, "threshold": 0.75}
         try:
-            # SSRF 白名单复用 TTS 闸模式
+            # SSRF 三道闸（同 TTSClient：①协议 ②主机白名单 ③解析 IP 边界）
+            import ipaddress as _ipa
+            import socket as _sk
             from urllib.parse import urlparse as _up
             u = _up(base)
             host = (u.hostname or "").lower()
             allowed = {h.strip().lower() for h in os.getenv(
                 "SYNCNET_ALLOWED_HOSTS", "localhost,127.0.0.1,::1").split(",")
                 if h.strip()}
-            if u.scheme not in ("http", "https") or host not in allowed:
+            if u.scheme not in ("http", "https") or not host:
+                raise PermissionError(f"SYNCNET_API_URL 非法 URL（须为 http/https）")
+            if host not in allowed:
                 raise PermissionError(f"SYNCNET_API_URL 主机不在白名单: {host}")
+            for sa in {info[4][0] for info in _sk.getaddrinfo(host, None)}:
+                ip = _ipa.ip_address(sa)
+                if ip.is_loopback:
+                    continue
+                if ip.is_link_local or ip.is_multicast or ip.is_reserved or ip.is_unspecified:
+                    raise PermissionError(f"SSRF 防护：SYNCNET 解析地址 {ip} 不可用")
             body = _json.dumps({"clip_dir": clip_dir}).encode()
             req = _rq.Request(f"{base}/v1/sync/score", data=body,
                               headers={"Content-Type": "application/json"})
