@@ -231,15 +231,21 @@ class ComfyUIClient:
                 raise PermissionError(f"SSRF 防护：解析地址 {ip} 不可用（链路本地/组播/保留段）")
 
     def _workflow(self, prompt: str, negative: str, width: int = 1024,
-                  height: int = 1024, seed: int = None) -> dict:
-        """标准 SD API 最小工作流（真实 ComfyUI 可直接执行）"""
-        return {
-            "3": {"class_type": "KSampler", "inputs": {
-                "seed": seed if seed is not None else int(time.time()) % (2 ** 31),
-                "steps": 25, "cfg": 7.0,
-                "sampler_name": "euler", "scheduler": "normal", "denoise": 1.0,
-                "model": ["4", 0], "positive": ["6", 0],
-                "negative": ["7", 0], "latent_image": ["5", 0]}},
+                  height: int = 1024, seed: int = None,
+                  ref_image: str = None) -> dict:
+        """标准 SD API 最小工作流（真实 ComfyUI 可直接执行）
+
+        :param ref_image: IPAdapter 参考图文件名（须位于 ComfyUI/input/）；
+                          提供时启用 PLUS FACE 人脸身份锚定（IPAdapterUnifiedLoader）
+        """
+        sampler = {"class_type": "KSampler", "inputs": {
+            "seed": seed if seed is not None else int(time.time()) % (2 ** 31),
+            "steps": 25, "cfg": 7.0,
+            "sampler_name": "euler", "scheduler": "normal", "denoise": 1.0,
+            "model": ["4", 0], "positive": ["6", 0],
+            "negative": ["7", 0], "latent_image": ["5", 0]}}
+        wf = {
+            "3": sampler,
             "4": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": self.model}},
             "5": {"class_type": "EmptyLatentImage", "inputs": {
                 "width": width, "height": height, "batch_size": 1}},
@@ -252,13 +258,25 @@ class ComfyUIClient:
             "9": {"class_type": "SaveImage", "inputs": {
                 "images": ["8", 0], "filename_prefix": "yyc3/shot"}},
         }
+        if ref_image:
+            # IPAdapter Plus：身份锚定（PLUS FACE 预设，无需训练即可复用角色面部特征）
+            wf["10"] = {"class_type": "IPAdapterUnifiedLoader", "inputs": {
+                "model": ["4", 0], "preset": "PLUS FACE (portraits)"}}
+            wf["11"] = {"class_type": "LoadImage", "inputs": {"image": ref_image}}
+            wf["12"] = {"class_type": "IPAdapter", "inputs": {
+                "model": ["10", 0], "ipadapter": ["10", 1], "image": ["11", 0],
+                "weight": 0.85, "start_at": 0.0, "end_at": 0.9,
+                "weight_type": "standard"}}
+            wf["3"]["inputs"]["model"] = ["12", 0]
+        return wf
 
     def generate_image(self, prompt: str, out_path: str,
                        negative: str = "", width: int = 1024, height: int = 1024,
-                       seed: int = None) -> dict:
+                       seed: int = None, ref_image: str = None) -> dict:
         """提交文生图任务并轮询取回产物（bytes 落 out_path）
 
         :param seed: 固定种子（身份锁定重生成用）；缺省按时间随机
+        :param ref_image: IPAdapter 参考图文件名（ComfyUI/input/ 内；身份锚定）
         """
         import json as _json
         import urllib.parse as _parse
@@ -271,7 +289,8 @@ class ComfyUIClient:
         assert (u.hostname or "").lower() in self._allowed_hosts, "SSRF 防护：主机不在白名单"
 
         client_id = _uuid.uuid4().hex
-        body = _json.dumps({"prompt": self._workflow(prompt, negative, width, height, seed),
+        body = _json.dumps({"prompt": self._workflow(prompt, negative, width, height,
+                                                     seed, ref_image),
                             "client_id": client_id}).encode()
         req = _rq.Request(f"{self.base}/prompt", data=body,
                           headers={"Content-Type": "application/json"})
@@ -300,6 +319,67 @@ class ComfyUIClient:
         raise TimeoutError(f"ComfyUI 任务 {prompt_id} 超时（{self.timeout}s）")
 
 
+class TTSClient:
+    """TTS 客户端 v1.0（OpenAI 兼容 /v1/audio/speech；M4 配音链）
+
+    - 端点：POST {TTS_API_URL}/v1/audio/speech（body: model/input/voice，响应=音频 bytes）
+    - 后端形态：独立 TTS 服务进程（本地 piper / 云端兼容端点均可）
+    - 高可用：未配置/失败 → 调用方回落 stub（永不断流）
+    - SSRF：沿用主机白名单三道闸模式（TTS_ALLOWED_HOSTS）
+    """
+
+    def __init__(self):
+        self.base = os.getenv("TTS_API_URL", "").rstrip("/")
+        self.model = os.getenv("TTS_MODEL", "piper-zh")
+        self.voice = os.getenv("TTS_VOICE", "zh_CN-huayan-medium")
+        self.timeout = int(os.getenv("TTS_TIMEOUT", "120"))
+        self._allowed_hosts = set()
+        self._validate_base()
+
+    @property
+    def enabled(self) -> bool:
+        return bool(self.base)
+
+    def _validate_base(self):
+        if not self.base:
+            return
+        u = urlparse(self.base)
+        host = (u.hostname or "").lower()
+        explicit = {h.strip().lower() for h in os.getenv(
+            "TTS_ALLOWED_HOSTS", "localhost,127.0.0.1,::1").split(",") if h.strip()}
+        if u.scheme not in ("http", "https") or not host:
+            raise PermissionError(f"TTS_API_URL 非法 URL: {self.base}")
+        if host not in explicit:
+            raise PermissionError(f"TTS_API_URL 主机不在白名单: {host}")
+        self._allowed_hosts = explicit
+        for sa in {info[4][0] for info in socket.getaddrinfo(host, None)}:
+            ip = ipaddress.ip_address(sa)
+            if ip.is_loopback:
+                continue
+            if ip.is_link_local or ip.is_multicast or ip.is_reserved or ip.is_unspecified:
+                raise PermissionError(f"SSRF 防护：TTS 解析地址 {ip} 不可用")
+
+    def synthesize(self, text: str, out_path: str) -> dict:
+        """合成语音并落盘（bytes → out_path.wav）"""
+        import json as _json
+        import urllib.request as _rq
+        if not self.enabled:
+            raise RuntimeError("TTS_API_URL 未配置")
+        self._validate_base()
+        u = urlparse(self.base)
+        assert (u.hostname or "").lower() in self._allowed_hosts, "TTS 主机不在白名单"
+        body = _json.dumps({"model": self.model, "input": text,
+                            "voice": self.voice,
+                            "response_format": "wav"}).encode()
+        req = _rq.Request(f"{self.base}/v1/audio/speech", data=body,
+                          headers={"Content-Type": "application/json"})
+        with _rq.urlopen(req, timeout=self.timeout) as r:
+            data = r.read()
+        from pathlib import Path as _P
+        _P(out_path).write_bytes(data)
+        return {"status": "ok", "audio_path": str(out_path), "bytes": len(data)}
+
+
 class DramaToolGateway:
     """漫剧工具网关（v1.2：text_to_image 已对接 ComfyUI；image_to_video 已对接 H3）
 
@@ -313,13 +393,34 @@ class DramaToolGateway:
     def __init__(self):
         self.h3 = H3VisionClient()
         self.comfy = ComfyUIClient()
+        self.tts_client = TTSClient()
+
+    def tts(self, text: str, voice_id: str = "default",
+            out_path: str = None) -> dict:
+        """TTS 配音（M4；独立 TTS 服务 OpenAI 兼容端点，未配置回落 stub）"""
+        base = {"task_type": "tts", "chars": len(text), "voice_id": voice_id}
+        if self.tts_client.enabled:
+            try:
+                if not out_path:
+                    out_path = f"/tmp/yyc3_tts_{int(time.time() * 1000)}.wav"
+                result = self.tts_client.synthesize(text, out_path)
+                result.update(base)
+                return result
+            except Exception as e:  # noqa: BLE001
+                base["status"] = "stub_fallback"
+                base["error"] = str(e)[:120]
+                return base
+        base["status"] = "stub"
+        return base
 
     def text_to_image(self, prompt: str, ref_assets: list = None,
-                      out_path: str = None, seed: int = None) -> dict:
+                      out_path: str = None, seed: int = None,
+                      ref_image: str = None) -> dict:
         """文生图（关键帧生成；ComfyUI/SDXL，经网关标签路由 preview/quality）
 
         :param out_path: 产物落盘路径（缺省 /tmp/yyc3_t2i_<ts>.png）
         :param seed: 固定种子（身份锁定重生成；缺省随机）
+        :param ref_image: IPAdapter 参考图文件名（ComfyUI/input/ 内；身份锚定）
         :return: {"status": "ok|stub|stub_fallback", "image_path"(ok 时), ...}
         """
         base = {"task_type": "text_to_image",
@@ -328,7 +429,8 @@ class DramaToolGateway:
             try:
                 if not out_path:
                     out_path = f"/tmp/yyc3_t2i_{int(time.time() * 1000)}.png"
-                result = self.comfy.generate_image(prompt, out_path, seed=seed)
+                result = self.comfy.generate_image(prompt, out_path, seed=seed,
+                                                   ref_image=ref_image)
                 result.update(base)
                 return result
             except Exception as e:  # noqa: BLE001  生成失败回落桩（永不断流）
@@ -359,11 +461,6 @@ class DramaToolGateway:
                 "image_ref": image_ref,
                 "trace_id": result.get("trace_id"),
                 "result": result.get("result")}
-
-    def tts(self, text: str, voice_id: str = "default") -> dict:
-        """配音 TTS（对接 XTTS v2）"""
-        return {"task_type": "tts", "status": "stub", "voice_id": voice_id,
-                "text_len": len(text)}
 
     def sync_score(self, clip_ref: str) -> dict:
         """口型同步评分（对接 SyncNet 双后端；<0.75 打回重生成）"""

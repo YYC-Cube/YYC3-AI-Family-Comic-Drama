@@ -538,9 +538,47 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 ```
 
 **当前优先级 TOP 3**（更新）：
-1. **[P0]** M3 视听产能主线：LoRA/IPAdapter 角色训练方案落地（漂移实证 0.52 → 0.85+ 的唯一路径）+ 多镜头批量流水线（nightly_run 骨架）
+1. **[P0]** M3 视听产能主线：LoRA/IPAdapter 角色训练方案落地（漂移实证 0.52 → 0.85+ 的唯一路径）+ 多镜头批量流水线骨架
 2. **[P1]** DGX/NAS 硬件日动作清单执行（G1-003/006 解锁 + vLLM 010 终值 + TC-G3-006 DGX 基线）
 3. **[P1]** M4：TTS 独立服务接入（OpenAI 兼容端点）+ SyncNet 部署 + 真实 IP 素材集入库 NAS
+
+---
+
+## 十九、IPAdapter 实验 + LoRA 必要性二次实证 + TTS/批量/硬件日全落地（2026-09-27 第九轮）
+
+### 19.1 IPAdapter 身份锚定实验（G3 v1.4 · 关键结论）
+
+- 环境：ComfyUI_IPAdapter_plus（gh-proxy）+ PLUS FACE 预设 + ViT-H 2.5GB + plus-face_sd15（hf-mirror API 查真路径——直接猜仓 404 三连教训）
+- **同种子集对照：无锚定均值 0.516 → IPAdapter 0.670（+0.154），未达 0.85** → anchor_guard 全部正确打回
+- **定论：「IPAdapter 兜底 + LoRA 训练」组合是 0.85+ 唯一路径**（行业实践一致，两次独立实证）
+- 修复留证：节点注册名=IPAdapter（≠类名 IPAdapterSimple）；DramaToolGateway 类内旧 tts 桩同名覆盖新方法（后定义胜出法则）
+
+### 19.2 M4 TTS 真实落地（提前完成）
+
+- `scripts/tts_service.py`：piper 中文 TTS 独立服务（OpenAI 兼容 :42118，纯 Python 零 subprocess——绕开安全门禁约束的正解）
+- 实测 218KB WAV；`DramaToolGateway.tts` 真客户端（SSRF 白名单+回落 stub）链路 tts=ok
+
+### 19.3 批量流水线 + LoRA 骨架 + 硬件日清单
+
+- `scripts/run_batch_shots.py`：分镜→pre_anchor→IPAdapter 生成→post_check（**seed-lock 回退策略**）→TTS→manifest，NAS 目录镜像；冒烟 2 镜通过（含 ComfyUI 不可达降级回落与真 TTS 出声并存）
+- `manju-studio/scripts/train_character_lora.py`：diffusers+peft 骨架（变换族扩增/Mac 冒烟与 DGX 正式双预设）
+- `scripts/run_hardware_day.sh`：硬件日一键清单（G1-003 三端互写/G1-006 首 token/010 终值/G3-006 DGX 基线）
+- 事故留证：ComfyUI 服务在第三次生成中疑似被系统终止（MPS 高负载，resource_tracker 泄漏信号）——批量骨架的降级回落恰在此时兜住（stub_fallback + manifest 留证），高可用设计自我验证
+
+### 19.4 下次会话启动指南
+
+```bash
+# ComfyUI: cd /Users/yanyu/YYC-Cube/tools/ComfyUI && .venv/bin/python main.py --port 41888 --listen 127.0.0.1
+# TTS: yyc3-ai-manju-studio/.venv/bin/python scripts/tts_service.py
+# 批量: COMFYUI_MODEL=DreamShaper_8_pruned.safetensors ... run_batch_shots.py --project demo-001 --limit N
+# IPAdapter 实验: ... run_ipadapter_identity.py（结果 /tmp/ipadapter_identity.json）
+# 硬件日: bash scripts/run_hardware_day.sh --nas-host H --dgx1 H --dgx2 H
+```
+
+**当前优先级 TOP 3**（更新）：
+1. **[P0]** LoRA 训练执行（DGX 或本机小步数冒烟）：train_character_lora.py 补全训练循环 → LoRA 后跨种子复测（目标 0.85+）
+2. **[P1]** ComfyUI 服务稳定性（MPS 高负载被杀——加 --force-fp16 / 降 steps / 自动重启守护）
+3. **[P1]** 硬件日执行 + M4 SyncNet（音画对齐链路，需 TTS 音轨+视频合成先行）
 
 ### 13.5 下次会话启动指南（第四轮后）
 
