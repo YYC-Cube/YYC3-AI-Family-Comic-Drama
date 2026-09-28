@@ -296,6 +296,7 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 ```
 
 **当前优先级 TOP 3**：
+
 1. **[P0]** M2 编排贯通：填 script_engine 三件 + storyboard Schema（清 4 STUB → TC-G2-007 可执行）
 2. **[P1]** YYC3-60 v1.1 修订：G1-005 预期 401→401/403；G3 用例编写（M3 前 1 周）
 3. **[P1]** 上游仓补 requirements.txt（本轮依赖清单已留证于 G1 记录）
@@ -387,6 +388,7 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 ```
 
 **当前优先级 TOP 3**：
+
 1. **[P0]** M2 收尾：prompt 装载运行时 + A2A 埋点（清 TC-G2-008/009 PARTIAL）
 2. **[P1]** 真实 LLM 全链（Ollama 上游已验证）→ TC-G2-010 并行收益 + TC-G2-005 复检达标复验
 3. **[P1]** TC-G3-001/002 一致性预研（insightface 512 维）
@@ -423,6 +425,7 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 ```
 
 **当前优先级 TOP 3**（更新）：
+
 1. **[P0]** M2 收尾：prompt 装载运行时 + A2A 埋点（清 TC-G2-008/009 PARTIAL）
 2. **[P1]** M3 主体：真实角色图入库 + anchor_guard 三段锚定联调（预研已实证可行性）
 3. **[P1]** 真实 LLM 全链 → TC-G2-010 并行收益复验
@@ -463,6 +466,7 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 ```
 
 **当前优先级 TOP 3**（更新）：
+
 1. **[P0]** M3 视听产能：DramaToolGateway 桩→实（ComfyUI 文生图接入，anchor_guard 真实进生成链）
 2. **[P1]** TC-G2-008 语枢复验 + TC-G2-010 真实模型并行计时（清 G2 双 PARTIAL）
 3. **[P1]** 真实多机位角色素材标定（anchor_guard 阈值 0.85 在真实素材上复标）
@@ -499,6 +503,7 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 ```
 
 **当前优先级 TOP 3**（更新）：
+
 1. **[P0]** 真实 ComfyUI 部署（本机 SDXL 或 DGX）→ Mock 生成本体替换 + anchor_guard 打回闭环真图复验
 2. **[P1]** DGX/NAS 硬件推进（G1-003/006 解锁 + vLLM 并发复跑 TC-G2-010）
 3. **[P1]** M4 前置：TTS/sync_score 工具接入（DramaToolGateway 余桩）+ 真实角色 IP 素材集
@@ -538,6 +543,7 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 ```
 
 **当前优先级 TOP 3**（更新）：
+
 1. **[P0]** M3 视听产能主线：LoRA/IPAdapter 角色训练方案落地（漂移实证 0.52 → 0.85+ 的唯一路径）+ 多镜头批量流水线骨架
 2. **[P1]** DGX/NAS 硬件日动作清单执行（G1-003/006 解锁 + vLLM 010 终值 + TC-G3-006 DGX 基线）
 3. **[P1]** M4：TTS 独立服务接入（OpenAI 兼容端点）+ SyncNet 部署 + 真实 IP 素材集入库 NAS
@@ -576,6 +582,7 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 ```
 
 **当前优先级 TOP 3**（更新）：
+
 1. **[P0]** LoRA 训练执行（DGX 或本机小步数冒烟）：train_character_lora.py 补全训练循环 → LoRA 后跨种子复测（目标 0.85+）
 2. **[P1]** ComfyUI 服务稳定性（MPS 高负载被杀——加 --force-fp16 / 降 steps / 自动重启守护）
 3. **[P1]** 硬件日执行 + M4 SyncNet（音画对齐链路，需 TTS 音轨+视频合成先行）
@@ -611,6 +618,7 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 ```
 
 **当前优先级 TOP 3**（更新）：
+
 1. **[P0]** kohya sd-scripts 部署（DGX 或本机 CPU 冒烟）→ 真 LoRA 0.85+ 复测（手工循环已弃用）
 2. **[P1]** DramaToolGateway.sync_score 真实对接（包装器封装进网关，静态打回→图生视频达标链路）
 3. **[P1]** 硬件日执行（清单就绪）+ 单集 demo 升级（图生视频动态镜头 → SyncNet 达标验证）
@@ -643,6 +651,7 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 ```
 
 **当前优先级 TOP 3**（更新）：
+
 1. **[P0]** kohya sd-scripts 正式训练（DGX）：LoRA 后跨种子复测冲 0.85+
 2. **[P1]** 图生视频接入（H3 服务起服）→ 动态镜头 → SyncNet 达标链路验证
 3. **[P1]** 硬件日执行 + Token-Console 看板对接真实指标（网关 /metrics WS 桥）
@@ -678,6 +687,7 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 ```
 
 **当前优先级 TOP 3**（更新）：
+
 1. **[P0]** kohya 独立 pin venv 构建（pyenv 3.10 本机或 DGX）→ 160 步训练 + kohya_eval.json 复测
 2. **[P1]** H3 权重下载（~30GB hf-mirror）→ server 起服 → 动态镜头 → SyncNet ≥0.75 达标验证
 3. **[P1]** 硬件日执行（run_hardware_day.sh 一键清单就绪）
@@ -715,6 +725,7 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 ```
 
 **当前优先级 TOP 3**（更新）：
+
 1. **[P0]** DGX 环境：kohya conda venv + 训练执行（macOS 已定论不可行，本轮留证完整）
 2. **[P1]** H3 权重下载 + server 起服（网关已验证 :8300 可用）
 3. **[P1]** 硬件日一键清单执行（run_hardware_day.sh）
@@ -746,6 +757,7 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 ```
 
 **当前优先级 TOP 3**（更新）：
+
 1. **[P0]** kohya sd-scripts 部署（DGX 或本机 CPU 冒烟）→ 真 LoRA 0.85+ 复测（手工循环已弃用）
 2. **[P1]** DramaToolGateway.sync_score 真实对接（包装器封装进网关，静态打回→图生视频达标链路）
 3. **[P1]** 硬件日执行（清单就绪）+ 单集 demo 升级（图生视频动态镜头 → SyncNet 达标验证）
@@ -759,6 +771,7 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 ```
 
 **当前优先级 TOP 3**：
+
 1. **[P0]** G2 十用例执行（TC-G2-001~010，分镜 Schema 已就绪；004/005 为回归锚点）
 2. **[P1]** M3 一致性专项预研（TC-G3-001/002 无 DGX 可先行）
 3. **[P1]** 上游仓补 requirements.txt + storyboards LLM 增强（script_engine 规则版 → LLM 精抽）
@@ -784,3 +797,31 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 1. **[P0]** 白名单提交 run_kohya_lora.py + 设计指导文档 + gitignore 补 .mimosa/face_library 规则（报告 Step 1-2）
 2. **[P1]** style_keeper.py 实现（一致性三件套收尾）+ backend/requirements.txt 补齐（报告 Step 5-6）
 3. **[P1]** YYC3-60 G4 用例细化 + H3 权重 hf-mirror 下载（报告 Step 7-8）
+
+---
+
+## 二十六、审核 Step 1-8 全量执行（2026-09-28 第十六轮）
+
+### 26.1 执行清单（对照审核报告 §五路线图）
+
+| 步骤 | 内容 | 结果 |
+| ---- | ---- | ---- |
+| Step 1-2 | 白名单提交 run_kohya_lora.py + 设计指导文档；五仓 gitignore 补 .mimosa/.v2c/.video_agent/face_library_*/ | 完成（根仓 eace9ef+71cf416，四子仓各一笔） |
+| Step 3 | YYC3-08 矩阵刷新 v1.1.0→v1.2.0（§1.1 快照/§2.2-2.5 四仓矩阵/§2.6 裁决表/agents 映射表/§4.3 P2 行） | 完成（根仓 95ed7d5） |
+| Step 4 | 幽灵占位裁决：23 处 0 字节空壳删除（超报告初判 8 处），承担者留证 §2.6 | 完成（manju ae3b71f / h3 dd1858b / archive 6831103 / 0379 b347565） |
+| Step 5 | **style_keeper.py v1.0 实现**（一致性三件套收口）：确定性派生（SHA-256 种子+LUT+笔触）/持久化防漂移/风格注入/参数级核验/图像级三态闭环（PIL 色彩矩+直方图，红线镜像 anchor_guard：降级不得进生产判定）；单测 17/17 PASS | 完成 |
+| Step 6 | backend/requirements.txt v1.0（numpy 2.5.3 + pillow 12.3.0 冻结；可选重依赖/编排依赖注释分层） | 完成 |
+| Step 7 | YYC3-60 v1.3.0：G4 用例细化 10 条（TC-G4-001~010，demo_ep01 实链路蓝本）+ §一总览 + TC-G3-009 前置更新 | 完成 |
+| Step 8 | scripts/download_h3_weights.sh（hf-mirror + 断点续传 + 空间检查）已入库并后台启动，5 个 NF4 文件并行下载中（~30Gi，中断重跑即续传） | 进行中（后台） |
+
+### 26.2 关键决策
+
+- **style_keeper 三态语义对齐 anchor_guard**：accept / redraw(≤2) / escalate；`last_mode != pil_hist` 的判定不得进生产（红线 2）；档案派生 `sha256-deterministic` 保证同 project_id 跨进程完全一致（TC-G3-009 主判定由构造保证）。
+- **requirements 分层**：核心（实测 import）/ 可选重依赖（真实模式 face_encoder）/ 可选编排依赖（api/v1+tasks 启动时补），避免 Mac 本地被 insightface 等重依赖阻塞。
+- **G4 用例锚定实链路**：执行器全部指向根仓 scripts/ 现有件（run_clip_compose.sh/tts/syncnet/batch_shots），002/009 允许 BLOCKED 留证，通过标准显式列出。
+
+### 26.3 当前优先级 TOP 3（本轮更新）
+
+1. **[P0]** 等待 H3 权重下载完成后：h3 网关 :8300 起服 → TC-G4-002 动态镜头首验（SyncNet ≥0.75 判定）
+2. **[P1]** DGX 硬件日四连收割（审核报告 Step 9-12：G1 清零/kohya LoRA/G2-010 终值/G3-006 基线）
+3. **[P2]** TC-G4-001~008 逐条执行留证（合成链执行器均已就绪，可无 H3 先行 001/003/004 复现）
