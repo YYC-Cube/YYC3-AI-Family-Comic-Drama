@@ -1,0 +1,31 @@
+{
+  "testcase": "TC-G4-002 动态镜头口型达标",
+  "date": "2026-09-28",
+  "verdict": "PASS",
+  "threshold": "conf >= 0.75",
+  "generation": {
+    "executor": "scripts/batch_ref2va_nf4.py",
+    "pipeline": "ref2va",
+    "variant": "nf4",
+    "seed": 42,
+    "resolution": "640x384",
+    "num_frames": 73,
+    "fps": 24,
+    "audio_sample_rate": 32000,
+    "steps": 30,
+    "gen_seconds": 5267.496,
+    "rss_peak_gb": 22.315,
+    "output": "output_batchg4t2/g4t2_ref/h3_seed_42.mp4",
+    "manifest_status": "SUCCESS"
+  },
+  "syncnet": [
+    {
+      "track": "00000.avi",
+      "offset": 0.0,
+      "conf": 6.3167,
+      "dist": 11.654,
+      "verdict": "达标(≥0.75)"
+    }
+  ],
+  "notes": "Ref2VA 音视频联合生成口型内生同步；dist 偏高留证（384p 唇部细节量推测，720p 复验跟踪）；run_pipeline 需 --min_track 40 --min_face_size 60（短视频 <100 帧默认必空轨）"
+}

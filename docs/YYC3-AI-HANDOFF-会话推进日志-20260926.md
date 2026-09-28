@@ -856,3 +856,37 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 1. **[P0]** H3 权重落盘后：网关 :8300 起服 → TC-G4-002 动态镜头 → SyncNet ≥0.75 达标判定（G4 核心指标）
 2. **[P1]** DGX 硬件日四连收割（G1 清零/kohya LoRA/G2-010/G3-006）
 3. **[P2]** 样片扩产至 ≥3 集 → TC-G4-005/007/008 批量执行
+
+## 二十八、TC-G4-002 达标收官：G4 核心四用例全 PASS（2026-09-28 第十八轮）
+
+### 28.1 结果
+
+**TC-G4-002 动态镜头口型达标 ✅ PASS** — conf 6.3167 ≥0.75（offset 0.0 / dist 11.654），G4 门禁核心四用例（001/002/003/004）全部 PASS。
+
+| 阶段 | 留证 |
+| ---- | ---- |
+| 权重 | `/Users/yanyu/models/MiniMax-H3-NF4/` 5 件 NF4 全齐（fl2va/ref2va 17.16G×2 + text-encoder 15.32G + video_vae 1.6G + audio_vae 284M），断点续传收尾成功；processor 仓修正 `MiniMaxAI/MiniMax-H3`（原 MiniMax/ 404，h3_common L56 同步改） |
+| 拆分仓脚本考古 | scripts 下 batch_ref2va_nf4.py 等原为 0 字节占位（production_agent 调用会崩）→ 从原始仓平移真身 6 脚本 + lib/h3_common.py + vendor/DiffSynth-Studio 符号链接（19M） |
+| 网关 | :8300 healthz `{"status":"ok","claim_ready":true}`；claim 密钥入 `.secrets/agent_claim.env`（chmod 600，gitignore 补 `.secrets/` 红线） |
+| 生成 | 直跑 batch_ref2va_nf4.py：seed 42 / preview 384p / 30 步 / 73 帧 / 24fps / 32kHz；**5267.5s（88.8min，168.9s/步）RSS 峰值 22.3GB**；产物 h3_seed_42.mp4（h264 640x384 + aac，3.05s，manifest SUCCESS） |
+| 评分 | run_pipeline（`--min_track 40 --min_face_size 60`）产脸 1 轨 → run_syncnet_score **conf 6.3167 达标** |
+
+### 28.2 本轮关键排障（5 连）
+
+1. 生成首跑 10/30 步遭外部 SIGTERM → 脚本断点设计（FAILED 记录）直接重跑
+2. 重跑 FileNotFoundError → 定位实际工作仓为项目内 `yyc3-minimax-h3/`（非原始仓路径混淆）
+3. SyncNet 空轨 → `min_track` 默认 100 帧 > 77 帧短视频，降参后产轨
+4. bnb NF4 反量化 dynamo recompile 告警 → 步速稳定 169s/it，接受不重启
+5. 网关子进程 35min 停滞（上轮遗留）→ 本轮确认根因 `DIFFSYNTH_SKIP_DOWNLOAD=True` 必带
+
+### 28.3 文档同步
+
+- 《G4-样片闭环首验记录》**v1.1.0**：新增 §四 TC-G4-002 达标节（含 dist 偏高诚实留证：384p 唇部细节量推测，720p 复验跟踪）；结论更新四用例全 PASS
+- YYC3-60 **v1.3.2**：TC-G4-002 回填首验实测 + 三条关键经验（min_track 短视频 / DIFFSYNTH_SKIP_DOWNLOAD / Ref2VA 内生同步 conf 量级）
+- 评分链口径核对：run_syncnet_score.py L52 `conf ≥0.75 达标`（score_norm 同口径）
+
+### 28.4 当前优先级 TOP 3（本轮更新）
+
+1. **[P1]** H3 批量动态化排期：720p 档质量复验（跟踪 dist）+ DGX 硬件日提速（Mac MPS 单镜 89min 不可量产）
+2. **[P1]** DGX 硬件日四连收割（G1 清零/kohya LoRA/G2-010/G3-006）——与动态化提速合并执行
+3. **[P2]** 样片扩产至 ≥3 集（引入 H3 动态镜头混排）→ TC-G4-005/007/008 批量执行；可选：网关带 DIFFSYNTH_SKIP_DOWNLOAD 复跑一轮取 claim→dispatch 全链留证
