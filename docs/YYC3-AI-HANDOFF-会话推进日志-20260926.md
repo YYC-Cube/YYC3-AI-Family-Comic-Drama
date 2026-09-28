@@ -762,3 +762,25 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 1. **[P0]** G2 十用例执行（TC-G2-001~010，分镜 Schema 已就绪；004/005 为回归锚点）
 2. **[P1]** M3 一致性专项预研（TC-G3-001/002 无 DGX 可先行）
 3. **[P1]** 上游仓补 requirements.txt + storyboards LLM 增强（script_engine 规则版 → LLM 精抽）
+
+---
+
+## 二十五、未跟进内容全量审核（2026-09-28 第十五轮）
+
+### 25.1 审核产出
+
+**《[未跟进内容审核分析报告-20260928.md](未跟进内容审核分析报告-20260928.md)》**——以 2026-09-28 代码实态（五仓 git log/status + 空占位 wc -c 实测）三角验证，对照 YYC3-09 里程碑 / YYC3-60 门禁 / YYC3-08 实现度矩阵。
+
+### 25.2 核心结论
+
+- **门禁面**：G2 已 10/10 满贯（v1.3）；G3 四用例 PASS + SyncNet 本地落地；G1 仍 4 BLOCKED（硬件/NAS）；G4/G5 未开跑但前置件齐（demo_ep01 成片 + 合成链全通）。
+- **缺口全收敛两类**：硬件依赖族（DGX 一个动作解锁 G1 清零/kohya LoRA/G2-010 终值/G3-006 基线四件事）+ 收尾规范族（空占位裁决/文档同步）。
+- **实测空占位（0 字节）**：style_keeper.py、score_aggregator.py、shot_planner.py、backend/requirements.txt、H3 server/api.py + scripts/closed_loop.py、docker-compose.nas.yml、init_nas_path.sh。
+- **高危发现**：`scripts/run_kohya_lora.py` 未入库但 HANDOFF §23.4/§24.3 启动指南直接引用（DGX 日评测断链风险）；YYC3-08 §2.2 矩阵严重过期（script_engine/consistency_engine 仍标空占位）；staged 的 YYC3-HTML-设计指导文档.md 未提交。
+- **审核结论：有条件通过**——完成报告 §五「立即执行」四步（白名单提交/gitignore 补规则/矩阵刷新/幽灵占位裁决）后，无硬件可推进至 Step 8；DGX 到位日按 Step 9-12 四连收割。
+
+### 25.3 当前优先级 TOP 3（本次审核更新）
+
+1. **[P0]** 白名单提交 run_kohya_lora.py + 设计指导文档 + gitignore 补 .mimosa/face_library 规则（报告 Step 1-2）
+2. **[P1]** style_keeper.py 实现（一致性三件套收尾）+ backend/requirements.txt 补齐（报告 Step 5-6）
+3. **[P1]** YYC3-60 G4 用例细化 + H3 权重 hf-mirror 下载（报告 Step 7-8）
