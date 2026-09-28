@@ -52,3 +52,8 @@ tmp/
 /yyc3-minimax-h3/
 /yyc3-ai-manju-studio/
 05-本地数据库替代方案分析.md
+
+# ===== 工具状态目录（不入仓库）=====
+.mimosa/
+.v2c/
+.video_agent/
