@@ -1,0 +1,37 @@
+{
+  "project": "g4-ep01",
+  "char": "sd-hero",
+  "comfy": true,
+  "tts": true,
+  "shots": [
+    {
+      "shot_id": "shot-ep01-001",
+      "seed": 1007,
+      "dialogue": "",
+      "gen_status": "ok",
+      "similarity": 0.6799,
+      "action": "escalate",
+      "redraw": "seed_lock"
+    },
+    {
+      "shot_id": "shot-ep01-002",
+      "seed": 1014,
+      "dialogue": "「这么晚来义庄，您找谁？",
+      "gen_status": "ok",
+      "similarity": 0.6583,
+      "action": "escalate",
+      "redraw": "seed_lock",
+      "tts": "ok"
+    },
+    {
+      "shot_id": "shot-ep01-003",
+      "seed": 1021,
+      "dialogue": "",
+      "gen_status": "ok",
+      "similarity": 0.6263,
+      "action": "escalate",
+      "redraw": "seed_lock"
+    }
+  ],
+  "elapsed_s": 883.3
+}

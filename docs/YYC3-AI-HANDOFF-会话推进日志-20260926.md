@@ -825,3 +825,34 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 1. **[P0]** 等待 H3 权重下载完成后：h3 网关 :8300 起服 → TC-G4-002 动态镜头首验（SyncNet ≥0.75 判定）
 2. **[P1]** DGX 硬件日四连收割（审核报告 Step 9-12：G1 清零/kohya LoRA/G2-010 终值/G3-006 基线）
 3. **[P2]** TC-G4-001~008 逐条执行留证（合成链执行器均已就绪，可无 H3 先行 001/003/004 复现）
+
+---
+
+## 二十七、G4 首验 + 全链服务化复跑（2026-09-28 第十七轮）
+
+### 27.1 G4 门禁首跑结果（《G4-样片闭环首验记录-20260928.md》）
+
+| 用例 | 结果 | 要点 |
+| ---- | ---- | ---- |
+| TC-G4-001 | ✅ PASS ×2 | run_clip_compose.sh 升级 1920x1080@30（force_original_aspect_ratio+crop 防拉伸）；两次规格一致 |
+| TC-G4-003 | ✅ PASS | 三轮实测定版**全重编码串联**（流拷贝 AAC priming 累积 +47ms 超差）；沉淀 run_episode_concat.sh（自动验证）；视频轨偏差 20.3ms < 1 帧，黑帧 0 |
+| TC-G4-004 | ✅ PASS | **全链零人工 883.3s**：脚本→分镜→ComfyUI 真图×3→insightface 真锚定（sim 0.63-0.68 全诚实 escalate 零假阳性）→TTS 服务真调用→合成→串联（8.3ms）→SyncNet 产脸 4 轨评分（conf 0.31-0.62 全部正确打回，静态帧预期红线有效） |
+| TC-G4-002 | ⬜ BLOCKED | H3 NF4 权重 33G 下载收尾中（3/5 文件落盘），断点续传脚本在跑 |
+
+### 27.2 服务化复跑基线（全绿）
+
+- ComfyUI :41888（guardian --force-fp16）/ TTS :42118（tts_service.py，manju venv）/ SyncNet :42218（syncnet_service.py，**ComfyUI.venv python**——torch 全家桶所在，HANDOFF L649/L747 留证复用）
+- SyncNet 全链：`cd tools/syncnet/syncnet_python && ComfyUI.venv/python run_pipeline.py --videofile X --data_dir /tmp/syncnet_work --overwrite` → `run_syncnet_score.py --crop_dir /tmp/syncnet_work/pycrop`
+- H3 网关起服（权重齐后）：`cd yyc3-minimax-h3 && ComfyUI.venv/bin/python -m uvicorn agent.h3_agent.gateway:app --port 8300`
+
+### 27.3 规格修订与文档同步
+
+- YYC3-60 **v1.3.1**：TC-G4-003 判定基准=视频轨时长（±1 帧；AAC padding 不计入），步骤补全重编码方法
+- 留证归档：`/tmp/yyc3_projects/_acceptance/G4/`（NAS 就位迁移）+ `docs/attachments/G4-20260928/`（manifest + syncnet_summary）
+- 新增执行器：run_episode_concat.sh；run_clip_compose.sh 升级交付规格
+
+### 27.4 当前优先级 TOP 3（本轮更新）
+
+1. **[P0]** H3 权重落盘后：网关 :8300 起服 → TC-G4-002 动态镜头 → SyncNet ≥0.75 达标判定（G4 核心指标）
+2. **[P1]** DGX 硬件日四连收割（G1 清零/kohya LoRA/G2-010/G3-006）
+3. **[P2]** 样片扩产至 ≥3 集 → TC-G4-005/007/008 批量执行

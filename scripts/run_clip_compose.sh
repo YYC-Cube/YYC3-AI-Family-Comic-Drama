@@ -34,12 +34,15 @@ open(out_wav, "wb").write(buf.getvalue())
 print(f"      wav={len(buf.getvalue())} bytes rate={voice.config.sample_rate}")
 PYEOF
 
-echo "[2/3] ffmpeg 合成（H.264 + AAC，时长=音轨）…"
+echo "[2/3] ffmpeg 合成（H.264 + AAC，交付规格 1920x1080@30，时长=音轨）…"
+# TC-G4-001 交付规格：1920x1080 / 30fps / H.264 / AAC
+# 方形原图（1024x1024）→ 等比放大覆盖 16:9 后居中裁切，避免拉伸变形
 ffmpeg -y -loop 1 -i "$IMG" -i "$TMP_WAV" \
-  -c:v libx264 -tune stillimage -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" \
+  -c:v libx264 -tune stillimage -pix_fmt yuv420p -r 30 \
+  -vf "scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080" \
   -c:a aac -b:a 128k -shortest "$OUT" 2>&1 | tail -2
 
-echo "[3/3] 校验产物…"
-ffprobe -v error -show_entries format=duration,size -show_entries stream=codec_name \
+echo "[3/3] 校验产物（TC-G4-001 规格）…"
+ffprobe -v error -show_entries format=duration,size -show_entries stream=codec_name,width,height,r_frame_rate \
   -of default=noprint_wrappers=1 "$OUT"
 echo "完成：${OUT}（音轨：${TMP_WAV}）"
