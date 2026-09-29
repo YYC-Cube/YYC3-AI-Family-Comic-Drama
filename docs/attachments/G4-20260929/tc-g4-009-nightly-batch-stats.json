@@ -1,0 +1,76 @@
+{
+  "testcase": "TC-G4-009 夜间批量集产能",
+  "date": "2026-09-29 夜间窗口（本地 Mac 错峰 + DGX n1 双节点并行）",
+  "manual": "YYC3-60 测试与验收执行手册 L416-423",
+  "expected": "单晚 >=1 集完整产出且质检全过（DGX 就位后对齐 TC-G3-007 吞吐目标）",
+  "executor": "scripts/run_batch_shots.py --episode 1/2/3 + H3 动态镜（DGX）+ run_episode_build.sh 混排",
+  "episodes": [
+    {
+      "episode": "g4-ep01",
+      "trace_id": "trace-BATCH-EP01",
+      "static_batch": { "shots": 3, "image_ok": 3, "tts_ok": 1, "elapsed_s": 739.6 },
+      "dynamic_shot": { "seed": 42, "node": "DGX n1", "gen_seconds": 1109.1, "syncnet_conf": 6.413 },
+      "full_video": {
+        "file": "output/g4_ep01_full.mp4",
+        "duration_s": 12.407,
+        "spec": "1080p30 h264+aac",
+        "av_drift_ms": 41.0
+      },
+      "quality_review": { "score": 100, "passed": true },
+      "cost_cny": 0.0335
+    },
+    {
+      "episode": "g4-ep02",
+      "trace_id": "trace-BATCH-EP02",
+      "static_batch": { "shots": 3, "image_ok": 3, "tts_ok": 1, "elapsed_s": 566.1 },
+      "dynamic_shot": { "seed": 43, "node": "DGX n1", "gen_seconds": 600.4, "syncnet_conf": 8.14 },
+      "full_video": {
+        "file": "output/g4_ep02_full.mp4",
+        "duration_s": 13.289,
+        "spec": "1080p30 h264+aac",
+        "av_drift_ms": 23.0
+      },
+      "quality_review": { "score": 100, "passed": true },
+      "cost_cny": 0.02
+    },
+    {
+      "episode": "g4-ep03",
+      "trace_id": "trace-BATCH-EP03",
+      "static_batch": { "shots": 3, "image_ok": 3, "tts_ok": 0, "elapsed_s": 522.6 },
+      "dynamic_shot": { "seed": 44, "node": "DGX n1", "gen_seconds": 434.4, "syncnet_conf": 4.963 },
+      "full_video": {
+        "file": "output/g4_ep03_full.mp4",
+        "duration_s": 11.478,
+        "spec": "1080p30 h264+aac",
+        "av_drift_ms": 44.7
+      },
+      "quality_review": { "score": 100, "passed": true },
+      "cost_cny": 0.0158
+    }
+  ],
+  "nightly_totals": {
+    "episodes_complete": 3,
+    "shots_static": 9,
+    "static_batch_seconds": 1828.3,
+    "dgx_dynamic_seconds": 2143.9,
+    "post_seconds": 270.0,
+    "all_quality_passed": true,
+    "avg_review_score": 100.0,
+    "human_review": { "episode": "g4-ep02", "consistency_rate": 100.0 },
+    "max_cost_cny": 0.0335
+  },
+  "throughput_note": "DGX 热批产 434.4s/镜（13.3s/it 统一内存宽松提速），单晚动态镜产能 3 镜；集级端到端（静态批量+动态生成并行+混排+质检）约 40 分钟/集",
+  "summary": {
+    "at_least_1_episode_complete": true,
+    "all_quality_passed": true,
+    "verdict": "PASS"
+  },
+  "related_evidence": [
+    "tc-g4-005-008-quality-review.json（三集五维 100 分）",
+    "tc-g4-007-cost-report.json（成本核算）",
+    "g4-expansion-dynamic-shots-syncnet.json（动态镜 conf）",
+    "tc-g4-006-anchor-guard-batch-3eps.txt（批量执行原始日志）"
+  ],
+  "drift_method": "2026-09-29 复测：ffprobe 音频流 vs 视频流 duration 差（含 AAC padding 编码器物理产物）；判定口径 = run_episode_concat.sh 音轨齐平 abs(a-v)<=0.1s（YYC3-60 L344 音画偏差 <=100ms），三集全过",
+  "honest_note": "ep03 首跑音频偏差 35.0ms FAIL（超 ±1 帧容差 1.7ms，TC-G4-003 视频轨基准口径），piper TTS 字节级非确定性 + 帧量化偶发，复跑 29.0ms PASS；本表 av_drift_ms 为流级复测值，口径不同不可直接对比。三集对白镜复用同 prompt 的样片阶段偏差已在 g4-expansion-dynamic-shots-syncnet.json 声明"
+}

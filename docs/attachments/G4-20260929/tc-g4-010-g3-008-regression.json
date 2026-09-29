@@ -1,0 +1,11 @@
+{
+  "tc": "TC-G3-008 提示词工程输出抽检（回归）",
+  "source": "今晚 g4-ep01/02/03 storyboard.v1.json 真实产物",
+  "sampled": 24,
+  "three_elements_ok": 24,
+  "rate": 100.0,
+  "threshold": 90,
+  "hook_distinction_ok": true,
+  "bad_shots": [],
+  "verdict": "PASS"
+}

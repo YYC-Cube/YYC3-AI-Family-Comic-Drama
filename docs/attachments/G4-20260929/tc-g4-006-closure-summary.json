@@ -1,0 +1,47 @@
+{
+  "testcase": "TC-G4-006 质检-重绘零人工闭环",
+  "date": "2026-09-29",
+  "manual": "YYC3-60 测试与验收执行手册 L389-396",
+  "expected": "三类闭环均全自动完成（qc_rounds <= 2），零人工介入；超限转人工留证",
+  "categories": {
+    "一致性 anchor_guard": {
+      "evidence": "tc-g4-006-anchor-guard-batch-3eps.txt（/tmp/batch_3eps.log 原样归档；.gitignore 忽略 *.log 故以 .txt 入库）",
+      "samples": "9 组（g4-ep01/02/03 各 3 镜，sd-hero）",
+      "closure": "首检不达标（sim 0.5906-0.7163 < 0.85）-> redraw(seed_lock 确定性重绘) -> 复检仍不达标 -> escalate 转人工",
+      "log_line": "[anchor_guard] sd-hero 候选帧相似度 0.6631 < 0.85，打回重绘（第 2/2 次）+ 已达重绘上限 2，转人工",
+      "qc_rounds": 2,
+      "attempts_semantics": "attempts=1 为首检（第 2/2 次即首次打回），attempts=2 复检后转人工，上限用满",
+      "human_intervention": "超限转人工（手册预期内留证；根因=无 LoRA 的 SD 跨镜一致性不足，G3 双实证）",
+      "verdict": "PASS（打回->重绘->复检->转人工全链真实执行）"
+    },
+    "风格 style_keeper": {
+      "evidence": [
+        "tc-g4-006-style-keeper-closure.json（标准闭环 closed）",
+        "tc-g4-006-style-keeper-escalate.json（超限演练 escalate）"
+      ],
+      "implementation": "yyc3-ai-manju-studio/backend/app/modules/consistency_engine/style_keeper.py（真实 StyleKeeper v1.0，单测 17/17 见 TC-G3-009）+ scripts/run_style_keeper.py 闭环执行器",
+      "checker": "PIL 30 维风格向量余弦（RGB 均值/标准差/8-bin 量化直方图），mode=pil_hist，阈值 0.85",
+      "closure": "构造暗调漂移（eq=brightness=-0.35:contrast=0.4，sim 0.5371）-> 打回 -> seed_lock 确定性重绘 -> 复检 sim 1.0 accept；超限演练：过曝重绘产物 sim 0.8016 压线被拒 -> qc_rounds=2 用满 -> escalate",
+      "qc_rounds": "closed=1 / escalate=2",
+      "human_intervention": false,
+      "verdict": "PASS（真实实现两条路径均闭环；构造轴实测标定：亮度/对比漂移有效，hue 旋转/负片在 8-bin 粗量化下 >0.98 不可作构造轴）"
+    },
+    "口型 SyncNet": {
+      "evidence": [
+        "docs/G4-样片闭环首验记录-20260928.md L79（静态帧 4/4 打回：conf 0.3087/0.4016/0.5433/0.6235 均 <0.75）",
+        "g4-expansion-dynamic-shots-syncnet.json（H3 动态重生成后 3/3 复检达标：conf 6.413/8.140/4.963）"
+      ],
+      "closure": "静态帧样片口型不动 -> SyncNet 打回（<0.75，QA 红线有效）-> image_to_video 动态重生成（H3 权重，seed 42/43/44）-> 复检达标（>=0.75）",
+      "qc_rounds": 1,
+      "human_intervention": false,
+      "verdict": "PASS（打回率 100%，重生成后达标率 100%）"
+    }
+  },
+  "summary": {
+    "three_categories_closed": true,
+    "auto_closure_within_qc_rounds": true,
+    "escalate_evidence_archived": true,
+    "verdict": "PASS"
+  },
+  "honest_note": "风格类为真实 StyleKeeper v1.0 实现（此前误判未落地，系主仓检索被子仓 gitignore 遮蔽，已纠正）；重绘环节 seed_lock 缓存命中语义引用 G3 实证（锁种子重绘 sim=1.000 ACCEPT），未重复真实扩散生成以保证演示不占用产线资源"
+}

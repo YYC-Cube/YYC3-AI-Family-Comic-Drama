@@ -932,3 +932,48 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 1. **[P1]** h3_common syncnet_score_impl 封装落地（现引用不存在模块 `syncnet_python.syncnet_pipeline`，评分走官方入口直调）+ PerformanceTimer Linux ru_maxrss 单位修复（KB vs 字节）
 2. **[P2]** LoRA 跨种子复测冲 M3 一致性 0.85+（sd-hero-prod 产物已备，n1 可直接注入 ComfyUI/生成链）
 3. **[P2]** TC-G4-006/009/010（Token-Console 真实计量 + NAS 就位）；生产化：动态素材按集定制 prompt（样片阶段三集复用同 prompt 已诚实留证）
+
+---
+
+## 三十、双文件诊断修复 + TC-G4-006/009/010 收割：G4 门禁全量完成（2026-09-29 第二十轮）
+
+### 30.1 双文件诊断修复（用户指令 `#problems` 直派）
+
+| 文件 | 提交 | 要点 |
+| ---- | ---- | ---- |
+| scripts/run_batch_shots.py | main fbff212 | ModuleType 动态属性 setattr + 7 处动态导入 `# type: ignore`，basedpyright 0 error |
+| yyc3-minimax-h3 h3_common.py | h3 59f03e7 | syncnet_score_impl 幻影模块根治：官方 run_pipeline/run_syncnet 入口直调 + 解释器候选链（H3_SYNCNET_PY > ComfyUI venv > mac h3 venv > 当前）+ `--min_track 40 --min_face_size 60` + Linux ru_maxrss KB 分支；**29.5 P1 随此清零** |
+
+- 四轮排障沉淀：manju venv 无 torch → mac h3 venv 缺 cv2 → ComfyUI venv 全齐置首 → 仍 None 终因 **logging 时间戳双冒号**（`split(":", 1)` 切在 `18:53:25,480` 上）→ `rsplit(":", 1)` 修复，冒烟 conf 6.349 与手动链路全同。
+
+### 30.2 TC-G4-006 三类打回零人工闭环（PASS）
+
+| 类别 | 闭环 | 证据 |
+| ---- | ---- | ---- |
+| 一致性 anchor_guard | 9 例：sim 0.59-0.72 → seed_lock 重绘 → escalate（qc_rounds=2 用满转人工留证） | tc-g4-006-anchor-guard-batch-3eps.txt |
+| 风格 style_keeper | **真实 StyleKeeper v1.0 双闭环**：暗调漂移 0.5371 → 打回 → 复检 1.0 accept；超限演练 0.8016 压线被拒 → escalate | tc-g4-006-style-keeper-{closure,escalate}.json |
+| 口型 SyncNet | 静态帧 4/4 打回（0.31-0.62 <0.75）→ H3 动态重生成 → 3/3 复检达标 | 首验记录 L79 + syncnet JSON |
+
+- **重大纠偏（诚实留证）**：style_keeper 曾误判「无实现」——主仓检索被子仓 gitignore 遮蔽；实际 `manju backend/.../style_keeper.py` v1.0 在位（PIL 30 维向量 + 单测 17/17）。教训：**跨子仓搜索必须绕过 gitignore 显式 Glob**。
+- 构造轴标定：亮度/对比漂移有效（0.54/0.80），hue/负片在 8-bin 粗量化下 >0.98 无效——已沉淀至 run_style_keeper.py 注释。
+- 新增 scripts/run_style_keeper.py（真实实现闭环执行器，可复跑）。
+
+### 30.3 TC-G4-009 夜间批量集产能（PASS）
+
+单晚三集完整产出且质检全过（超额达成 ≥1 集）：静态 739.6/566.1/522.6s + DGX 动态 1109.1/600.4/434.4s 并行 → 3 集 1080p30 成片，五维评审 100 分 ×3，成本 0.0158-0.0335 元/集，端到端约 40 分钟/集。详证 tc-g4-009-nightly-batch-stats.json（音画流级差 23.0-44.7ms，≤100ms 齐平口径全过，复测方法如实标注）。
+
+### 30.4 TC-G4-010 G4 回归门禁（PASS，零退化）
+
+17 项回归：G1-004（7/7 原语义，实现零变更）+ G1-005（10/10）+ G2 十用例（7 PASS + 3 PARTIAL 与历史逐字一致 + 0 FAIL）+ G3 五项（001/002 建库比对、003 三态闭环、008 抽检 24 镜三要素 100%、009 单测 17/17）。
+
+- **新发现 OBS-G1-004-1（非退化）**：`is_nas_path('/mnt/nasdir/x')` 误判 True（前缀匹配缺 `/` 边界，normalize 侧正确）——开观察项，下轮 yyc3-0379-world 子仓一行修复 + 补断言。
+
+### 30.5 G4 门禁总账
+
+**TC-G4-001~010 十用例全部 PASS**（001-004 首验+720p 复验、005 五维+人工留证、006 三类闭环、007/008 成本交付、009 夜间批量、010 零退化回归）——YYC3-60 L434 通过标准全满足，002/009 BLOCKED 条款不适用。主文档 v1.1.0（§6.5 对照表），留证 15 份 docs/attachments/G4-20260929/。
+
+### 30.6 下轮起点（TOP 3）
+
+1. **[P1]** OBS-G1-004-1：yyc3-0379-world `is_nas_path` 边界一行修复 + 补断言（G1-004 E2E 亦待网关合流）
+2. **[P1]** LoRA 跨种子复测冲 M3 一致性 0.85+（sd-hero-prod 已备，注入 ComfyUI 生成链 → 静态镜 accept 率验证）
+3. **[P2]** G5 门禁骨架用例补齐（YYC3-60 L436 占位）；生产化双项：动态素材按集定制 prompt + Token-Console 真实计量接入成本链

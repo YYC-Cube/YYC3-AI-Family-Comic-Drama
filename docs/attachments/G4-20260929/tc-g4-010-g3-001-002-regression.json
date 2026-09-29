@@ -1,0 +1,66 @@
+[TC-G3-001 建库输出]
+    PASS hero: dim=512 cos_sim_same=1.000000 mode=insightface
+    PASS villain: dim=512 cos_sim_same=1.000000 mode=insightface
+TC-G3-001 {"2 角色入库": true, "mode=insightface（真实模型）": true, "dim=512": true, "同图二次编码 cos=1.0": true, "feature.npy+manifest.json+index.json 三件齐": true} modes={'hero': 'insightface', 'villain': 'insightface'}
+[TC-G3-002 相似度矩阵]
+    同角色 hero: 库特征 vs 跨镜头shot2: 0.9643
+    同角色 hero: shot1 vs shot2: 0.9643
+    同角色 villain: 库特征 vs 跨镜头shot2: 0.8921
+    同角色 villain: shot1 vs shot2: 0.8921
+    跨角色 A1×B1: 0.0119
+    跨角色 A1×B2: -0.0013
+    跨角色 A2×B1: 0.0095
+    跨角色 A2×B2: 0.0033
+TC-G3-002 {"dim=512×4": true, "4 帧全部真实模型提取（无哈希降级）": true, "同角色跨镜头全部 ≥0.85": true, "跨角色全部 <0.85（区分度）": true} same_min=0.8921 cross_max=0.0119
+
+=== G3 一致性预研汇总：PASS 2 / FAIL 0（共 2）===
+{
+  "summary": {
+    "pass": 2,
+    "fail": 0
+  },
+  "library": "/Users/yanyu/YYC-Cube/YYC3 AI Family-Comic Drama/yyc3-ai-manju-studio/backend/face_library_g3",
+  "matrix": {
+    "hero: 库特征 vs 跨镜头shot2": 0.9643,
+    "hero: shot1 vs shot2": 0.9643,
+    "villain: 库特征 vs 跨镜头shot2": 0.8921,
+    "villain: shot1 vs shot2": 0.8921,
+    "A1×B1": 0.0119,
+    "A1×B2": -0.0013,
+    "A2×B1": 0.0095,
+    "A2×B2": 0.0033
+  },
+  "results": [
+    {
+      "id": "TC-G3-001",
+      "name": "角色特征库建库（512 维）",
+      "status": "PASS",
+      "checks": {
+        "2 角色入库": true,
+        "mode=insightface（真实模型）": true,
+        "dim=512": true,
+        "同图二次编码 cos=1.0": true,
+        "feature.npy+manifest.json+index.json 三件齐": true
+      },
+      "deviations": [
+        "建库逻辑与 build_face_library.py 同一 FaceEncoder 代码路径（脚本本体直跑留证见验收记录）",
+        "素材为 AI 合成人脸/接口人像的本地变换变体（预研用），生产库落 NAS 待硬件"
+      ]
+    },
+    {
+      "id": "TC-G3-002",
+      "name": "跨镜头一致性比对",
+      "status": "PASS",
+      "checks": {
+        "dim=512×4": true,
+        "4 帧全部真实模型提取（无哈希降级）": true,
+        "同角色跨镜头全部 ≥0.85": true,
+        "跨角色全部 <0.85（区分度）": true
+      },
+      "deviations": [
+        "逐帧提取模式留证：['insightface', 'insightface', 'insightface', 'insightface']",
+        "shot2 为同源人脸感知裁剪变体（检测框外扩1.8×/亮度1.12/JPEG88），模拟同角色跨机位；真实多机位素材待 M3 主体阶段补充"
+      ]
+    }
+  ]
+}

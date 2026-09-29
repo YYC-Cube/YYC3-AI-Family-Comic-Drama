@@ -1,0 +1,62 @@
+[建库] {'hero': 'insightface', 'villain': 'insightface'}
+[闭环] attempt1（错人帧）: action=redraw sim=-0.0013
+[闭环] attempt2（同人帧）: action=accept sim=0.9643
+[闭环] 超限（错人帧×2）  : action=escalate attempts=2
+  PASS  hero 锚定成功且 dim=512
+  PASS  锚定前缀生成
+  PASS  未建库角色 BLOCKED
+  PASS  controlnet 约束描述（桩态）
+  PASS  错人帧 similarity<0.5
+  PASS  错人帧被 REDRAW（触发重绘）
+  PASS  同人帧 similarity≥0.85
+  PASS  同人帧被 ACCEPT
+  PASS  重绘上限 MAX_ATTEMPTS=2
+  PASS  超限转人工 ESCALATE
+  PASS  全程真实模型特征（无哈希降级）
+
+=== TC-G3-003 三段锚定联调：PASS（11/11）===
+{
+  "tc": "TC-G3-003",
+  "status": "PASS",
+  "checks": {
+    "hero 锚定成功且 dim=512": true,
+    "锚定前缀生成": true,
+    "未建库角色 BLOCKED": true,
+    "controlnet 约束描述（桩态）": true,
+    "错人帧 similarity<0.5": true,
+    "错人帧被 REDRAW（触发重绘）": true,
+    "同人帧 similarity≥0.85": true,
+    "同人帧被 ACCEPT": true,
+    "重绘上限 MAX_ATTEMPTS=2": true,
+    "超限转人工 ESCALATE": true,
+    "全程真实模型特征（无哈希降级）": true
+  },
+  "evidence": {
+    "attempt1": {
+      "passed": false,
+      "action": "redraw",
+      "similarity": -0.0013,
+      "attempts": 1,
+      "threshold": 0.85,
+      "mode": "insightface",
+      "reason": "一致性低于阈值，携带锚定前缀重绘"
+    },
+    "attempt2": {
+      "passed": true,
+      "action": "accept",
+      "similarity": 0.9643,
+      "attempts": 2,
+      "threshold": 0.85,
+      "mode": "insightface"
+    },
+    "escalate": {
+      "passed": false,
+      "action": "escalate",
+      "similarity": -0.0013,
+      "attempts": 2,
+      "threshold": 0.85,
+      "mode": "insightface",
+      "reason": "重绘上限已满，转人工介入"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+[style_keeper] 项目 proj-a 候选帧风格相似度 0.2082 < 0.85，打回重绘（第 1/2 次）
+[style_keeper] 项目 proj-a 已达重绘上限 2，转人工
+[1] 确定性派生
+  PASS  seed 一致
+  PASS  LUT 一致
+  PASS  笔触一致
+  PASS  派生标识
+[2] 跨项目隔离
+  PASS  种子不同
+  PASS  LUT 不同
+[3] 持久化防漂移
+  PASS  manifest 存在
+  PASS  读缓存相等
+[4] 风格注入
+  PASS  前缀含风格锚定
+  PASS  前缀含种子
+  PASS  原 prompt 保留
+[5] 参数核验（TC-G3-009 主判定）
+  PASS  3 镜头一致 PASS
+  PASS  漂移检出
+[6] 图像级三态闭环
+  PASS  同分布 accept
+  PASS  异分布 redraw
+  PASS  超限 escalate
+  PASS  文件缺失 blocked
+
+结果：17 PASS / 0 FAIL

@@ -1,0 +1,58 @@
+{
+  "testcase": "TC-G4-006 质检-重绘零人工闭环（风格类）",
+  "executor": "run_style_keeper.py（真实 StyleKeeper v1.0 闭环执行）",
+  "implementation": "yyc3-ai-manju-studio/backend/app/modules/consistency_engine/style_keeper.py",
+  "checker": "PIL 30 维风格向量余弦（RGB 均值/标准差/量化直方图），mode=pil_hist",
+  "threshold": 0.85,
+  "max_attempts": 2,
+  "project_id": "g4-ep01",
+  "anchor": "/tmp/yyc3_projects/g4-ep01/images/shot-ep01-003.png",
+  "style_profile": {
+    "project_id": "g4-ep01",
+    "version": "v1",
+    "derived": "sha256-deterministic",
+    "seed": 1317118405,
+    "lut": {
+      "color_temp_k": 3611.8,
+      "tint": 0.43,
+      "contrast": 1.008,
+      "saturation": 0.821,
+      "shadow_lift": 0.125,
+      "highlight_gain": 1.013
+    },
+    "brush": {
+      "line_weight": 0.976,
+      "coloring": "cel",
+      "texture_intensity": 0.263,
+      "edge_style": "sharp"
+    }
+  },
+  "closure": [
+    {
+      "round": 1,
+      "candidate": "/tmp/style_keeper_demo/candidate_r1_dark.png",
+      "construction": "ffmpeg eq=brightness=-0.35:contrast=0.4（构造暗调风格漂移产物）",
+      "passed": false,
+      "action": "redraw",
+      "similarity": 0.5371,
+      "attempts": 1,
+      "threshold": 0.85,
+      "mode": "pil_hist",
+      "reason": "风格低于阈值，携带风格锚定前缀重绘"
+    },
+    {
+      "round": 2,
+      "candidate": "/tmp/style_keeper_demo/candidate_r2_seedlock.png",
+      "construction": "seed_lock 确定性重绘（同 prompt+seed 复绘，同参缓存命中，G3 实证策略）",
+      "passed": true,
+      "action": "accept",
+      "similarity": 1.0,
+      "attempts": 2,
+      "threshold": 0.85,
+      "mode": "pil_hist"
+    }
+  ],
+  "verdict": "closed",
+  "qc_rounds": 1,
+  "human_intervention": false
+}

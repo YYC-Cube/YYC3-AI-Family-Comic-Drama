@@ -1,0 +1,59 @@
+{
+  "testcase": "TC-G4-010 G4 回归门禁（启动前置）",
+  "date": "2026-09-29",
+  "manual": "YYC3-60 测试与验收执行手册 L425-432",
+  "expected": "回归集全 PASS（零退化）；任一退化先开缺陷单修复后重跑",
+  "regression_set": {
+    "G1": [
+      {
+        "id": "TC-G1-004 路径归一",
+        "result": "PASS（无退化）",
+        "evidence": "实现零变更（app/api/middleware/path_normalize.py 无本轮提交）；验收明文 5 case + 扩展 2 case = 7/7 原语义全过（/Volumes/nas 别名归一/标准路径原样/相对路径拼接/None 兜底/非 NAS 不篡改）",
+        "status_baseline": "PARTIAL PASS（E2E 待网关合流，维持历史结论）"
+      },
+      {
+        "id": "TC-G1-005 鉴权逻辑",
+        "result": "PASS 10/10",
+        "evidence": "yyc3-0379-world/tests/test_g1_005_auth_logic.py 直跑：hash 确定性/verify 命中与未命中/skip 路径/admin 隔离/看板壳特例/JWT 生成校验全过",
+        "status_baseline": "PASS（偏差留证：错误密钥 403 语义，YYC3-60 v1.1 已修订）"
+      }
+    ],
+    "G2": [
+      {"id": "TC-G2-001", "result": "PASS"},
+      {"id": "TC-G2-002", "result": "PASS"},
+      {"id": "TC-G2-003", "result": "PASS"},
+      {"id": "TC-G2-004", "result": "PASS"},
+      {"id": "TC-G2-005", "result": "PASS"},
+      {"id": "TC-G2-006", "result": "PASS"},
+      {"id": "TC-G2-007", "result": "PASS"},
+      {"id": "TC-G2-008", "result": "PARTIAL", "note": "与历史一致：结构面 11/11 全过，LLM 原始输出契约待 M2 P1-1 接线（偏差留证非退化）"},
+      {"id": "TC-G2-009", "result": "PARTIAL", "note": "与历史一致：编排面透传通过，A2A 事件流待 Redis/NAS"},
+      {"id": "TC-G2-010", "result": "PARTIAL", "note": "与历史一致：计时链路可用，并行收益判定需真实 LLM"}
+    ],
+    "G3": [
+      {"id": "TC-G3-001 角色特征库建库", "result": "PASS", "evidence": "tc-g4-010-g3-001-002-regression.json（mode=insightface，dim=512，同图二次编码 cos=1.0）"},
+      {"id": "TC-G3-002 跨镜头一致性比对", "result": "PASS", "evidence": "同上（同角色 >=0.85 / 跨角色区分度达标）"},
+      {"id": "TC-G3-003 一致性打回闭环", "result": "PASS", "evidence": "tc-g4-010-g3-003-regression.json（三段锚定联调：accept/redraw/escalate 三态正确，escalate similarity -0.0013 超限转人工，mode=insightface）"},
+      {"id": "TC-G3-008 提示词抽检", "result": "PASS", "evidence": "tc-g4-010-g3-008-regression.json（今晚三集 storyboard 真实产物抽检 24 镜：三要素 100% >=90%，钩子镜头标记可区分性全对）"},
+      {"id": "TC-G3-009 风格一致性管控", "result": "PASS", "evidence": "tc-g4-010-g3-009-regression.txt（style_keeper 单测 17 PASS / 0 FAIL）"}
+    ]
+  },
+  "summary": {"pass": 14, "partial_consistent_with_baseline": 3, "fail": 0, "regression": "零退化"},
+  "new_observations": [
+    {
+      "id": "OBS-G1-004-1（非退化·新发现）",
+      "finding": "is_nas_path('/mnt/nasdir/x') 误判 True：normalize_nas_path 用 startswith('/mnt/nas/')（带斜杠，正确），而 is_nas_path 用 startswith('/mnt/nas')（无斜杠边界缺失）",
+      "impact": "仅判定函数，不改写路径；/mnt/nasdir 类同名前缀路径会被误认为 NAS 路径",
+      "suggestion": "is_nas_path 改为 cleaned == NAS_STANDARD_ROOT or startswith(NAS_STANDARD_ROOT + '/') 同款边界（一行修复）",
+      "disposition": "本轮不动 yyc3-0379-world 子仓（超本轮范围），建议下轮修复并补断言；不影响 G4 回归判定"
+    }
+  ],
+  "evidence_files": [
+    "tc-g4-010-g2-regression.json（G2 十用例完整输出）",
+    "tc-g4-010-g3-001-002-regression.json",
+    "tc-g4-010-g3-003-regression.json",
+    "tc-g4-010-g3-008-regression.json",
+    "tc-g4-010-g3-009-regression.txt"
+  ],
+  "verdict": "PASS（回归集全 PASS，3 项 PARTIAL 与历史基线逐字一致，零退化）"
+}

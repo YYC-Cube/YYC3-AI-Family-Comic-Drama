@@ -1,0 +1,39 @@
+/Users/yanyu/YYC-Cube/YYC3 AI Family-Comic Drama/yyc3-ai-manju-studio/.venv/lib/python3.14/site-packages/insightface/utils/face_align.py:23: FutureWarning: `estimate` is deprecated since version 0.26 and will be removed in version 2.2. Please use `SimilarityTransform.from_estimate` class constructor instead.
+  tform.estimate(lmk, dst)
+[anchor_guard] sd-hero 候选帧相似度 0.6631 < 0.85，打回重绘（第 2/2 次）
+[anchor_guard] sd-hero 已达重绘上限 2，转人工
+[anchor_guard] sd-hero 候选帧相似度 0.7071 < 0.85，打回重绘（第 2/2 次）
+[anchor_guard] sd-hero 已达重绘上限 2，转人工
+[anchor_guard] sd-hero 候选帧相似度 0.6708 < 0.85，打回重绘（第 2/2 次）
+[anchor_guard] sd-hero 已达重绘上限 2，转人工
+[batch] g4-ep01 ep1: 章节=- 镜头池=80 trace=trace-BATCH-EP01
+[batch] shot-ep01-001: gen=ok sim=0.6799 action=escalate tts=-
+[batch] shot-ep01-002: gen=ok sim=0.7119 action=escalate tts=-
+[batch] shot-ep01-003: gen=ok sim=0.6583 action=escalate tts=ok
+{"summary": {"shots": 3, "accepted": 0, "elapsed_s": 739.6, "comfy": true, "tts": true}}
+/Users/yanyu/YYC-Cube/YYC3 AI Family-Comic Drama/yyc3-ai-manju-studio/.venv/lib/python3.14/site-packages/insightface/utils/face_align.py:23: FutureWarning: `estimate` is deprecated since version 0.26 and will be removed in version 2.2. Please use `SimilarityTransform.from_estimate` class constructor instead.
+  tform.estimate(lmk, dst)
+[anchor_guard] sd-hero 候选帧相似度 0.7141 < 0.85，打回重绘（第 2/2 次）
+[anchor_guard] sd-hero 已达重绘上限 2，转人工
+[anchor_guard] sd-hero 候选帧相似度 0.7163 < 0.85，打回重绘（第 2/2 次）
+[anchor_guard] sd-hero 已达重绘上限 2，转人工
+[anchor_guard] sd-hero 候选帧相似度 0.6438 < 0.85，打回重绘（第 2/2 次）
+[anchor_guard] sd-hero 已达重绘上限 2，转人工
+[batch] g4-ep02 ep2: 章节=- 镜头池=80 trace=trace-BATCH-EP02
+[batch] shot-ep02-001: gen=ok sim=0.6185 action=escalate tts=-
+[batch] shot-ep02-002: gen=ok sim=0.5906 action=escalate tts=-
+[batch] shot-ep02-003: gen=ok sim=0.6609 action=escalate tts=ok
+{"summary": {"shots": 3, "accepted": 0, "elapsed_s": 566.1, "comfy": true, "tts": true}}
+/Users/yanyu/YYC-Cube/YYC3 AI Family-Comic Drama/yyc3-ai-manju-studio/.venv/lib/python3.14/site-packages/insightface/utils/face_align.py:23: FutureWarning: `estimate` is deprecated since version 0.26 and will be removed in version 2.2. Please use `SimilarityTransform.from_estimate` class constructor instead.
+  tform.estimate(lmk, dst)
+[anchor_guard] sd-hero 候选帧相似度 0.6618 < 0.85，打回重绘（第 2/2 次）
+[anchor_guard] sd-hero 已达重绘上限 2，转人工
+[anchor_guard] sd-hero 候选帧相似度 0.6586 < 0.85，打回重绘（第 2/2 次）
+[anchor_guard] sd-hero 已达重绘上限 2，转人工
+[anchor_guard] sd-hero 候选帧相似度 0.6695 < 0.85，打回重绘（第 2/2 次）
+[anchor_guard] sd-hero 已达重绘上限 2，转人工
+[batch] g4-ep03 ep3: 章节=- 镜头池=80 trace=trace-BATCH-EP03
+[batch] shot-ep03-001: gen=ok sim=0.6814 action=escalate tts=-
+[batch] shot-ep03-002: gen=ok sim=0.6839 action=escalate tts=-
+[batch] shot-ep03-003: gen=ok sim=0.6525 action=escalate tts=-
+{"summary": {"shots": 3, "accepted": 0, "elapsed_s": 522.6, "comfy": true, "tts": true}}
