@@ -977,3 +977,33 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 1. **[P1]** OBS-G1-004-1：yyc3-0379-world `is_nas_path` 边界一行修复 + 补断言（G1-004 E2E 亦待网关合流）
 2. **[P1]** LoRA 跨种子复测冲 M3 一致性 0.85+（sd-hero-prod 已备，注入 ComfyUI 生成链 → 静态镜 accept 率验证）
 3. **[P2]** G5 门禁骨架用例补齐（YYC3-60 L436 占位）；生产化双项：动态素材按集定制 prompt + Token-Console 真实计量接入成本链
+
+## 三十一、双执行器诊断清零 + OBS-G1-004-1 修复 + LoRA 跨种子复测（2026-09-29 第二十一轮）
+
+### 31.1 双执行器诊断清零（IDE #problems 归零）
+
+- `run_style_keeper.py`「无法解析导入 app.modules...」：跨仓运行时 sys.path 注入静态不可达，补 `# pyright: ignore[reportMissingImports]` 行内豁免（头部注释注明非掩盖缺陷）；诊断清零，冒烟 verdict=closed PASS
+- `run_kohya_lora.py`：修 `import os` 缺失（eval 首跑 NameError）+ PIL `Image.LANCZOS/FLIP_LEFT_RIGHT` 改 9.1+ 正规枚举（`Resampling.LANCZOS`/`Transpose.FLIP_LEFT_RIGHT`，venv 12.3.0 实证）+ 跨 venv 导入同模式豁免；新增 combo 模式（LoRA + IPAdapter 组合评测器）
+
+### 31.2 OBS-G1-004-1 修复（yyc3-0379-world，P1 清零）
+
+`is_nas_path` 前缀边界修复 v1.0.0→v1.0.1：判定口径与 normalize 侧对齐（根本身或 `root + "/"` 前缀）。新建 `tests/test_g1_004_path_normalize.py` 19/19 PASS（含 `/mnt/nasdir/x`、`/mnt/nasx`、`/Volumes/nasdir/x` 三个边界回归锚），G1-005 回归 10/10 无连带破坏。
+
+### 31.3 LoRA 跨种子复测（TOP 2 执行，0.85 未达成——诚实留证）
+
+sd-hero-prod 五件产物自 n1 取回，4 漂移种子 insightface 余弦同 G3 口径：
+
+| 路线 | mean | 结论 |
+| ---- | ---- | ---- |
+| 无锚定基线 | 0.5157 | 行业返工率根因 |
+| **LoRA step2000（四检查点扫描最优）** | **0.6441** | **+25% vs 无锚定**，min 0.4834 |
+| LoRA+IPA diffusers 整图 scale=0.6 | 0.5443 | 组合无增益 |
+| LoRA+IPA diffusers 整图 scale=1.0 | 0.1964 | 满强度画面崩坏（seed888 脸检测降级） |
+
+科学结论：①LoRA 方向有效但 4 张变换族训练集是泛化瓶颈（0.52→0.64，距 0.85 差 0.21）；②diffusers 整图路线与漂移提示词语义冲突单调恶化，历史 0.670 系 ComfyUI PLUS FACE 脸区域嵌入、不可直接归因对比；③**0.85+ 路径收敛：训练集扩充（多视角/多光照/多表情）+ PLUS FACE 工作流组合**；④M3 生产现行 seed-lock 策略（sim=1.0）不变，锚定增强不阻塞生产链。详证 tc-m3-lora-crosseed-eval.json，主文档 v1.2.0 §9。
+
+### 31.4 下轮起点（TOP 3）
+
+1. **[P1]** LoRA 二轮冲刺前置：训练集扩充至 12-16 张（多视角/多光照/多表情，可 diffusers 变换 + 生产镜帧筛选）→ kohya 重训 → PLUS FACE 工作流组合复测
+2. **[P2]** G5 门禁骨架用例补齐（YYC3-60 L436 占位）；生产化双项（动态 prompt 定制 + Token-Console 计量）
+3. **[P2]** G1-004 E2E（网关实际请求）待网关合流；三仓提交后按需 push

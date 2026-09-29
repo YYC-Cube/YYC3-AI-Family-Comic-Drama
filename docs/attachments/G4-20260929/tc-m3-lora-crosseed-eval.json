@@ -1,0 +1,42 @@
+{
+  "testcase": "M3 一致性 LoRA 跨种子复测（HANDOFF TOP 2：冲 0.85+）",
+  "date": "2026-09-29",
+  "executor": "scripts/run_kohya_lora.py eval/combo（ComfyUI venv，MPS，DreamShaper 8 + 20 步采样）",
+  "lora_source": "yyc3-n1:/home/yyc3/models/yyc3h3/lora/sd-hero-prod*.safetensors（kohya 正式训练 rank32/alpha16，2000 步 loss 0.0107）",
+  "protocol": "4 漂移种子（777/888/999/1111）× 漂移提示词（smiling/night lantern/different angle）→ insightface 512 维余弦 vs hero_base.png；目标 min ≥ 0.85",
+  "loRA_checkpoint_sweep": {
+    "step0500": {"mean": 0.5717, "min": 0.4799, "max": 0.6223},
+    "step1000": {"mean": 0.5455, "min": 0.4526, "max": 0.624},
+    "step1500": {"mean": 0.5682, "min": 0.5166, "max": 0.5987},
+    "step2000": {"mean": 0.6441, "min": 0.4834, "max": 0.708,
+                 "rows": [{"seed": 777, "sim": 0.4834}, {"seed": 888, "sim": 0.6863},
+                          {"seed": 999, "sim": 0.708}, {"seed": 1111, "sim": 0.6987}]}
+  },
+  "combo_lora_plus_ipadapter": {
+    "note": "diffusers 管线 load_ip_adapter(ip-adapter-plus-face_sd15) + hero_base 整图注入，scale 扫描两轮",
+    "scale_0.6": {"mean": 0.5443, "min": 0.4566, "max": 0.6723,
+                  "rows": [{"seed": 777, "sim": 0.5692}, {"seed": 888, "sim": 0.4566},
+                           {"seed": 999, "sim": 0.479}, {"seed": 1111, "sim": 0.6723}]},
+    "scale_1.0": {"mean": 0.1964, "min": -0.0041, "max": 0.4587,
+                  "rows": [{"seed": 777, "sim": 0.1109}, {"seed": 888, "sim": -0.0041, "mode": "degraded"},
+                           {"seed": 999, "sim": 0.2201}, {"seed": 1111, "sim": 0.4587}],
+                  "note": "满强度整图注入画面崩坏（seed888 脸检测降级）"}
+  },
+  "baselines": {
+    "no_anchor_mean": 0.5157,
+    "ipadapter_only_comfyui_plusface_mean": 0.67,
+    "lora_only_best_mean": 0.6441
+  },
+  "verdict": "0.85 未达成（target_ge_0.85=false，诚实留证不强行判 PASS）",
+  "findings": [
+    "LoRA 训练方向有效：无锚定 0.5157 → LoRA 0.6441（+25%），四检查点扫描 step2000 最优（非单调，1000 最差）",
+    "diffusers 整图路线 IPAdapter 与漂移提示词语义冲突：scale 0.6→0.5443、1.0→0.1964 单调恶化，组合无增益；历史 0.670 基线来自 ComfyUI PLUS FACE 工作流（脸区域嵌入，实现差异大，不可直接对比归因）",
+    "0.85+ 路径收敛于：训练数据集扩充（当前仅 4 张变换族图，多视角/多光照/多表情为必要条件）+ ComfyUI PLUS FACE 工作流组合验证",
+    "M3 生产现行策略不变：seed-lock 确定性重绘 sim=1.0（G3 实证），锚定增强属产能增强路径，不阻塞生产链"
+  ],
+  "artifacts": [
+    "tc-m3-lora-crosseed-eval.json（本汇总）",
+    "/tmp/kohya_out/kohya_eval_s{0500,1000,1500}.json + /tmp/lora_eval_prod.log（s2000）",
+    "/tmp/kohya_out/combo_eval_scale{060,100}.json"
+  ]
+}

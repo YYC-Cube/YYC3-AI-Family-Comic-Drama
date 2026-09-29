@@ -9,6 +9,8 @@
 # 运行（PIL+numpy 依赖，manju venv 与生产链同环境）：
 #   yyc3-ai-manju-studio/.venv/bin/python scripts/run_style_keeper.py \
 #     --out docs/attachments/G4-20260929/tc-g4-006-style-keeper-closure.json
+# 说明：目标模块位于 manju 子仓 backend（运行时 sys.path 注入，
+#   主仓静态解析不可达——pyright 行内豁免，非掩盖真实缺陷）
 # ==============================================================
 import argparse
 import json
@@ -22,7 +24,7 @@ REPO = Path(__file__).resolve().parents[1]
 MANJU = REPO / "yyc3-ai-manju-studio"
 sys.path.insert(0, str(MANJU / "backend"))
 
-from app.modules.consistency_engine.style_keeper import (  # noqa: E402
+from app.modules.consistency_engine.style_keeper import (  # noqa: E402 # pyright: ignore[reportMissingImports]
     MAX_ATTEMPTS, STYLE_SIM_THRESHOLD, StyleKeeper)
 
 logging.basicConfig(level=logging.WARNING,
