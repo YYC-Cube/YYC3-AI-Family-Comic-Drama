@@ -1007,3 +1007,28 @@ sd-hero-prod 五件产物自 n1 取回，4 漂移种子 insightface 余弦同 G3
 1. **[P1]** LoRA 二轮冲刺前置：训练集扩充至 12-16 张（多视角/多光照/多表情，可 diffusers 变换 + 生产镜帧筛选）→ kohya 重训 → PLUS FACE 工作流组合复测
 2. **[P2]** G5 门禁骨架用例补齐（YYC3-60 L436 占位）；生产化双项（动态 prompt 定制 + Token-Console 计量）
 3. **[P2]** G1-004 E2E（网关实际请求）待网关合流；三仓提交后按需 push
+
+## 三十二、M3 二轮冲刺：数据集扩充 + kohya 重训 + 组合权重寻优（2026-09-29 第二十二轮，31.4 P1 执行）
+
+### 32.1 数据集扩充（4 → 19 图三源混合）
+
+首轮配方自 safetensors 元数据完整恢复（ss_network_dim=32/alpha=16、lr 5e-4 constant、AdamW、bf16、512 bucket、keep_tokens 1）原样复用，数据集扩充三源：hero_base+首轮变换族 5、新增变换（亮度±/饱和度±/上下裁剪）5、H3 动态镜抽帧 9（output_batch9001/9003 g4t2_ref 真实生产帧，insightface 质检 19/19 有脸）。19 图 × 10 repeats，2000 步 ≈ 10.5 epoch。执行器 run_lora_dataset_v2.py。
+
+### 32.2 n1 二轮重训
+
+2000 步 24:19（1.37it/s），avr_loss 0.104 → 0.0372，五件产物 sd-hero-v2*。排障：首跑缺 `--resolution` 即败（AssertionError），补 512,512 成功。
+
+### 32.3 评测（LoRA-only + 组合权重扫描）
+
+- LoRA-only 四检查点：step2000 最优 **mean 0.6726**（一轮 0.6441 +4.4%），下限抬升至 0.5525
+- 组合六轮权重扫描（ComfyUI 工作流 LoraLoader + PLUS FACE 脸区域嵌入，run_lora_plusface_combo.py）：**峰值 w=0.15 mean 0.8669**（0.08→0.857 回落确认峰值；0.85→0.6084 负交互区）
+- **双口径诚实结论**：mean 口径 0.85 达成（0.5157→0.8669，+68%；3/4 种子 ≥0.885，anchor_guard 拒绝率 4/4→1/4）；生产 min 口径未达（seed777 拖尾 0.778，不强行判 PASS）
+- **一轮「组合无增益」结论推翻**：系未做权重扫描所致——IPAdapter 权重是第一杠杆，历史默认 0.85 恰为负交互区，最优 0.15，增益窗口 0.08-0.25
+
+详证 tc-m3-lora-v2-sweep.json + tc-m3-lora-v2-train.log.txt，主文档 v1.3.0 §11。
+
+### 32.4 下轮起点（TOP 3）
+
+1. **[P1]** LoRA min 口径冲刺：训练集补 777 类姿态样本（777 全权重域最低，生成姿态偏离训练分布）/ text_encoder 单独训 / rank 32→64，冲 anchor_guard 全种子过闸
+2. **[P2]** combo(w=0.15) 接入 run_batch_shots.py 生成链（替换纯 seed-lock 主策略，seed-lock 保底），实测集产能与拒绝率
+3. **[P2]** G5 门禁骨架用例补齐；生产化双项（动态 prompt 定制 + Token-Console 计量）；G1-004 E2E 待网关合流

@@ -1,0 +1,64 @@
+{
+  "testcase": "M3 一致性 LoRA 二轮冲刺（训练集扩充 + kohya 重训 + PLUS FACE 组合权重扫描）",
+  "date": "2026-09-29",
+  "executor": "scripts/run_lora_dataset_v2.py（数据集）+ n1 kohya train_network.py（重训）+ scripts/run_kohya_lora.py eval（LoRA-only）+ scripts/run_lora_plusface_combo.py（组合权重扫描）",
+  "protocol": "4 漂移种子（777/888/999/1111）× 漂移提示词 → insightface 512 维余弦 vs hero_base.png；目标口径 min ≥ 0.85（anchor_guard 生产判定），mean ≥ 0.85 为均值口径",
+  "dataset_v2": {
+    "images": 19,
+    "sources": "hero_base + 首轮 4 变换（orig/flip/warm/cool）+ 新增 6 变换（亮度±/饱和度±/上下裁剪视角）+ H3 动态镜抽帧 9 张（output_batch9001/9003 g4t2_ref 真实生产帧）",
+    "qc": "insightface 全量质检 19/19 有脸（变换族 sim 0.93-0.99 保真，H3 帧 0.53-0.72 真实多姿态）",
+    "steps": "19 图 × 10 repeats = 190 步/epoch，2000 步 ≈ 10.5 epoch（首轮 5 图 40 epoch）"
+  },
+  "training": {
+    "recipe": "首轮配方自 safetensors 元数据完整恢复并复用：networks.lora dim32/alpha16，lr 5e-4 constant，AdamW，bf16，512 bucket no_upscale（256-1024），keep_tokens 1，gradient_checkpointing",
+    "hardware": "yyc3-n1 DGX Spark（GPU 空闲窗口）",
+    "result": "2000 步 24:19（1.37it/s），avr_loss 0.104 → 0.0372，五件产物 sd-hero-v2*（save_every 500）",
+    "incidents": "首跑缺 --resolution 参数立即失败（AssertionError），补 512,512 重启成功——已沉淀至命令重建记录"
+  },
+  "lora_only_sweep": {
+    "step0500": {"mean": 0.3843, "min": 0.0809, "max": 0.5998},
+    "step1000": {"mean": 0.6231, "min": 0.4612, "max": 0.7372},
+    "step1500": {"mean": 0.578, "min": 0.4778, "max": 0.6385},
+    "step2000": {"mean": 0.6726, "min": 0.5525, "max": 0.7854,
+                 "rows": [{"seed": 777, "sim": 0.6056}, {"seed": 888, "sim": 0.7469},
+                          {"seed": 999, "sim": 0.5525}, {"seed": 1111, "sim": 0.7854}]},
+    "vs_round1_best": "0.6441 → 0.6726（+4.4%），下限 0.4834 → 0.5525 抬升；扩充方向有效但 LoRA-only 增益递减"
+  },
+  "combo_weight_sweep": {
+    "route": "ComfyUI 工作流（LoraLoader + IPAdapterUnifiedLoader PLUS FACE 脸区域嵌入 + IPAdapter weight 注入），与历史 0.670 基线同路线；25 步 euler/normal/cfg7/512 与 run_ipadapter_identity 同口径",
+    "w008": {"mean": 0.857, "min": 0.7561, "max": 0.9052},
+    "w015_peak": {"mean": 0.8669, "min": 0.778, "max": 0.9103,
+                  "rows": [{"seed": 777, "sim": 0.778}, {"seed": 888, "sim": 0.8852},
+                           {"seed": 999, "sim": 0.8943}, {"seed": 1111, "sim": 0.9103}]},
+    "w025": {"mean": 0.8239, "min": 0.6459, "max": 0.8966},
+    "w035": {"mean": 0.8125, "min": 0.6593, "max": 0.8735},
+    "w050": {"mean": 0.7541, "min": 0.5996, "max": 0.8229},
+    "w085": {"mean": 0.6084, "min": 0.493, "max": 0.6805},
+    "peak": "w=0.15（0.08 回落至 0.857 确认峰值）；权重敏感性极强：0.85→0.6084 vs 0.15→0.8669（历史默认 0.85 恰为负交互区）"
+  },
+  "baselines": {
+    "no_anchor_mean": 0.5157,
+    "round1_lora_only_best": 0.6441,
+    "round1_diffusers_combo_best": "无增益（0.5443@0.6，整图路线语义冲突）",
+    "ipadapter_only_plusface": 0.67
+  },
+  "verdict": {
+    "mean_ge_085": true,
+    "mean": 0.8669,
+    "min_ge_085": false,
+    "min": 0.778,
+    "honest_note": "均值口径 0.85 达成（0.5157 → 0.8669，+68%）；生产 min 口径（anchor_guard 单图判定）未达：seed777 拖尾 0.778，其余 3 种子全 ≥0.885。不强行判 PASS，如实双口径报告。"
+  },
+  "findings": [
+    "训练集扩充方向二轮继续有效：LoRA-only +4.4%、组合后 +34%（0.6441→0.8669），增益主要来自组合权重寻优",
+    "IPAdapter 权重是第一杠杆：历史默认 0.85 恰为负交互区（0.6084），最优 0.15（0.8669）；一轮『组合无增益』结论系未做权重扫描所致，本轮推翻——组合增益存在但窗口窄（0.08-0.25）",
+    "seed777 系顽固拖尾（全权重域最低，LoRA-only 亦最低 0.6056）：该种子生成姿态偏离训练分布，min 口径达标的针对性路径 = 训练集补 777 类姿态样本 / text_encoder 单独训 / rank 提升",
+    "M3 生产意义：combo(w=0.15) 下 3/4 漂移种子过 anchor_guard 闸（≥0.85），refusal 率从 4/4 降至 1/4；seed-lock 策略仍为保底"
+  ],
+  "artifacts": [
+    "tc-m3-lora-v2-sweep.json（本汇总）",
+    "tc-m3-lora-v2-train.log.txt（n1 训练日志原样归档）",
+    "/tmp/kohya_out/kohya_eval_v2_s{0500,1000,1500,2000}.json（LoRA-only）",
+    "/tmp/kohya_out/combo_v2_w{008,015,025,035,050,085}.json（组合权重扫描）"
+  ]
+}
