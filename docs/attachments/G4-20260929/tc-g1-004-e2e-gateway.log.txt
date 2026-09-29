@@ -1,0 +1,280 @@
+INFO:     Loading environment from '../.env'
+INFO:     Started server process [96949]
+INFO:     Waiting for application startup.
+INFO:app.main:以下 API Key 未配置（按需忽略）: ZHIPU_API_KEY, DEEPSEEK_API_KEY, OPENAI_API_KEY
+INFO:app.main:配置校验通过，服务启动正常
+WARNING:app.services.pricing:task_prices 表加载失败（用内存默认表）: Multiple exceptions: [Errno 61] Connect call failed ('::1', 5432, 0, 0), [Errno 61] Connect call failed ('127.0.0.1', 5432)
+INFO:app.services.virtual_key_manager:虚拟密钥记账管道已启动（批量落库 spend_logs）
+INFO:app.api.agent:[agent-worker] 内置 Worker 已启动（lease 30min）
+INFO:app.services.a2a_protocol:[a2a] 内置编队注册/心跳循环已启动（周期 30s）
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8010 (Press CTRL+C to quit)
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.middleware.rate_limit:Redis 不可用，限流降级为内存模式
+INFO:     127.0.0.1:55658 - "GET /healthz HTTP/1.1" 200 OK
+INFO:app.middleware.path_normalize:[path_normalize] nas_output_path: '/Volumes/nas/projects/_g1_probe/tc-g1-004-e2e.txt' -> '/mnt/nas/projects/_g1_probe/tc-g1-004-e2e.txt'
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+ERROR:app.cache:Cache get error: invalid username-password pair or user is disabled.
+WARNING:app.api.chat:上游 stub-llm 地址失败 http://127.0.0.1:25290: All connection attempts failed（0.0s）
+INFO:httpx:HTTP Request: POST http://localhost:11434/v1/chat/completions "HTTP/1.1 404 Not Found"
+WARNING:app.api.chat:上游 ollama-local 地址失败 http://localhost:11434: Client error '404 Not Found' for url 'http://localhost:11434/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404（0.0s）
+ERROR:app.errors.handler:{'error_type': 'network', 'error_message': "上游降级链全部失败: stub-llm: http://127.0.0.1:25290: All connection attempts failed; ollama-local: http://localhost:11434: Client error '404 Not Found' for url 'http://localhost:11434/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404", 'error_class': 'RuntimeError', 'context': {'model': 'stub-chat-1', 'backend': 'upstream:stub-llm', 'operation': 'backend_request'}}
+Traceback (most recent call last):
+  File "/Users/yanyu/YYC-Cube/YYC3 AI Family-Comic Drama/yyc3-0379-world/core/app/api/chat.py", line 434, in _handle_sync
+    response = await backend.chat_completion(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "/Users/yanyu/YYC-Cube/YYC3 AI Family-Comic Drama/yyc3-0379-world/core/app/api/chat.py", line 144, in chat_completion
+    raise RuntimeError(f"上游降级链全部失败: {'; '.join(errors)}")
+RuntimeError: 上游降级链全部失败: stub-llm: http://127.0.0.1:25290: All connection attempts failed; ollama-local: http://localhost:11434: Client error '404 Not Found' for url 'http://localhost:11434/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404
+INFO:     127.0.0.1:55711 - "POST /v1/chat/completions HTTP/1.1" 502 Bad Gateway
+WARNING:app.middleware.path_normalize:[path_normalize] 非 NAS 路径，原样保留：'/mnt/nasdir/x/t.txt'
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+ERROR:app.cache:Cache get error: invalid username-password pair or user is disabled.
+WARNING:app.api.chat:上游 stub-llm 地址失败 http://127.0.0.1:25290: All connection attempts failed（0.0s）
+INFO:httpx:HTTP Request: POST http://localhost:11434/v1/chat/completions "HTTP/1.1 404 Not Found"
+WARNING:app.api.chat:上游 ollama-local 地址失败 http://localhost:11434: Client error '404 Not Found' for url 'http://localhost:11434/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404（0.0s）
+ERROR:app.errors.handler:{'error_type': 'network', 'error_message': "上游降级链全部失败: stub-llm: http://127.0.0.1:25290: All connection attempts failed; ollama-local: http://localhost:11434: Client error '404 Not Found' for url 'http://localhost:11434/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404", 'error_class': 'RuntimeError', 'context': {'model': 'stub-chat-1', 'backend': 'upstream:stub-llm', 'operation': 'backend_request'}}
+Traceback (most recent call last):
+  File "/Users/yanyu/YYC-Cube/YYC3 AI Family-Comic Drama/yyc3-0379-world/core/app/api/chat.py", line 434, in _handle_sync
+    response = await backend.chat_completion(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "/Users/yanyu/YYC-Cube/YYC3 AI Family-Comic Drama/yyc3-0379-world/core/app/api/chat.py", line 144, in chat_completion
+    raise RuntimeError(f"上游降级链全部失败: {'; '.join(errors)}")
+RuntimeError: 上游降级链全部失败: stub-llm: http://127.0.0.1:25290: All connection attempts failed; ollama-local: http://localhost:11434: Client error '404 Not Found' for url 'http://localhost:11434/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404
+INFO:     127.0.0.1:55853 - "POST /v1/chat/completions HTTP/1.1" 502 Bad Gateway
+INFO:app.middleware.path_normalize:[path_normalize] meta.out_dir: 'projects/ep01' -> '/mnt/nas/projects/ep01'
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+ERROR:app.cache:Cache get error: invalid username-password pair or user is disabled.
+WARNING:app.api.chat:上游 stub-llm 地址失败 http://127.0.0.1:25290: All connection attempts failed（0.0s）
+WARNING:app.services.upstream_registry:上游 stub-llm 熔断 OPEN（连续失败 3 次），30s 后半开探测
+INFO:httpx:HTTP Request: POST http://localhost:11434/v1/chat/completions "HTTP/1.1 404 Not Found"
+WARNING:app.api.chat:上游 ollama-local 地址失败 http://localhost:11434: Client error '404 Not Found' for url 'http://localhost:11434/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404（0.0s）
+WARNING:app.services.upstream_registry:上游 ollama-local 熔断 OPEN（连续失败 3 次），30s 后半开探测
+ERROR:app.errors.handler:{'error_type': 'network', 'error_message': "上游降级链全部失败: stub-llm: http://127.0.0.1:25290: All connection attempts failed; ollama-local: http://localhost:11434: Client error '404 Not Found' for url 'http://localhost:11434/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404", 'error_class': 'RuntimeError', 'context': {'model': 'stub-chat-1', 'backend': 'upstream:stub-llm', 'operation': 'backend_request'}}
+Traceback (most recent call last):
+  File "/Users/yanyu/YYC-Cube/YYC3 AI Family-Comic Drama/yyc3-0379-world/core/app/api/chat.py", line 434, in _handle_sync
+    response = await backend.chat_completion(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "/Users/yanyu/YYC-Cube/YYC3 AI Family-Comic Drama/yyc3-0379-world/core/app/api/chat.py", line 144, in chat_completion
+    raise RuntimeError(f"上游降级链全部失败: {'; '.join(errors)}")
+RuntimeError: 上游降级链全部失败: stub-llm: http://127.0.0.1:25290: All connection attempts failed; ollama-local: http://localhost:11434: Client error '404 Not Found' for url 'http://localhost:11434/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404
+INFO:     127.0.0.1:55981 - "POST /v1/chat/completions HTTP/1.1" 502 Bad Gateway
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+INFO:app.middleware.path_normalize:[path_normalize] nas_output_path: '/Volumes/nas/projects/_g1_probe/tc-g1-004-e2e.txt' -> '/mnt/nas/projects/_g1_probe/tc-g1-004-e2e.txt'
+INFO:     127.0.0.1:58348 - "POST /v1/chat/completions HTTP/1.1" 401 Unauthorized
+WARNING:app.middleware.path_normalize:[path_normalize] 非 NAS 路径，原样保留：'/mnt/nasdir/x/t.txt'
+INFO:     127.0.0.1:58349 - "POST /v1/chat/completions HTTP/1.1" 401 Unauthorized
+INFO:app.middleware.path_normalize:[path_normalize] meta.out_dir: 'projects/ep01' -> '/mnt/nas/projects/ep01'
+INFO:     127.0.0.1:58352 - "POST /v1/chat/completions HTTP/1.1" 401 Unauthorized
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+INFO:app.middleware.path_normalize:[path_normalize] nas_output_path: '/Volumes/nas/projects/_g1_probe/tc-g1-004-e2e.txt' -> '/mnt/nas/projects/_g1_probe/tc-g1-004-e2e.txt'
+WARNING:app.middleware.auth:Invalid JWT token: Not enough segments
+INFO:     127.0.0.1:58777 - "POST /v1/chat/completions HTTP/1.1" 403 Forbidden
+WARNING:app.middleware.path_normalize:[path_normalize] 非 NAS 路径，原样保留：'/mnt/nasdir/x/t.txt'
+WARNING:app.middleware.auth:Invalid JWT token: Not enough segments
+INFO:     127.0.0.1:58778 - "POST /v1/chat/completions HTTP/1.1" 403 Forbidden
+INFO:app.middleware.path_normalize:[path_normalize] meta.out_dir: 'projects/ep01' -> '/mnt/nas/projects/ep01'
+WARNING:app.middleware.auth:Invalid JWT token: Not enough segments
+INFO:     127.0.0.1:58779 - "POST /v1/chat/completions HTTP/1.1" 403 Forbidden
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+INFO:app.middleware.path_normalize:[path_normalize] nas_output_path: '/Volumes/nas/projects/_g1_probe/tc-g1-004-e2e.txt' -> '/mnt/nas/projects/_g1_probe/tc-g1-004-e2e.txt'
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+ERROR:app.cache:Cache get error: invalid username-password pair or user is disabled.
+INFO:httpx:HTTP Request: POST http://127.0.0.1:25290/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:app.services.upstream_registry:上游 stub-llm 熔断恢复 closed
+ERROR:app.cache:Cache set error: invalid username-password pair or user is disabled.
+WARNING:app.api.chat:log_usage 失败（不影响响应）: Multiple exceptions: [Errno 61] Connect call failed ('::1', 5432, 0, 0), [Errno 61] Connect call failed ('127.0.0.1', 5432)
+INFO:     127.0.0.1:59362 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+WARNING:app.middleware.path_normalize:[path_normalize] 非 NAS 路径，原样保留：'/mnt/nasdir/x/t.txt'
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+ERROR:app.cache:Cache get error: invalid username-password pair or user is disabled.
+INFO:httpx:HTTP Request: POST http://127.0.0.1:25290/v1/chat/completions "HTTP/1.1 200 OK"
+ERROR:app.cache:Cache set error: invalid username-password pair or user is disabled.
+WARNING:app.api.chat:log_usage 失败（不影响响应）: Multiple exceptions: [Errno 61] Connect call failed ('::1', 5432, 0, 0), [Errno 61] Connect call failed ('127.0.0.1', 5432)
+INFO:     127.0.0.1:59539 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:app.middleware.path_normalize:[path_normalize] meta.out_dir: 'projects/ep01' -> '/mnt/nas/projects/ep01'
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+ERROR:app.cache:Cache get error: invalid username-password pair or user is disabled.
+INFO:httpx:HTTP Request: POST http://127.0.0.1:25290/v1/chat/completions "HTTP/1.1 200 OK"
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+ERROR:app.cache:Cache set error: invalid username-password pair or user is disabled.
+WARNING:app.api.chat:log_usage 失败（不影响响应）: Multiple exceptions: [Errno 61] Connect call failed ('::1', 5432, 0, 0), [Errno 61] Connect call failed ('127.0.0.1', 5432)
+INFO:     127.0.0.1:59721 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.api.agent:[agent-worker] 认领失败，5s 退避重试：invalid username-password pair or user is disabled.
+WARNING:app.services.a2a_protocol:[a2a] 内置编队注册/心跳失败（30s 后重试）：invalid username-password pair or user is disabled.

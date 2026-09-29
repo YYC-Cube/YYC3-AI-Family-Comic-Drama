@@ -1032,3 +1032,38 @@ sd-hero-prod 五件产物自 n1 取回，4 漂移种子 insightface 余弦同 G3
 1. **[P1]** LoRA min 口径冲刺：训练集补 777 类姿态样本（777 全权重域最低，生成姿态偏离训练分布）/ text_encoder 单独训 / rank 32→64，冲 anchor_guard 全种子过闸
 2. **[P2]** combo(w=0.15) 接入 run_batch_shots.py 生成链（替换纯 seed-lock 主策略，seed-lock 保底），实测集产能与拒绝率
 3. **[P2]** G5 门禁骨架用例补齐；生产化双项（动态 prompt 定制 + Token-Console 计量）；G1-004 E2E 待网关合流
+
+## 三十三、M3 三轮 min 口径冲刺 + G5 骨架 + 生产化双项 + G1-004 E2E 闭环（2026-09-29/30 第二十三轮，32.4 全项执行）
+
+### 33.1 777 类姿态挖掘 + 数据集 v3（19 → 42 图）
+
+伪再演练/自蒸馏路线：run_lora_pose_mining.py 用现行最优路线（sd-hero-v2 + PLUS FACE w=0.15）seed777 × 8 条姿态提示词变体生成候选池，insightface 身份门 sim ≥ 0.75 筛选——**8/8 全过门**（sim 0.7739-0.7808），门控防漂移放大。H3 密集帧 n1 端 3 视频 × 5 时间点回拉 15 帧（md5 去重，质检 15/15 有脸 sim 0.573-0.724 与 v2 同域）。run_lora_dataset_v3.py 组装 42 图（420 步/epoch）；上传口径只传 png（对齐 v2 实际训练形态——caption 未生效走目录 class token，控制变量）。质检留证 tc-m3-dataset-v3-qc.json + tc-m3-pose-mining.json。
+
+### 33.2 n1 三轮重训（rank 64）+ 评测（假设证伪——诚实留证）
+
+配方自 v2 产物元数据逐字恢复，唯一变量 dim64/alpha32。27:50（1.20it/s）2000 步，五件 sd-hero-v3*（144M）。排障：首跑阻塞 HF hub 联网校验（4:38 仅 5s CPU），`HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1` 秒过——沉淀至 n1 命令重建记录。
+
+评测（LoRA-only + 组合聚焦域 0.10/0.15/0.20/0.25）：
+
+- LoRA-only step2000：mean 0.6511 / min 0.5777，**seed777 0.6056 → 0.6557（+8.3%）——777 补样对 LoRA 本体有效**
+- 组合峰值 w=0.15：mean 0.7273 / min 0.7068，较 v2 同权重 0.8669 **回退 -0.14**，全窗 min <0.85
+- **三轮假设证伪**：「777 补样 + rank64 → min 达标」在该配方（4.76 epoch）下不成立。新科学结论：LoRA 容量/分布宽度是组合敏感变量——强 LoRA 削弱 IPA 主导形态的组合增益（v2「弱 LoRA + IPA 主导」仍最优）
+- 下轮：①42 图回退 rank32 + 4200 步（10 epoch）隔离 rank 变量；②v2 LoRA 增量续训 777 样本；③生产维持 v2+w0.15+seed-lock，生产语义零影响
+
+详证 tc-m3-lora-v3-sweep.json + tc-m3-lora-v3-train.log.txt，主文档 v1.4.0 §13。
+
+### 33.3 G5 骨架 + 生产化双项（32.4 TOP2/3 前半）
+
+- **G5 骨架**（YYC3-60 v1.4.0）：占位替换为 TC-G5-001~006 六条完整用例（完播率 ≥5pp / 产能 ≥4 集/晚 / LoRA 增量触发 100% 准确 / 伯乐采纳 ≥60% / 成本降 ≥20% 且 ≤2 元/集 / 回归门禁全量）；001/004 依赖真实运营窗口可 BLOCKED 留证
+- **动态 prompt 按集定制**：run_batch_shots.py 三级覆盖（shot_overrides > episodes > default_style > 内置保底），manifest 记 style_source；冒烟 4/4
+- **Token-Console 计量接入成本链**：run_cost_report.py v1.1.0 接网关 /v1/models/stats + /v1/models 价表，USD→CNY 按集均摊，不可达如实标注 unreachable 不虚构 0；降级 2/2
+
+### 33.4 G1-004 E2E 完整闭环（32.4 TOP3 后半，真实网关 + 真实请求）
+
+core/api 接线 PathNormalizeMiddleware（最外层注册；core/app 与 core/api 双目录同 inode）。三探针全 200：Mac 别名归一（头 1 + INFO 日志）/ /mnt/nasdir 边界不篡改（无头 + warning）/ 嵌套相对路径归一（meta.out_dir → /mnt/nas 绝对）。排障：①首测 502 系本地桩上游未启动（scripts/stub_upstream.py :25290）+ 双上游熔断，启动桩后闭环；②鉴权口径：Bearer 仅收 JWT（非 JWT 提前置 403），API Key 必须走 X-API-Key 头。留证 tc-g1-004-e2e-probes.log.txt + tc-g1-004-e2e-gateway.log.txt。
+
+### 33.5 下轮起点（TOP 3）
+
+1. **[P1]** min 口径正确路径重试：v3 数据集 42 图回退 rank32 + 步数补足 4200 步（10 epoch）重训评测（隔离 rank 变量，验证「777 补样 + 足 epoch」是否达标）；备选 v2 LoRA 增量续训
+2. **[P2]** combo(w=0.15) 接入 run_batch_shots.py 生成链（32.4 遗留，v2 配置），实测集产能与拒绝率
+3. **[P2]** G5 用例运营数据接入（TC-G5-001/004 真实窗口后收割）；G1-004 落位步骤待 /mnt/nas 挂载实机复验

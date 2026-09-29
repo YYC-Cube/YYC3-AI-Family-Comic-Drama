@@ -1,0 +1,62 @@
+{
+  "testcase": "M3 三轮 min 口径冲刺（777 类姿态样本 + rank 32→64 + G1-004 E2E 闭环同轮）",
+  "date": "2026-09-29",
+  "executor": "scripts/run_lora_pose_mining.py（777 挖掘）+ scripts/run_lora_dataset_v3.py（数据集）+ n1 kohya train_network.py（重训 dim64/alpha32）+ scripts/run_kohya_lora.py eval（LoRA-only）+ scripts/run_lora_plusface_combo.py（组合聚焦域）",
+  "protocol": "4 漂移种子（777/888/999/1111）× 漂移提示词 → insightface 512 维余弦 vs hero_base.png；目标口径 min ≥ 0.85（anchor_guard 生产判定）",
+  "dataset_v3": {
+    "images": 42,
+    "sources": "v2 全量复用 19 + H3 密集帧 15（md5 去重，质检 15/15 有脸 sim 0.573-0.724）+ 777 类姿态挖掘过门 8（sim 0.7739-0.7808 >= 0.75 身份门）",
+    "steps": "42 图 × 10 repeats = 420 步/epoch，2000 步 ≈ 4.76 epoch",
+    "upload_policy": "只传 png（对齐 v2 实际训练形态，控制变量）",
+    "qc_evidence": "tc-m3-dataset-v3-qc.json + tc-m3-pose-mining.json"
+  },
+  "training": {
+    "recipe": "v2 配方元数据恢复逐字对齐（lr 5e-4 constant、AdamW、bf16、batch 1、512 bucket no_upscale 256-1024、keep_tokens 1、gradient_checkpointing、seed 42），唯一变量 network_dim=64 / network_alpha=32",
+    "hardware": "yyc3-n1 DGX Spark",
+    "result": "2000 步 27:50（1.20it/s），avr_loss 0.104 → 0.0632，五件产物 sd-hero-v3*（144M，体积随 rank 翻倍）",
+    "incidents": "首跑阻塞 HuggingFace hub 联网校验（4:38 仅 5s CPU），HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 秒级过闸"
+  },
+  "lora_only_sweep": {
+    "step2000": {"mean": 0.6511, "min": 0.5777, "max": 0.7024,
+                 "rows": [{"seed": 777, "sim": 0.6557}, {"seed": 888, "sim": 0.6687},
+                          {"seed": 999, "sim": 0.7024}, {"seed": 1111, "sim": 0.5777}]},
+    "key_finding": "seed777 0.6056 → 0.6557（+8.3%）：777 类姿态补强对 LoRA 本体有效；整体 mean 0.6726 → 0.6511（-3.2%，epoch 减半 trade）"
+  },
+  "combo_weight_sweep": {
+    "route": "ComfyUI 工作流（LoraLoader + IPAdapterUnifiedLoader PLUS FACE 脸区域嵌入），与 v2 峰值同路线；聚焦域 0.10-0.25",
+    "w010": {"mean": 0.7201, "min": 0.6947, "max": 0.745, "seed777": 0.7175},
+    "w015_peak": {"mean": 0.7273, "min": 0.7068, "max": 0.7462, "seed777": 0.7183,
+                  "rows": [{"seed": 777, "sim": 0.7183}, {"seed": 888, "sim": 0.7462},
+                           {"seed": 999, "sim": 0.738}, {"seed": 1111, "sim": 0.7068}]},
+    "w020": {"mean": 0.7255, "min": 0.713, "max": 0.742, "seed777": 0.7142},
+    "w025": {"mean": 0.7153, "min": 0.7023, "max": 0.731, "seed777": 0.7023},
+    "v2_same_weight_reference": {"w015": {"mean": 0.8669, "min": 0.778, "seed777": 0.778}}
+  },
+  "baselines": {
+    "no_anchor_mean": 0.5157,
+    "v2_combo_best_mean": 0.8669,
+    "v2_combo_min": 0.778,
+    "lora_only_v2_best_mean": 0.6726
+  },
+  "verdict": {
+    "mean_ge_085": false,
+    "mean": 0.7273,
+    "min_ge_085": false,
+    "min": 0.7068,
+    "honest_note": "三轮假设（777 补样 + rank64 → min 达标）在该训练配方下证伪：组合峰值 mean 0.7273 较 v2 同权重 0.8669 回退 -0.14，全窗 min <0.85。LoRA-only 维度 777 +8.3% 证明补样方向正确，恶化发生在组合域——rank 翻倍+分布加宽的强 LoRA 与 IPA 脸区嵌入特征竞争增强（v2『弱 LoRA + IPA 主导』仍为组合最优形态）。不强行判 PASS，如实留证。"
+  },
+  "findings": [
+    "777 类姿态补样对 LoRA 本体有效（777: 0.6056 → 0.6557，+8.3%），姿态分布假设得到正向验证",
+    "组合域回退的新科学结论：LoRA 容量（rank）/训练分布宽度是组合敏感变量——强 LoRA 削弱 IPA 主导形态的组合增益",
+    "min 口径下轮路径：①42 图回退 rank32 + 4200 步（10 epoch）隔离 rank 变量；②v2 LoRA 增量续训 777 样本；③生产维持 v2+w0.15+seed-lock 不变，生产语义零影响",
+    "n1 训练排障沉淀：HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 解 hub 联网阻塞"
+  ],
+  "artifacts": [
+    "tc-m3-lora-v3-sweep.json（本汇总）",
+    "tc-m3-lora-v3-train.log.txt（n1 三轮训练日志原样归档）",
+    "tc-m3-pose-mining.json（777 挖掘门控留证）",
+    "tc-m3-dataset-v3-qc.json（42 图质检留证）",
+    "/tmp/kohya_out/kohya_eval_v3_s2000.json（LoRA-only）",
+    "/tmp/kohya_out/combo_v3_w{010,015,020,025}.json（组合聚焦域）"
+  ]
+}

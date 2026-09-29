@@ -1,0 +1,36 @@
+{
+  "testcase": "M3 三轮训练集 v3 组装质检（777 类姿态冲刺）",
+  "date": "2026-09-29",
+  "executor": "scripts/run_lora_dataset_v3.py（组装）+ insightface 质检（manju venv FaceEncoder）",
+  "dataset_v3": {
+    "images": 42,
+    "sources": "v2 全量复用 19（10 变换族 + 9 生产帧）+ H3 密集帧 15（3 视频 x 5 时间点回拉，md5 去重）+ 777 类姿态挖掘过门 8（sd-hero-v2 w=0.15 自生成 + 身份门 sim>=0.75）",
+    "steps": "42 图 x 10 repeats = 420 步/epoch，2000 步 ≈ 4.76 epoch",
+    "upload_policy": "只传 png（对齐 v2 实际训练形态：caption 未生效，目录 class token 路线，控制变量）"
+  },
+  "qc": {
+    "h3v3_frames": {"passed": 15, "total": 15, "sim_range": [0.5726, 0.7238],
+                    "rows": [
+                      {"file": "h3_seed_42_t0.3", "sim": 0.6196},
+                      {"file": "h3_seed_42_t0.9", "sim": 0.6048},
+                      {"file": "h3_seed_42_t1.5", "sim": 0.6088},
+                      {"file": "h3_seed_42_t2.1", "sim": 0.6374},
+                      {"file": "h3_seed_42_t2.7", "sim": 0.6083},
+                      {"file": "h3_seed_43_t0.3", "sim": 0.7043},
+                      {"file": "h3_seed_43_t0.9", "sim": 0.7},
+                      {"file": "h3_seed_43_t1.5", "sim": 0.7238},
+                      {"file": "h3_seed_43_t2.1", "sim": 0.705},
+                      {"file": "h3_seed_43_t2.7", "sim": 0.7004},
+                      {"file": "h3_seed_44_t0.3", "sim": 0.5726},
+                      {"file": "h3_seed_44_t0.9", "sim": 0.6079},
+                      {"file": "h3_seed_44_t1.5", "sim": 0.6347},
+                      {"file": "h3_seed_44_t2.1", "sim": 0.6228},
+                      {"file": "h3_seed_44_t2.7", "sim": 0.5883}
+                    ],
+                    "note": "sim 域与 v2 轮 H3 帧（0.53-0.72）一致，真实多姿态特征健康"},
+    "mine777": {"passed": 8, "total": 8, "sim_gate": 0.75,
+                "sim_range": [0.7739, 0.7808],
+                "evidence": "tc-m3-pose-mining.json（挖掘器门控留证）"}
+  },
+  "verdict": "42/42 全量质检通过（h3v3 15/15 有脸 + mine777 8/8 过身份门 + v2 存量 19 历史已检）"
+}

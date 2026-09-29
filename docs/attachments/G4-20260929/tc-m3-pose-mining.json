@@ -1,0 +1,51 @@
+{
+  "testcase": "M3 三轮 777 类姿态样本挖掘（身份门 sim>=0.75）",
+  "lora": "sd-hero-v2.safetensors",
+  "weight": 0.15,
+  "seed": 777,
+  "sim_gate": 0.75,
+  "candidates": 8,
+  "accepted": 8,
+  "rows": [
+    {
+      "pose": "side profile view, night lantern lighting",
+      "sim": 0.7775,
+      "accepted": true
+    },
+    {
+      "pose": "looking back over shoulder, different angle",
+      "sim": 0.7793,
+      "accepted": true
+    },
+    {
+      "pose": "three quarter view, walking forward",
+      "sim": 0.7777,
+      "accepted": true
+    },
+    {
+      "pose": "drawing sword, dynamic pose",
+      "sim": 0.7739,
+      "accepted": true
+    },
+    {
+      "pose": "looking up, low angle view",
+      "sim": 0.7763,
+      "accepted": true
+    },
+    {
+      "pose": "head turned left, profile lighting",
+      "sim": 0.7758,
+      "accepted": true
+    },
+    {
+      "pose": "smiling, looking away, night scene",
+      "sim": 0.7808,
+      "accepted": true
+    },
+    {
+      "pose": "closeup face, tilted head, night lantern",
+      "sim": 0.7806,
+      "accepted": true
+    }
+  ]
+}

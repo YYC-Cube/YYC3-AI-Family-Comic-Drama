@@ -1,0 +1,57 @@
+# TC-G1-004 E2E 三探针实测（真实网关进程 :8010 + 桩上游 :25290）
+# 日期：2026-09-29；鉴权：X-API-Key（Bearer 仅 JWT，非 JWT 提前置 403——auth.py L328）；密钥零入库
+
+===== 探针1 响应头 =====
+HTTP/1.1 200 OK
+date: Tue, 29 Sep 2026 15:36:23 GMT
+server: uvicorn
+x-yyc3-upstream: stub-llm
+content-length: 324
+content-type: application/json
+vary: Origin
+x-ratelimit-limit: 500
+x-ratelimit-remaining: 499
+x-ratelimit-reset: 1790696244
+x-api-version: v1
+x-yyc3-path-normalized: 1
+
+----- 探针1 响应体 -----
+{"id":"chatcmpl-stub-03cec399e3fd","object":"chat.completion","created":1790696192,"model":"stub-chat-1","choices":[{"index":0,"message":{"role":"assistant","content":"OK from stub upstream（E2E 链路验证）· 收到 6 字符"},"finish_reason":"stop"}],"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}
+===== 探针2 响应头 =====
+HTTP/1.1 200 OK
+date: Tue, 29 Sep 2026 15:36:33 GMT
+server: uvicorn
+x-yyc3-upstream: stub-llm
+content-length: 324
+content-type: application/json
+vary: Origin
+x-ratelimit-limit: 500
+x-ratelimit-remaining: 498
+x-ratelimit-reset: 1790696254
+x-api-version: v1
+
+----- 探针2 响应体 -----
+{"id":"chatcmpl-stub-39ed56ad8aaa","object":"chat.completion","created":1790696202,"model":"stub-chat-1","choices":[{"index":0,"message":{"role":"assistant","content":"OK from stub upstream（E2E 链路验证）· 收到 6 字符"},"finish_reason":"stop"}],"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}
+===== 探针3 响应头 =====
+HTTP/1.1 200 OK
+date: Tue, 29 Sep 2026 15:36:44 GMT
+server: uvicorn
+x-yyc3-upstream: stub-llm
+content-length: 324
+content-type: application/json
+vary: Origin
+x-ratelimit-limit: 500
+x-ratelimit-remaining: 497
+x-ratelimit-reset: 1790696265
+x-api-version: v1
+x-yyc3-path-normalized: 1
+
+----- 探针3 响应体 -----
+{"id":"chatcmpl-stub-90a84b84a149","object":"chat.completion","created":1790696213,"model":"stub-chat-1","choices":[{"index":0,"message":{"role":"assistant","content":"OK from stub upstream（E2E 链路验证）· 收到 6 字符"},"finish_reason":"stop"}],"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}
+===== 网关日志对应段 =====
+INFO:app.middleware.path_normalize:[path_normalize] nas_output_path: '/Volumes/nas/projects/_g1_probe/tc-g1-004-e2e.txt' -> '/mnt/nas/projects/_g1_probe/tc-g1-004-e2e.txt'
+INFO:     127.0.0.1:59362 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+WARNING:app.middleware.path_normalize:[path_normalize] 非 NAS 路径，原样保留：'/mnt/nasdir/x/t.txt'
+INFO:     127.0.0.1:59539 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:app.middleware.path_normalize:[path_normalize] meta.out_dir: 'projects/ep01' -> '/mnt/nas/projects/ep01'
+INFO:     127.0.0.1:59721 - "POST /v1/chat/completions HTTP/1.1" 200 OK

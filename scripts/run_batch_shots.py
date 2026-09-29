@@ -79,6 +79,36 @@ NOVEL = ("第一章 夜雨叩门\n"
 REF_STYLE = "portrait of a young chinese wuxia heroine, ancient hanfu, ink wash background"
 
 
+def load_style_file(path: str | None) -> dict:
+    """加载动态 prompt 定制配置（生产化：按集/按镜覆盖样式提示词）。
+
+    JSON 结构：{"default_style": str?, "episodes": {"1": str},
+                "shot_overrides": {"EP01-SHOT-03": str}}
+    三级优先：shot_overrides > episodes[集号] > default_style > 内置 REF_STYLE 保底。
+    """
+    if not path:
+        return {}
+    p = Path(path)
+    if not p.exists():
+        print(f"[batch] 警告：--style-file 不存在，回退内置 REF_STYLE：{path}")
+        return {}
+    cfg = json.loads(p.read_text(encoding="utf-8"))
+    print(f"[batch] 动态 prompt 定制已加载：{path}（episodes={len(cfg.get('episodes', {}))} "
+          f"shot_overrides={len(cfg.get('shot_overrides', {}))}）")
+    return cfg
+
+
+def resolve_style(cfg: dict, episode: int, shot_id: str) -> tuple[str, str]:
+    """返回（生效 prompt，来源标记）——来源留证入 manifest。"""
+    if shot_id in cfg.get("shot_overrides", {}):
+        return cfg["shot_overrides"][shot_id], "shot_override"
+    if str(episode) in cfg.get("episodes", {}):
+        return cfg["episodes"][str(episode)], "episode"
+    if cfg.get("default_style"):
+        return cfg["default_style"], "default"
+    return REF_STYLE, "builtin"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--project", default="demo-001")
@@ -89,7 +119,10 @@ def main():
     ap.add_argument("--episode", type=int, default=1,
                     help="集号（1 起，取分集计划第 N 集；扩产 ≥3 集用）")
     ap.add_argument("--root", default=os.getenv("PROJECT_ROOT", "/tmp/yyc3_projects"))
+    ap.add_argument("--style-file", default=os.getenv("STYLE_FILE", ""),
+                    help="动态 prompt 定制 JSON（按集/按镜覆盖样式，缺省复用内置 REF_STYLE）")
     args = ap.parse_args()
+    style_cfg = load_style_file(args.style_file)
 
     proj = Path(args.root) / args.project
     for sub in ("storyboard", "images", "audio", "state", "output"):
@@ -120,6 +153,7 @@ def main():
 
     manifest = {"project": args.project, "char": args.char,
                 "comfy": gw.comfy.enabled, "tts": gw.tts_client.enabled,
+                "style_file": args.style_file or None,
                 "shots": []}
     t_start = time.time()
     for shot in sb["shots"][:args.limit]:
@@ -134,7 +168,9 @@ def main():
             continue
 
         out = proj / "images" / f"{sid}.png"
-        gen = gw.text_to_image(f"{REF_STYLE}, {shot['description']}",
+        style, style_src = resolve_style(style_cfg, args.episode, sid)
+        row["style_source"] = style_src  # 动态 prompt 定制留证（builtin=三集复用旧口径）
+        gen = gw.text_to_image(f"{style}, {shot['description']}",
                                ref_assets=[args.char], out_path=str(out),
                                seed=seed, ref_image=args.ref_image)
         row["gen_status"] = gen["status"]
@@ -149,7 +185,7 @@ def main():
                 # 生产策略（G3 v1.3/v1.4 实证）：IPAdapter 锚定不足时回退
                 # seed-lock（角色基础种子确定性重绘，同参缓存近零成本）
                 row["redraw"] = "seed_lock"
-                gen = gw.text_to_image(f"{REF_STYLE}, {shot['description']}",
+                gen = gw.text_to_image(f"{style}, {shot['description']}",
                                        ref_assets=[args.char], out_path=str(out),
                                        seed=base_seed, ref_image=args.ref_image)
                 attempts += 1
