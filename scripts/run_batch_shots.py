@@ -34,25 +34,25 @@ _m = types.ModuleType("milvus_retriever")
 
 
 class _S:
-    def __init__(self, *a, **k):
+    def __init__(self, *_args, **_kwargs):
         pass
 
-    def search(self, *a, **k):
+    def search(self, *_args, **_kwargs):
         raise ConnectionError("stub")
 
 
-_m.MilvusRetriever = _S
+setattr(_m, "MilvusRetriever", _S)  # ModuleType 动态属性：setattr 规避类型检查误报
 sys.modules["milvus_retriever"] = _m
 for p in (COMPONENTS, MANJU / "backend", SCRIPT_ENGINE):
     sys.path.insert(0, str(p))
 
-from drama_stage_adapter import DramaToolGateway  # noqa: E402
-from app.modules.consistency_engine.face_encoder import FaceEncoder  # noqa: E402
-from app.modules.consistency_engine.anchor_guard import AnchorGuard  # noqa: E402
-from splitter import split_chapters                  # noqa: E402
-from episode_planner import plan_episodes            # noqa: E402
-from extractor import extract_elements               # noqa: E402
-from storyboard_schema import draft_storyboard       # noqa: E402
+from drama_stage_adapter import DramaToolGateway  # type: ignore
+from app.modules.consistency_engine.face_encoder import FaceEncoder  # type: ignore
+from app.modules.consistency_engine.anchor_guard import AnchorGuard  # type: ignore
+from splitter import split_chapters  # type: ignore
+from episode_planner import plan_episodes  # type: ignore
+from extractor import extract_elements  # type: ignore
+from storyboard_schema import draft_storyboard  # type: ignore
 
 # 三章各 ~220 字：章末残留 ≥183 字独立成集（plan_episodes budget=367/2 门槛），
 # 两章累计 <367 字不提前合并 → 严格切出 3 集（扩产 ≥3 集样片前提）
