@@ -54,10 +54,27 @@ from episode_planner import plan_episodes            # noqa: E402
 from extractor import extract_elements               # noqa: E402
 from storyboard_schema import draft_storyboard       # noqa: E402
 
-NOVEL = ("第一章 夜雨叩门\n暴雨倾盆的深夜，沈青梧提着灯笼叩响了义庄的大门。"
-         "「这么晚来义庄，您找谁？」守夜的老汉眯着眼问。「找一具三日前的尸体。」"
-         "她声音很冷。谁也没想到，棺中人是她失踪七日的兄长，脸上盖着官府的封条。"
-         "难道义庄里还藏着第三个人？")
+# 三章各 ~220 字：章末残留 ≥183 字独立成集（plan_episodes budget=367/2 门槛），
+# 两章累计 <367 字不提前合并 → 严格切出 3 集（扩产 ≥3 集样片前提）
+NOVEL = ("第一章 夜雨叩门\n"
+         "暴雨倾盆的深夜，沈青梧提着灯笼叩响了义庄的大门。木门吱呀半开，守夜的老汉举着油灯，眯眼打量来客。"
+         "「这么晚来义庄，您找谁？」她的声音比雨声还冷：「找一具三日前的尸体。」"
+         "老汉引她穿过停满棺木的长廊，灯笼的光在墙上摇晃出细长影子。停在最里间的棺前，盖着官府的封条。"
+         "「这尸首古怪，姑娘三思。」老汉低声劝。她掀开一角——棺中人竟是她失踪七日的兄长。"
+         "雨声轰鸣，她握灯笼的手稳如磐石，心却沉入冰窟。是谁封的棺？兄长又为何暴毙？"
+         "这一夜叩门，叩开的是复仇之路的第一道门。\n"
+         "第二章 棺中疑云\n"
+         "沈青梧撬开官府封条，凑近细看。棺中兄长面色如生，嘴角却凝着一丝黑血，指缝里还嵌着几缕灰线。"
+         "「中毒？」守夜老汉举灯近看，忽然浑身发抖——尸斑竟呈诡异青紫色，指尖隐有黑气。"
+         "「这不是普通的毒。」老汉声音压得极低，「三日前深夜，有一队黑衣人来过义庄，抬走了一口棺材。」"
+         "沈青梧翻检兄长随身之物，玉佩完好，银票不见，唯有一张揉皱的字条，上面画着一道朱砂符。"
+         "她攥紧剑柄，指节发白。兄长之死，远比想象更深。字条上的符，她在一本禁书里见过——那是引魂符。\n"
+         "第三章 夜半尸行\n"
+         "子时刚过，义庄内忽起阴风，烛火齐灭。黑暗里，棺中传出指甲抓挠木板的声响，一下，又一下。"
+         "沈青梧提剑守在棺侧，剑穗在风中绷得笔直。棺盖无声滑开，兄长双眼猛然睁开，瞳孔泛着灰白。"
+         "「兄长？」她的声音第一次颤抖。尸身坐起，却越过她直扑门外，像被什么牵引着，冲进暴雨深夜。"
+         "她提剑追出，雨幕深处，一串黑衣人的灯笼连成一线，正朝城外乱葬岗移动。"
+         "尸行在前，人影在后。她咬破指尖在剑身画下破煞符——今夜，要么救回兄长魂魄，要么让引魂者偿命。")
 
 REF_STYLE = "portrait of a young chinese wuxia heroine, ancient hanfu, ink wash background"
 
@@ -69,6 +86,8 @@ def main():
     ap.add_argument("--ref-image", default="hero_base.png",
                     help="IPAdapter 参考图（ComfyUI/input/ 内文件名）")
     ap.add_argument("--limit", type=int, default=2, help="本次批量镜头数")
+    ap.add_argument("--episode", type=int, default=1,
+                    help="集号（1 起，取分集计划第 N 集；扩产 ≥3 集用）")
     ap.add_argument("--root", default=os.getenv("PROJECT_ROOT", "/tmp/yyc3_projects"))
     args = ap.parse_args()
 
@@ -84,12 +103,20 @@ def main():
         enc.save_character(args.char, args.char, src)
     guard = AnchorGuard(library_root=str(LIBRARY))
 
-    # 1) 分镜
+    # 1) 分镜（--episode 取对应集；分集计划按章节流 105s 预算切分）
     els = extract_elements(NOVEL)
     eps = plan_episodes(split_chapters(NOVEL))
-    sb = draft_storyboard(args.project, eps[0], els, trace_id="trace-BATCH-000001")
+    ep_idx = args.episode - 1
+    if ep_idx < 0 or ep_idx >= len(eps):
+        print(f"[batch] 错误：--episode {args.episode} 超界（分集计划共 {len(eps)} 集）")
+        return 1
+    ep = eps[ep_idx]
+    trace_id = f"trace-BATCH-EP{args.episode:02d}"
+    sb = draft_storyboard(args.project, ep, els, trace_id=trace_id)
     (proj / "storyboard" / "storyboard.v1.json").write_text(
         json.dumps(sb, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[batch] {args.project} ep{args.episode}: 章节={ep.get('title', '-')} "
+          f"镜头池={len(sb['shots'])} trace={trace_id}")
 
     manifest = {"project": args.project, "char": args.char,
                 "comfy": gw.comfy.enabled, "tts": gw.tts_client.enabled,

@@ -1,0 +1,78 @@
+{
+  "testcase": "TC-G4-007 单集成本核算",
+  "executor": "run_cost_report.py",
+  "口径说明": "全本地链零外部 API 成本；电费按实测功率折算（Mac 55W/DGX 传入功率）",
+  "episodes": [
+    {
+      "episode": "g4-ep01",
+      "stages": {
+        "脚本分镜+图像+TTS（manifest.elapsed_s）": 739.6,
+        "合成+串联+评分（补录）": 90.0,
+        "H3 动态镜头生成（DGX）": 1109.1
+      },
+      "counts": {
+        "shots": 3,
+        "image_ok": 3,
+        "tts_ok": 1
+      },
+      "external_api_cost_cny": 0.0,
+      "local_compute": {
+        "mac_seconds": 829.6,
+        "dgx_seconds": 1109.1,
+        "kwh": 0.05581,
+        "electricity_cny": 0.0335
+      },
+      "total_cost_cny": 0.0335,
+      "budget_cny": 2.0,
+      "passed": true
+    },
+    {
+      "episode": "g4-ep02",
+      "stages": {
+        "脚本分镜+图像+TTS（manifest.elapsed_s）": 566.1,
+        "合成+串联+评分（补录）": 90.0,
+        "H3 动态镜头生成（DGX）": 600.4
+      },
+      "counts": {
+        "shots": 3,
+        "image_ok": 3,
+        "tts_ok": 1
+      },
+      "external_api_cost_cny": 0.0,
+      "local_compute": {
+        "mac_seconds": 656.1,
+        "dgx_seconds": 600.4,
+        "kwh": 0.03337,
+        "electricity_cny": 0.02
+      },
+      "total_cost_cny": 0.02,
+      "budget_cny": 2.0,
+      "passed": true
+    },
+    {
+      "episode": "g4-ep03",
+      "stages": {
+        "脚本分镜+图像+TTS（manifest.elapsed_s）": 522.6,
+        "合成+串联+评分（补录）": 90.0,
+        "H3 动态镜头生成（DGX）": 434.4
+      },
+      "counts": {
+        "shots": 3,
+        "image_ok": 3,
+        "tts_ok": 0
+      },
+      "external_api_cost_cny": 0.0,
+      "local_compute": {
+        "mac_seconds": 612.6,
+        "dgx_seconds": 434.4,
+        "kwh": 0.02625,
+        "electricity_cny": 0.0158
+      },
+      "total_cost_cny": 0.0158,
+      "budget_cny": 2.0,
+      "passed": true
+    }
+  ],
+  "max_cost": 0.0335,
+  "all_passed": true
+}

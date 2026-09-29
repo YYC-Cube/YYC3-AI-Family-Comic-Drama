@@ -1,0 +1,51 @@
+{
+  "testcase": "TC-G4-002 动态镜头口型达标（720p 复验 + DGX 提速）",
+  "date": "2026-09-29",
+  "verdict": "PASS",
+  "threshold": "conf >= 0.75",
+  "executor_node": "yyc3-n1 (DGX Spark GB10, sm_121, CUDA 13.0, torch 2.11.0+cu130)",
+  "comparisons": [
+    {
+      "tier": "mac 384p 首验",
+      "date": "2026-09-28",
+      "node": "Mac M4 Max (MPS)",
+      "resolution": "640x384",
+      "gen_seconds": 5267.496,
+      "conf": 6.3167,
+      "offset": 0.0,
+      "dist": 11.654,
+      "evidence": "docs/attachments/G4-20260928/tc-g4-002-syncnet-score.json"
+    },
+    {
+      "tier": "DGX 360p 探路",
+      "date": "2026-09-29",
+      "node": "yyc3-n1",
+      "resolution": "640x384",
+      "gen_seconds": 1109.144,
+      "conf": 6.413,
+      "offset": -1.0,
+      "dist": 8.970,
+      "batch": "output_batch9001",
+      "speedup_vs_mac": 4.75
+    },
+    {
+      "tier": "DGX 720p 复验",
+      "date": "2026-09-29",
+      "node": "yyc3-n1",
+      "resolution": "1280x736",
+      "gen_seconds": 1290.793,
+      "conf": 6.740,
+      "offset": -1.0,
+      "dist": 8.309,
+      "batch": "output_batch9002",
+      "syncnet_data_dir": "/tmp/syncnet_9002"
+    }
+  ],
+  "analysis": {
+    "resolution_hypothesis": "支持——dist 随分辨率单调下降：11.654 (384p mac) -> 8.970 (384p DGX) -> 8.309 (720p DGX)；conf 同步上升 6.317 -> 6.413 -> 6.740。首验 notes 中『dist 偏高疑因 384p 唇部细节量不足』假设成立",
+    "dgx_speedup": "4.75x (360p 同档) / 4.08x (720p vs mac 384p)；GPU 仅占 10.1G / 空闲 110G，批量扩产余量充足",
+    "syncnet_params": "--min_track 40 --min_face_size 60（短视频口径，已固化 h3_common syncnet_score_impl）",
+    "gen_env": "DIFFSYNTH_SKIP_DOWNLOAD=True H3_WEIGHTS_DIR=/home/yyc3/models/yyc3h3 HF_ENDPOINT=https://hf-mirror.com PYTHONPATH=vendor torch==2.11.0+cu130"
+  },
+  "notes": "三档同 seed=42 / 73帧 / 30步 / ref2va NF4；run_pipeline+run_syncnet 官方入口直调（h3_common syncnet_pipeline 封装未落地，待修）"
+}

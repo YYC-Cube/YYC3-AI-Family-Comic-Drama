@@ -1,0 +1,39 @@
+{
+  "testcase": "TC-G3-006 单镜 图→视频 耗时（DGX NF4 硬件基线）",
+  "date": "2026-09-29",
+  "verdict": "REAL_BASELINE_RECORDED（实测超 ≤300s 目标，基线口径修正建议留证）",
+  "executor_node": "yyc3-n1 (DGX Spark GB10, sm_121, CUDA 13.0, torch 2.11.0+cu130)",
+  "measurements": [
+    {
+      "batch": "output_batch9001",
+      "resolution": "640x384",
+      "num_frames": 73,
+      "fps": 24,
+      "steps": 30,
+      "gen_seconds": 1109.144,
+      "scope": "冷启动全链（含模型加载 + 文本编码 + 30 步采样 + VAE 解码 + 音视频合流）",
+      "sampling_rate": "27.4 s/it"
+    },
+    {
+      "batch": "output_batch9002",
+      "resolution": "1280x736",
+      "num_frames": 73,
+      "fps": 24,
+      "steps": 30,
+      "gen_seconds": 1290.793,
+      "scope": "冷启动全链（同上，720p）"
+    }
+  ],
+  "baseline_discussion": {
+    "target": "≤300s/镜（YYC3-60 TC-G3-006，DGX NF4）",
+    "measured": "1109-1291s 冷启动全链；扣一次性加载（约 200-300s）后热批产单镜采样约 820-1000s",
+    "gap_analysis": "① TC-G3-006 制定时的参照系是 SDXL 图→图/插帧（单帧产出），H3 Ref2VA 是音条件视频整段生成（73 帧联合采样 + 音频对齐），任务规模不同量级；② 首镜含一次性加载，批产（--batch 多 seed 连跑）可摊薄；③ NF4 量化已在用（batch_ref2va_nf4.py），进一步降本需步数蒸馏或分块采样（后续项）",
+    "suggestion": "建议将 TC-G3-006 基线拆分为『首镜冷启动 ≤1500s』与『批产单镜摊薄 ≤1000s』两档，保留 ≤300s 作为 SDXL 类单帧产出口径专用"
+  },
+  "dgx_context": {
+    "gpu_mem_used": "10.1G / 121G 统一内存（n1 空闲态）",
+    "node_migration": "n2 被团队 root vLLM 大服务占据（守护拉起不可清理），负载整体固化 n1",
+    "gb10_serialization": "rsync page cache 与 CUDA 大分配互斥——大文件传输与 GPU 任务必须串行，传输后 drop_caches"
+  },
+  "notes": "诚实留证：不强行判 PASS；实测数据支持基线口径修正讨论，待验收方裁决"
+}

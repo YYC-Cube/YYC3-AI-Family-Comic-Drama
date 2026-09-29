@@ -890,3 +890,45 @@ cat docs/YYC3-AI-HANDOFF-会话推进日志-20260926.md
 1. **[P1]** H3 批量动态化排期：720p 档质量复验（跟踪 dist）+ DGX 硬件日提速（Mac MPS 单镜 89min 不可量产）
 2. **[P1]** DGX 硬件日四连收割（G1 清零/kohya LoRA/G2-010/G3-006）——与动态化提速合并执行
 3. **[P2]** 样片扩产至 ≥3 集（引入 H3 动态镜头混排）→ TC-G4-005/007/008 批量执行；可选：网关带 DIFFSYNTH_SKIP_DOWNLOAD 复跑一轮取 claim→dispatch 全链留证
+
+## 二十九、DGX 硬件日四连收割 + TOP1/3 全清：G4 七用例闭环（2026-09-29 第十九轮）
+
+### 29.1 结果总览（TOP 1/2/3 全部收割）
+
+| 项 | 结果 | 关键数据 |
+| -- | ---- | -------- |
+| TOP1 720p 复验 | **PASS** | conf 6.740 / dist 8.309 / offset -1（mac 384p 11.654 → DGX 720p 8.309，降 3.35，分辨率假设成立） |
+| TOP1 DGX 提速 | **4.75x** | 1109.1s vs MPS 5267.5s；vLLM 清空后 13.3s/it 再翻倍，热批产单镜 434.4s |
+| TOP2 四连收割 | **全清** | G1 清零 ✓ / kohya LoRA n1 2000 步正式（loss 0.0107，六产物）✓ / G2-010 ✓ / G3-006 DGX 实测留证（1109-1291s，口径拆分建议）✓ |
+| TOP3 样片扩产 | **≥3 集全 PASS** | 三章剧本 --episode 切集（238/227/219 字）→ 3 集 1080p30 动态混排成片（偏差 13-29ms，黑帧 0，音频齐平） |
+| TC-G4-005/007/008 | **全 PASS** | 五维评审 100 分 ×3 + 人工一致率 100%；成本 0.0158-0.0335 元/集 ≤2 元；交付规范 20/20 |
+
+**G4 进度：001-005/007/008 七用例 PASS；006/009/010 待 Token-Console/NAS 条件。**
+
+### 29.2 本轮关键工程发现（concat demuxer 混排缺陷根治）
+
+- **现象**：动态镜混排后成片音频流 9.57s < 视频 12.53s——c3 段整体静音；aresample=async 不可修复
+- **根因**：concat **demuxer** 混排源（H3 32k stereo + compose AAC）音频 pts 断裂丢帧；静态同质镜（首验）不触发
+- **修复**：run_episode_concat.sh 改 **concat filter 解码域拼接**（逐镜统一 32k stereo + `concat=n=3:v=1:a=1`）+ 新增音频轨齐平判定（±100ms）
+- **TC-G4-003 方法论四连定版**：流拷贝 ✗ → 半重编 ✗ → 全重编码（同质镜）✓ → concat filter（混排镜）✓✓
+
+### 29.3 节点与排障沉淀
+
+1. **节点固化**：n2 被团队 root vLLM 大服务占据（守护拉起不可清理），负载整体固化 n1（GPU 空闲 110G）
+2. **GB10 串行化**：rsync page cache 与 CUDA 大分配互斥——大文件传输与 GPU 任务必须串行，传输后 drop_caches
+3. **cu130 wheel**：sm_121 需 torch 2.11.0+cu130（cu128 NVRTC 崩 `invalid value for --gpu-architecture`）
+4. **kohya 环境链**：peft 0.14.0 + torchvision 0.26.0+cu128（ABI 匹配）+ 卸载 tensorflow 2.10 残留 + `--network_alpha` + `--enable_bucket --bucket_no_upscale` + `HF_ENDPOINT=https://hf-mirror.com`
+5. **pkill 自匹配**：`pkill -f` 会匹配 SSH 命令行自身（两次 exit 255）——用 `[V]LLM` 字符类或先取 PID
+6. **piper TTS 非确定性**：同文本合成字节级波动 → 成片时长边缘偶发 FAIL，复跑即过（首验 46ms 波动先例一致）
+
+### 29.4 文档同步
+
+- 《G4-样片扩产与硬件日收割记录-20260929》v1.0.0 新建（本轮主文档）
+- 留证 4 份：docs/attachments/G4-20260929/{tc-g4-002-syncnet-720p-revalidation, tc-g3-006-dgx-h3-measured, g4-expansion-dynamic-shots-syncnet, tc-g4-005-008-quality-review, tc-g4-007-cost-report}.json
+- 新增执行器：run_episode_build.sh / run_dynamic_clip.sh / run_quality_review.py / run_cost_report.py；修订：run_batch_shots.py（三章 + --episode）/ run_episode_concat.sh（filter 定版）/ h3_common.py（双端自适应，h3 仓）
+
+### 29.5 当前优先级 TOP 3（本轮更新）
+
+1. **[P1]** h3_common syncnet_score_impl 封装落地（现引用不存在模块 `syncnet_python.syncnet_pipeline`，评分走官方入口直调）+ PerformanceTimer Linux ru_maxrss 单位修复（KB vs 字节）
+2. **[P2]** LoRA 跨种子复测冲 M3 一致性 0.85+（sd-hero-prod 产物已备，n1 可直接注入 ComfyUI/生成链）
+3. **[P2]** TC-G4-006/009/010（Token-Console 真实计量 + NAS 就位）；生产化：动态素材按集定制 prompt（样片阶段三集复用同 prompt 已诚实留证）

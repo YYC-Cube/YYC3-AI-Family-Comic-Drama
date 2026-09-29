@@ -1,0 +1,23 @@
+{
+  "testcase": "G4 样片扩产动态镜头（batch9003 × seed43/44 + batch9001 复用 seed42）",
+  "date": "2026-09-29",
+  "verdict": "PASS（3/3 conf ≥0.75）",
+  "threshold": "conf >= 0.75",
+  "executor_node": "yyc3-n1 (DGX Spark GB10, torch 2.11.0+cu130)",
+  "generation": {
+    "batch": "output_batch9003",
+    "resolution": "640x384 (VAE 上取整 384 高度)",
+    "num_frames": 73,
+    "steps": 30,
+    "seed43_gen_seconds": 600.419,
+    "seed44_gen_seconds": "见 manifest（同量级约 600s）",
+    "speedup_note": "统一内存宽松后 13.3s/it，较 batch9001（27.4s/it）再提速约 2 倍"
+  },
+  "syncnet": [
+    {"seed": 42, "episode": "g4-ep01", "conf": 6.413, "dist": 8.970, "offset": -1, "verdict": "达标", "evidence": "output_batch9001（复验同款）"},
+    {"seed": 43, "episode": "g4-ep02", "conf": 8.140, "dist": 7.020, "offset": -1, "verdict": "达标（dist 首次进入经验良好带 <8）"},
+    {"seed": 44, "episode": "g4-ep03", "conf": 4.963, "dist": 9.219, "offset": 0, "verdict": "达标"}
+  ],
+  "honest_note": "三集动态素材复用同 prompt（g4t2_ref 守夜老汉台词「这么晚来义庄，您找谁？」，seed 42/43/44 区分）；集内 storyboard 第三镜对白若非该台词，存在样片阶段可接受的复用偏差，生产阶段按集定制 prompt",
+  "syncnet_params": "--min_track 40 --min_face_size 60（短视频口径）；data_dir /tmp/syncnet_9003，reference g4t2_s43/g4t2_s44"
+}
