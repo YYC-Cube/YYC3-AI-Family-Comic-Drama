@@ -121,6 +121,13 @@ def main():
     ap.add_argument("--root", default=os.getenv("PROJECT_ROOT", "/tmp/yyc3_projects"))
     ap.add_argument("--style-file", default=os.getenv("STYLE_FILE", ""),
                     help="动态 prompt 定制 JSON（按集/按镜覆盖样式，缺省复用内置 REF_STYLE）")
+    ap.add_argument("--lora", default=os.getenv("CHAR_LORA", ""),
+                    help="combo 生产配置：LoRA 文件名（ComfyUI/models/loras/ 内；"
+                         "缺省空=纯 IPAdapter 旧口径）")
+    ap.add_argument("--ipa-weight", type=float,
+                    default=float(os.getenv("IPA_WEIGHT", "0.15")),
+                    help="IPAdapter 权重（M3 二轮 combo 实证：LoRA 组合时 0.15 最优，"
+                         "历史默认 0.85 为负交互区）")
     args = ap.parse_args()
     style_cfg = load_style_file(args.style_file)
 
@@ -154,6 +161,10 @@ def main():
     manifest = {"project": args.project, "char": args.char,
                 "comfy": gw.comfy.enabled, "tts": gw.tts_client.enabled,
                 "style_file": args.style_file or None,
+                "anchor_config": {"lora": args.lora or None,
+                                  "ipa_weight": args.ipa_weight,
+                                  "strategy": "combo+seed_lock" if args.lora
+                                  else "ipadapter+seed_lock"},
                 "shots": []}
     t_start = time.time()
     for shot in sb["shots"][:args.limit]:
@@ -172,7 +183,9 @@ def main():
         row["style_source"] = style_src  # 动态 prompt 定制留证（builtin=三集复用旧口径）
         gen = gw.text_to_image(f"{style}, {shot['description']}",
                                ref_assets=[args.char], out_path=str(out),
-                               seed=seed, ref_image=args.ref_image)
+                               seed=seed, ref_image=args.ref_image,
+                               lora=args.lora or None,
+                               ipa_weight=args.ipa_weight)
         row["gen_status"] = gen["status"]
         attempts = 1
         base_seed = int(os.environ.get("CHAR_BASE_SEED", "42"))
@@ -187,7 +200,9 @@ def main():
                 row["redraw"] = "seed_lock"
                 gen = gw.text_to_image(f"{style}, {shot['description']}",
                                        ref_assets=[args.char], out_path=str(out),
-                                       seed=base_seed, ref_image=args.ref_image)
+                                       seed=base_seed, ref_image=args.ref_image,
+                                       lora=args.lora or None,
+                                       ipa_weight=args.ipa_weight)
                 attempts += 1
                 continue
             break  # escalate/blocked

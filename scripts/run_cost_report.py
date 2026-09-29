@@ -41,12 +41,13 @@ def fetch_gateway_metering(gateway_url: str, api_key: str,
         headers = {"X-API-Key": api_key} if api_key else {}
         req = urllib.request.Request(f"{gateway_url.rstrip('/')}/v1/models",
                                      headers=headers)
-        with urllib.request.urlopen(req, timeout=3) as r:
+        # 超时 8s：PG 不可达时网关端点实测 ~4s（DB 重试拖慢），3s 会误判不可达
+        with urllib.request.urlopen(req, timeout=8) as r:
             prices = {m["id"]: float(m.get("cost_per_1k_tokens") or 0)
                       for m in json.loads(r.read().decode())}
         req = urllib.request.Request(f"{gateway_url.rstrip('/')}/v1/models/stats",
                                      headers=headers)
-        with urllib.request.urlopen(req, timeout=3) as r:
+        with urllib.request.urlopen(req, timeout=8) as r:
             stats = json.loads(r.read().decode())
         rows, cost_usd = [], 0.0
         for s in stats:

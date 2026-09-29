@@ -1,0 +1,35 @@
+{
+  "project": "combo-smoke-001",
+  "char": "sd-hero",
+  "comfy": true,
+  "tts": true,
+  "style_file": null,
+  "anchor_config": {
+    "lora": "sd-hero-v2.safetensors",
+    "ipa_weight": 0.15,
+    "strategy": "combo+seed_lock"
+  },
+  "shots": [
+    {
+      "shot_id": "shot-ep01-001",
+      "seed": 1007,
+      "dialogue": "",
+      "style_source": "builtin",
+      "gen_status": "ok",
+      "similarity": 0.1391,
+      "action": "escalate",
+      "redraw": "seed_lock"
+    },
+    {
+      "shot_id": "shot-ep01-002",
+      "seed": 1014,
+      "dialogue": "",
+      "style_source": "builtin",
+      "gen_status": "ok",
+      "similarity": 0.7052,
+      "action": "escalate",
+      "redraw": "seed_lock"
+    }
+  ],
+  "elapsed_s": 2269.7
+}

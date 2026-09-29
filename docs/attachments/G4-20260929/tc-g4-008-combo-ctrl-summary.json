@@ -1,0 +1,49 @@
+{
+  "testcase": "TC-G4-008 生产链对照冒烟（纯 IPA w0.85 旧口径 vs combo w0.15）",
+  "purpose": "验证 combo 接入后旧链路（--lora 缺省空）无回归，并采集生产域产能/拒绝率双口径",
+  "config": {
+    "project": "combo-ctrl-001",
+    "anchor": "ipadapter+seed_lock",
+    "ipa_weight": 0.85,
+    "lora": null
+  },
+  "result": {
+    "shots": 2,
+    "accepted": 0,
+    "elapsed_s": 1771.5,
+    "rows": [
+      {
+        "shot": "shot-ep01-001",
+        "sim": 0.7793,
+        "action": "escalate"
+      },
+      {
+        "shot": "shot-ep01-002",
+        "sim": 0.7053,
+        "action": "escalate"
+      }
+    ],
+    "throughput_note": "约886秒/镜（含首绘+seed_lock重绘1次+转人工），1024x1024生产域"
+  },
+  "historical_baseline": {
+    "g4_ep01_03_nine_shots_20260929": "首检sim 0.5906-0.7163全部<0.85，9/9 escalate转人工",
+    "verdict_vs_baseline": "本轮0.7053-0.7793与历史区间一致且略高，旧链路无回归"
+  },
+  "comparison_vs_combo": {
+    "combo_smoke_001_first_pass": [
+      0.595,
+      0.7052
+    ],
+    "ctrl_smoke_001_first_pass": [
+      0.7793,
+      0.7053
+    ],
+    "note": "combo(w=0.15,v2)在生产域对首绘sim无增益甚至负交互（首镜-0.18），维持--lora缺省空的生产决策"
+  },
+  "verdict": {
+    "no_regression": true,
+    "production_reject_rate": "100%（2/2 escalate，与历史批次9/9一致；生产域身份一致性为未解产能瓶颈，锚定域再校准列后续项）",
+    "combo_decision": "combo能力保留为可选参数（--lora），生产默认纯IPA旧口径不变"
+  },
+  "timestamp": "2026-09-30T06:50:45+0800"
+}

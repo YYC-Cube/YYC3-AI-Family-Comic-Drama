@@ -1067,3 +1067,34 @@ core/api 接线 PathNormalizeMiddleware（最外层注册；core/app 与 core/ap
 1. **[P1]** min 口径正确路径重试：v3 数据集 42 图回退 rank32 + 步数补足 4200 步（10 epoch）重训评测（隔离 rank 变量，验证「777 补样 + 足 epoch」是否达标）；备选 v2 LoRA 增量续训
 2. **[P2]** combo(w=0.15) 接入 run_batch_shots.py 生成链（32.4 遗留，v2 配置），实测集产能与拒绝率
 3. **[P2]** G5 用例运营数据接入（TC-G5-001/004 真实窗口后收割）；G1-004 落位步骤待 /mnt/nas 挂载实机复验
+
+## 三十四、四轮 rank 变量隔离重训 + combo 生产接入 + 对照冒烟 + G1-004 上游桩计量可达（2026-09-30 第二十四轮，33.5 三项执行）
+
+### 34.1 v3r32 回退 rank32 + 4200 步重训评测（33.5-1 P1，负结果归因收敛）
+
+按 33.5 指令回退 rank32/alpha16 + 步数补足 4200 步（10 epoch 与 v2 对齐），数据集不变（v3 42 图），单变量隔离。n1 58 分钟收齐五件产物（step1050/2100/3150/4200 + 终版）。评测（4 漂移种子 insightface）：
+
+- LoRA-only s4200：mean 0.5177 / min 0.4435——与无锚基线 0.5157 持平（LoRA 本体增益≈0）
+- 组合聚焦域：w0.10 mean 0.4815 / w0.15 mean 0.4788（两组 seed999 未检出人脸降级哈希）/ w0.20 mean 0.6218（峰值，仍远未达标）
+- **min 口径（≥0.85）全线未达成**，v3r32 峰值 0.6218 较 v3r64（0.7273）进一步回退——rank 回退 + 步数补足均无法挽救
+- **三轮独立训练交叉归因收敛：回退主因 = v3 数据集新增 23 图（15 H3 密集帧 + 8 777 挖掘）的分布冲突/质量噪声，而非 rank 或步数**；锚定 LoRA 生产决策落定维持 sd-hero-v2（19 图）；v3 路线证伪归档，重启扩数据须先对新增样本做人脸质检重筛
+
+详证 tc-m3-lora-v3r32-sweep.json + train_v3r32.log（752KB 归档 /tmp/kohya_out/v3r32/），主文档 v1.5.0 §16。
+
+### 34.2 combo 生产接入 + 对照冒烟（33.5-2 P2，能力沉淀 + 旧链路无回归）
+
+- **三层透传接线**：drama_stage_adapter `_workflow`/`generate_image`/`text_to_image` 增 lora + ipa_weight 参数（LoraLoader 节点 13 全链注入，IPA model 源切换）；run_batch_shots.py 增 --lora（缺省空=旧口径逐字节等价）+ --ipa-weight（缺省 0.15），manifest 增 anchor_config 留证；自检 3/3 PASS
+- **生产域双口径实测**（1024×1024 场景域）：combo-smoke-001（combo w0.15）首绘 0.5950/0.7052 全 escalate，重绘更差（0.1391/0.1954）——负交互实证；combo-ctrl-001（纯 IPA w0.85 旧口径）0.7793/0.7053 全 escalate，与 G4-ep01~03 九镜历史区间（0.5906-0.7163）一致——**旧链路无回归**
+- **产能与拒绝率口径（诚实报告）**：纯 IPA 链 ~886 秒/镜（含首绘+seed_lock 重绘+转人工）；拒绝率 100%（2/2，与历史 9/9 一致）——生产域身份一致性为未解产能瓶颈（离线 512 肖像域不可外推），锚定域再校准列后续项；生产默认维持纯 IPA（--lora 缺省空），combo 保留为可选能力
+
+详证 tc-g4-008-combo-ctrl-summary.json + tc-g4-008-combo-ctrl-manifest.json + tc-g4-006-combo-smoke-manifest.json，主文档 v1.5.0 §17。
+
+### 34.3 G1-004 上游桩 + 计量可达路径闭环（33.5-3 P2 选择性执行）
+
+stub_upstream（:25290）+ 网关（:8010）双进程保活；计量可达路径实测 reachable=true（PG 不可达时端点 ~4 秒响应，run_cost_report.py timeout 3→8 秒修复误判）；鉴权口径复核（Bearer 仅 JWT / API Key 走 X-API-Key）；token_cost 0.0 如实（stub 零价零 token 不虚构）。留证 tc-g4-007-cost-report-gw-reachable.json，主文档 v1.5.0 §18。
+
+### 34.4 下轮起点（TOP 3）
+
+1. **[P1]** 生产域锚定再校准：当前 1024 场景域拒绝率 100%（历史+本轮双证），需按生产域重标定锚定策略——候选①生产域 prompt 下重扫 IPA 权重窗（0.85-1.0+）；②1024px 肖像/半身构图约束 prompt 模板降分布偏移；③分辨率梯度（512/768/1024）锚定衰减曲线标定
+2. **[P2]** v2 LoRA 增量续训 777 样本（33.5 备选路径，未执行）：v2 19 图 checkpoint 起步 + 8 图 777 样本低步数续训，保 v2 分布底座吸收 777 姿态增益
+3. **[P2]** G5 用例运营数据接入（TC-G5-001/004 真实窗口后收割）；G1-004 落位步骤待 /mnt/nas 挂载实机复验；combo 能力待锚定域校准后复评

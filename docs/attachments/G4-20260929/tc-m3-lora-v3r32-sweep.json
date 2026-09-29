@@ -1,0 +1,71 @@
+{
+  "testcase": "TC-M3-LoRA-v3r32 rank变量隔离重训评测（v3数据集42图 x dim32/alpha16 x 4200步/10epoch）",
+  "purpose": "上轮证伪组合(rank64+4.76epoch)后，回退rank32并补足步数至与v2对齐的10epoch，隔离归因回退主因",
+  "train": {
+    "dataset": "kohya_dataset_v3 (42图=19 v2复用+15 H3密集帧+8 777挖掘)",
+    "network": "dim32/alpha16",
+    "max_train_steps": 4200,
+    "save_steps": 1050,
+    "lr": "5e-4 constant AdamW",
+    "seed": 42,
+    "base_model": "DreamShaper_8_pruned",
+    "env": "yyc3-n1 kohya venv (HF_HUB_OFFLINE=1)",
+    "elapsed_note": "3826/4200 @1.24it/s avr_loss 0.0544，总时长约56分钟"
+  },
+  "eval_protocol": "4漂移种子(777/888/999/1111) insightface余弦 vs hero_base.png",
+  "results": {
+    "lora_only_s4200": {
+      "mean": 0.5177,
+      "min": 0.4435,
+      "max": 0.6258,
+      "rows": {
+        "777": 0.4435,
+        "888": 0.5388,
+        "999": 0.6258,
+        "1111": 0.4627
+      }
+    },
+    "combo_w010": {
+      "mean": 0.4815,
+      "min": -0.0585,
+      "note": "seed999未检出人脸，降级哈希模式sim不可信"
+    },
+    "combo_w015": {
+      "mean": 0.4788,
+      "min": -0.0428,
+      "note": "seed999未检出人脸，降级哈希模式sim不可信"
+    },
+    "combo_w020": {
+      "mean": 0.6218,
+      "min": 0.5344
+    }
+  },
+  "historical_baseline": {
+    "v2_combo_w015_s2000": {
+      "mean": 0.8669,
+      "min": 0.778
+    },
+    "v3r64_combo_w015_s2000_4p76ep": {
+      "mean": 0.7273,
+      "min": 0.7068
+    },
+    "no_anchor_mean": 0.5157,
+    "ipadapter_only_plusface_mean": 0.67
+  },
+  "verdict": {
+    "min_ge_085": false,
+    "conclusion": "v3r32三组combo与LoRA-only全线未达标(min口径0.85)，且较v3r64(0.7273)进一步回退至0.6218峰值；rank回退+步数补足均无法挽救，单变量归因收敛：v3数据集新增23图(H3密集帧+777挖掘)为回退主因",
+    "action": "生产锚定维持v2配置(sd-hero-v2, 19图)；v3数据集路线证伪归档，若重启扩数据须先对新增样本做人脸质检重筛"
+  },
+  "artifacts": {
+    "lora_only": "kohya_eval_v3r32_s4200.json",
+    "combo_json": [
+      "combo_v3r32_w0.10.json",
+      "combo_v3r32_w0.15.json",
+      "combo_v3r32_w0.20.json"
+    ],
+    "train_log": "train_v3r32.log",
+    "checkpoints": "sd-hero-v3r32{,-step00001050,-step00002100,-step00003150,-step00004200}.safetensors"
+  },
+  "timestamp": "2026-09-30T06:49:43+0800"
+}
