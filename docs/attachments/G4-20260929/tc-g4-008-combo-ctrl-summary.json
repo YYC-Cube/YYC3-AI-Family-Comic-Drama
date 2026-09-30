@@ -1,11 +1,12 @@
 {
-  "testcase": "TC-G4-008 生产链对照冒烟（纯 IPA w0.85 旧口径 vs combo w0.15）",
+  "testcase": "TC-G4-008 生产链对照冒烟（纯 IPA w0.15 无 LoRA vs combo w0.15+v2 LoRA）",
   "purpose": "验证 combo 接入后旧链路（--lora 缺省空）无回归，并采集生产域产能/拒绝率双口径",
   "config": {
     "project": "combo-ctrl-001",
     "anchor": "ipadapter+seed_lock",
-    "ipa_weight": 0.85,
-    "lora": null
+    "ipa_weight": 0.15,
+    "lora": null,
+    "weight_note": "纠错（2026-09-30）：初版记录误写 0.85；manifest 实测 anchor_config.ipa_weight=0.15（--ipa-weight 缺省值，本轮新增参数首战未显式传参）——以 manifest 为准"
   },
   "result": {
     "shots": 2,
@@ -30,15 +31,9 @@
     "verdict_vs_baseline": "本轮0.7053-0.7793与历史区间一致且略高，旧链路无回归"
   },
   "comparison_vs_combo": {
-    "combo_smoke_001_first_pass": [
-      0.595,
-      0.7052
-    ],
-    "ctrl_smoke_001_first_pass": [
-      0.7793,
-      0.7053
-    ],
-    "note": "combo(w=0.15,v2)在生产域对首绘sim无增益甚至负交互（首镜-0.18），维持--lora缺省空的生产决策"
+    "combo_smoke_001_first_pass": [0.595, 0.7052],
+    "ctrl_smoke_001_first_pass": [0.7793, 0.7053],
+    "note": "两冒烟 IPA 权重同为 0.15，唯一变量 LoRA 有无：LoRA 在生产域首镜 -0.18、次镜持平——LoRA 为生产域负交互因子（非 IPA 权重）"
   },
   "verdict": {
     "no_regression": true,

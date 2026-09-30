@@ -1,0 +1,67 @@
+{
+  "testcase": "TC-G5-预研 生产域锚定再校准（HANDOFF 34.4 P1，纯 IPA 三轴）",
+  "protocol": "生产链同参（adapter 工作流 1024/负向空/分镜 prompt/种子 sid*7+1000），insightface 余弦 vs hero_base.png，2 生产镜头",
+  "axis_a_weight_window": {
+    "w015_ctrl_manifest": {
+      "source": "combo-ctrl-001 manifest（纯 IPA w0.15 @1024）",
+      "shot-ep01-001": 0.7793,
+      "shot-ep01-002": 0.7053
+    },
+    "w050": {
+      "shot-ep01-001": 0.7124,
+      "shot-ep01-002": 0.6767
+    },
+    "w085": {
+      "shot-ep01-001": 0.6631,
+      "shot-ep01-002": 0.7071
+    },
+    "w100": {
+      "shot-ep01-001": 0.6628,
+      "shot-ep01-002": 0.664
+    },
+    "means": {
+      "w0.15": 0.7423,
+      "w0.50": 0.69455,
+      "w0.85": 0.6851,
+      "w1.00": 0.6634
+    },
+    "best_w": 0.5
+  },
+  "axis_b_composition": {
+    "suffix": ", upper body portrait, facing viewer, centered composition",
+    "comp_w050": {
+      "w050_shot-ep01-001": 0.7064,
+      "w050_shot-ep01-002": 0.6571
+    },
+    "comp_w015": {
+      "w015_shot-ep01-001": 0.7048,
+      "w015_shot-ep01-002": 0.6958
+    },
+    "means": {
+      "w0.5": 0.6818,
+      "w0.15": 0.7003
+    }
+  },
+  "axis_c_resolution_decay": {
+    "res512_w015": {
+      "shot-ep01-001": 0.6527,
+      "shot-ep01-002": 0.6411
+    },
+    "res1024_w015_ctrl": {
+      "source": "combo-ctrl-001 manifest（纯 IPA w0.15 @1024）",
+      "shot-ep01-001": 0.7793,
+      "shot-ep01-002": 0.7053
+    },
+    "mean_512": 0.6469,
+    "mean_1024": 0.7423,
+    "decay": 0.0954
+  },
+  "timestamp": "2026-09-30T10:47:31+0800",
+  "conclusions": {
+    "axis_a": "权重窗单调递减：w0.15 最优（0.7423），生产域与离线域同向——现行 --ipa-weight 缺省 0.15 即实测最优配置，零变更获实证背书",
+    "axis_b": "构图约束后缀无增益（w0.15: -0.042 / w0.50: -0.013）——场景叙事稀释效应，该路线证伪",
+    "axis_c": "1024 反优于 512（+0.095），『分辨率衰减』假设被实测推翻——生产分辨率不是锚定劣化原因",
+    "verdict": "三轴均无法突破 0.85（全场最佳 0.7423 = w0.15 基线自身）：生产域 100% 拒绝率根因为 PLUS FACE 在场景叙事 prompt 域的身份保持能力边界（模型能力问题，非配置问题）。生产配置维持纯 IPA w0.15 不变；瓶颈破局路线 = 更强身份保持模型（InstantID/PuLID 类）替换评测，列下轮候选",
+    "artifacts": "recal_*.png x10（/tmp/kohya_out，1024 x8 + 512 x2，种子 1007/1014）+ 本报告"
+  }
+}

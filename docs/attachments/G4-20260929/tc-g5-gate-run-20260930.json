@@ -1,0 +1,90 @@
+{
+  "testcase": "TC-G5 门禁执行器首轮运行（骨架生产化）",
+  "gate_summary": {
+    "TC-G5-001": "BLOCKED",
+    "TC-G5-002": "BLOCKED",
+    "TC-G5-003": "partial",
+    "TC-G5-004": "BLOCKED",
+    "TC-G5-005": "BLOCKED",
+    "TC-G5-006": "BLOCKED"
+  },
+  "gate_verdict": "BLOCKED-partial",
+  "cases": {
+    "TC-G5-001": {
+      "case": "反哺前后完播率对比（>=5pp）",
+      "verdict": "BLOCKED",
+      "honest_note": "依赖真实运营曝光窗口（每集 >=30 会话 x2 期），手册允许 BLOCKED"
+    },
+    "TC-G5-002": {
+      "case": "TC-G5-002 反哺后产能提升（>=30%）",
+      "baseline": "TC-G4-009：3 集/晚（tc-g4-009-nightly-batch-stats.json）",
+      "verdict": "BLOCKED",
+      "honest_note": "反哺项（锚定域再校准/combo 复评）未全量启用，整夜批量窗口未复跑；计算链就绪（manifest 聚合 + 产能对照），启用后一键复算"
+    },
+    "TC-G5-003": {
+      "case": "TC-G5-003 LoRA 增量训练触发验证",
+      "step1_trigger_judgement": {
+        "rule": "组合峰值 mean < 0.85 触发（均值口径上线门槛）",
+        "rows": [
+          {
+            "model": "sd-hero-v2（生产上线配置）",
+            "combo_peak_mean": 0.8669,
+            "trigger_fired": false,
+            "expected": false,
+            "correct": true,
+            "evidence": "tc-m3-lora-v2-sweep.json"
+          },
+          {
+            "model": "sd-hero-v3（rank64+4.76ep）",
+            "combo_peak_mean": 0.7273,
+            "trigger_fired": true,
+            "expected": true,
+            "correct": true,
+            "evidence": "tc-m3-lora-v3-sweep.json"
+          },
+          {
+            "model": "sd-hero-v3r32（rank32+10ep）",
+            "combo_peak_mean": 0.6218,
+            "trigger_fired": true,
+            "expected": true,
+            "correct": true,
+            "evidence": "tc-m3-lora-v3r32-sweep.json"
+          }
+        ],
+        "accuracy": 1.0,
+        "false_trigger_count": 0,
+        "verdict": "PASS"
+      },
+      "step2_incremental_retrain": {
+        "verdict": "BLOCKED",
+        "note": "增量重训窗口待排（33.5 备选路径：v2 checkpoint 起步 + 777 样本低步数续训）"
+      },
+      "step3_re_eval": {
+        "verdict": "BLOCKED",
+        "note": "依赖 step2"
+      },
+      "verdict": "partial",
+      "honest_note": "①触发判定 100% 准确/零误触发（真实执行三模型）；②③待训练窗口，手册预期 min≥0.85 复测口径不变"
+    },
+    "TC-G5-004": {
+      "case": "伯乐排期建议采纳率（>=60%）",
+      "verdict": "BLOCKED",
+      "honest_note": "依赖智语伯乐接入排期流程 >=4 周期台账，手册允许 BLOCKED"
+    },
+    "TC-G5-005": {
+      "case": "TC-G5-005 运营成本反哺核算（较基线降 >=20%）",
+      "baseline_cny_per_ep": [
+        0.0158,
+        0.0335
+      ],
+      "verdict": "BLOCKED",
+      "honest_note": "G4 基线 0.0158-0.0335 元/集在位；反哺项未全量启用故无'反哺后'核算对象；核算链 v1.1.1 就绪（电费折算 + Token-Console 计量接入，timeout 8s 修复）"
+    },
+    "TC-G5-006": {
+      "case": "G5 回归门禁（启动前置）",
+      "verdict": "BLOCKED",
+      "honest_note": "启动前置：G5 其余用例执行完毕；回归集（G1 三项+G2 十用例+G3 五项+G4 抽样）清单与历史留证已对齐"
+    }
+  },
+  "timestamp": "2026-09-30T08:40:35+0800"
+}

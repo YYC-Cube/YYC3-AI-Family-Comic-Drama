@@ -1,0 +1,25 @@
+# TC-G1-004 E2E 三探针复验（2026-09-30，真实网关 :8010 + 桩上游 :25290）
+# 鉴权：X-API-Key（密钥运行时读取零入库）
+
+===== probe1_mac_alias =====
+预期：Mac 别名归一（期待 x-yyc3-path-normalized: 1）
+HTTP 200  x-yyc3-upstream=stub-llm  x-yyc3-path-normalized=1  17.9s
+----- 响应体 -----
+{"id":"chatcmpl-stub-61069232f808","object":"chat.completion","created":1790728704,"model":"stub-chat-1","choices":[{"index":0,"message":{"role":"assistant","content":"OK from stub upstream（E2E 链路验证）· 收到 6 字符"},"finish_reason":"stop"}],"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":
+
+===== probe2_boundary =====
+预期：/mnt/nasdir 边界不篡改（期待无归一头 + 网关 warning）
+HTTP 200  x-yyc3-upstream=stub-llm  x-yyc3-path-normalized=-  10.6s
+----- 响应体 -----
+{"id":"chatcmpl-stub-a7df33712064","object":"chat.completion","created":1790728715,"model":"stub-chat-1","choices":[{"index":0,"message":{"role":"assistant","content":"OK from stub upstream（E2E 链路验证）· 收到 6 字符"},"finish_reason":"stop"}],"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":
+
+===== probe3_relative =====
+预期：嵌套相对路径归一（期待 meta.out_dir -> /mnt/nas/projects/ep01）
+HTTP 200  x-yyc3-upstream=stub-llm  x-yyc3-path-normalized=1  11.7s
+----- 响应体 -----
+{"id":"chatcmpl-stub-d0bd98376d43","object":"chat.completion","created":1790728727,"model":"stub-chat-1","choices":[{"index":0,"message":{"role":"assistant","content":"OK from stub upstream（E2E 链路验证）· 收到 6 字符"},"finish_reason":"stop"}],"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":
+===== 网关日志对应段 =====
+INFO:app.middleware.path_normalize:[path_normalize] nas_output_path: /Volumes/nas/projects/_g1_probe/tc-g1-004-e2e.txt -> /mnt/nas/projects/_g1_probe/tc-g1-004-e2e.txt（探针1，x-yyc3-path-normalized: 1）
+WARNING:app.middleware.path_normalize:[path_normalize] 非 NAS 路径，原样保留：/mnt/nasdir/x/t.txt（探针2，无归一头）
+INFO:app.middleware.path_normalize:[path_normalize] meta.out_dir: projects/ep01 -> /mnt/nas/projects/ep01（探针3，x-yyc3-path-normalized: 1）
+INFO:httpx: HTTP Request: POST http://127.0.0.1:25290/v1/chat/completions "HTTP/1.1 200 OK"（三探针均真实透传桩上游）
