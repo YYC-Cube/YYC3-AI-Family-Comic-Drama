@@ -1,0 +1,30 @@
+{
+  "v2m777_ep1_w015": {
+    "combo_v2_w015_777.png": 0.7309,
+    "combo_v2_w015_888.png": 0.9091,
+    "combo_v2_w015_999.png": 0.8995,
+    "combo_v2_w015_1111.png": 0.9122
+  },
+  "faceid_sweep": {
+    "faceid_v2_sweep_fv230_w120_s1111.png": 0.7691,
+    "faceid_v2_sweep_fv230_w120_s777.png": 0.7288,
+    "faceid_v2_sweep_fv230_w120_s888.png": 0.7821,
+    "faceid_v2_sweep_fv230_w120_s999.png": 0.7687,
+    "faceid_v2_sweep_fv230_w160_s1111.png": 0.7343,
+    "faceid_v2_sweep_fv230_w160_s777.png": 0.6658,
+    "faceid_v2_sweep_fv230_w160_s888.png": 0.7293,
+    "faceid_v2_sweep_fv230_w160_s999.png": 0.746,
+    "faceid_v2_sweep_fv240_w160_s1111.png": 0.6637,
+    "faceid_v2_sweep_fv240_w160_s777.png": 0.6498,
+    "faceid_v2_sweep_fv240_w160_s888.png": 0.696,
+    "faceid_v2_sweep_fv240_w160_s999.png": 0.6991
+  },
+  "faceid_probe": {
+    "faceid_v2_probe_fv220_w120_s888.png": 0.7472,
+    "faceid_v2_probe_fv220_w80_s888.png": 0.7554,
+    "faceid_v2_probe_fv230_w120_s888.png": 0.7821,
+    "faceid_v2_probe_fv230_w80_s888.png": 0.8052
+  },
+  "faceid_smoke": 0.7892,
+  "ref_calibration": 1.0
+}

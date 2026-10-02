@@ -1,0 +1,32 @@
+{
+  "testcase": "TC-EVAL-REF-DRIFT 评测参考系漂移发现与校准（2026-10-02）",
+  "category": "负结果如实留证 + 根因治理",
+  "phenomenon": {
+    "date": "2026-10-02",
+    "symptom": "当日全部评测数值异常塌方：FaceID PlusV2 初判 mean 0.4896（<0.67 历史基线）、v2m777 初判 mean 0.5187（远低于 v2 基线 0.8669），各模型普遍落至 0.51-0.56 区间",
+    "first_signal": "sd-hero-v2 本体（历史达标模型）同口径重测也塌至 0.5108——达标模型不可能劣化至此，判定为参考系问题而非模型问题"
+  },
+  "root_cause": {
+    "finding": "seed42 纯生成参考图（hero_base）随 ComfyUI 环境更新漂移：当日以同参数重建 /tmp/comfy_out/hero_base.png，与 2026-09-27 库存特征向量余弦仅 0.5675",
+    "mechanism": "ComfyUI 节点/模型链在 9/27 后发生更新，同 seed 复现产物不再是逐字节稳定对象；以'重建图'为参考系等价于用漂移尺子量历史产物，致全体评测误判",
+    "invariant": "ComfyUI/input/hero_base.png（2026-09-27 设定图本体文件）逐字节稳定，与库存向量校准 1.0，为唯一可信参考系锚点"
+  },
+  "arbitration": {
+    "method": "insightface 特征库向量比对",
+    "ref_calibration": 1.0,
+    "anchor": "ComfyUI/input/hero_base.png"
+  },
+  "remediation": {
+    "code_fix": "scripts/run_lora_plusface_combo.py HERO 锚定历史设定图本体，/tmp 仅回落并告警",
+    "pending_unified": "run_kohya_lora.py / run_batch_shots.py / run_anchor_domain_recal.py 的 HERO 仍指 /tmp，待后续统一治理",
+    "rescoring": "对已生成产物以历史参考系重评分（rescore_histref.json），恢复真实可比值",
+    "rescore_detail_evidence": "rescore_histref.json"
+  },
+  "misjudgement_corrections": [
+    {"item": "FaceID PlusV2 初判 FAIL（0.4896）", "corrected": "历史参考系重评 mean 0.7926，见 tc-m3-faceid-plusv2-eval.json"},
+    {"item": "v2m777 初判崩坏（0.5187）", "corrected": "历史参考系重评 mean 0.8586，见 tc-m3-lora-v2m777-eval.json"}
+  ],
+  "cross_day_rule": "历史各日评测在当日参考系内自洽；跨日对比必须锚定当日设定图本体（input/ 目录存档），禁止以纯生成图作跨日参考系",
+  "raw_reports_from_wrong_ref": ["tc-m3-faceid-plusv2-report-raw.json（错误参考系期 raw 报告，如实保留不删除）"],
+  "timestamp": "2026-10-02T00:00:00+08:00"
+}

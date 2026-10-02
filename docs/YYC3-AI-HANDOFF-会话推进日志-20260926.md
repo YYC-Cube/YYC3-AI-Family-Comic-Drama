@@ -1121,3 +1121,33 @@ run_anchor_domain_recal.py 生产链同参三轴网格（纯 IPA，2 生产镜�
 1. **[P1]** 身份保持模型替换评测：PLUS FACE 能力边界已定位（三轴配置优化全部证伪），候选 InstantID / PuLID 接入 adapter 工作流同口径评测（生产 2 镜 + 离线 4 漂移种子双域），目标生产域 mean ≥0.85
 2. **[P2]** v2 LoRA 增量续训 777 样本（34.4-2 遗留）：v2 19 图 checkpoint 起步 + 8 图 777 样本低步数续训
 3. **[P2]** G5-003②③ 增量重训窗口（依赖 P2-2 产物）；G5-002/005 反哺项启用后一键复算（执行器已就绪）；G1-004 落位步骤待 /mnt/nas 挂载实机复验
+
+## 三十六、评测参考系漂移校准 + FaceID PlusV2 升级评测 + v2m777 增量续训与 G5-003 联动（2026-10-02 第二十六轮，35.4 三项执行）
+
+### 36.1 评测参考系漂移发现与校准（35.4 执行期关键根因，先于一切评测结论）
+
+35.4 P1/P2 首日全部评测塌方（FaceID 初判 0.4896 / v2m777 初判 0.5187），**首信号为达标模型 v2 本体重测也塌至 0.5108**——判定参考系问题。库存向量仲裁：当日同参重建的 seed42 参考图与 9/27 库存向量余弦仅 0.5675（ComfyUI 环境更新致同 seed 产物漂移），而 **ComfyUI/input/hero_base.png（9/27 设定图本体）逐字节稳定、校准 1.0**。处置：run_lora_plusface_combo.py HERO 锚定历史设定图本体（/tmp 回落告警；run_kohya_lora/run_batch_shots/run_anchor_domain_recal 同类硬编码待统一治理）；全部产物以历史参考系重评分恢复真实值；**跨日规则沉淀：纯生成图禁止作跨日参考系，必须锚定当日设定图本体**。错误参考系期 raw 报告如实保留。留证 tc-eval-ref-drift-20261002.json + rescore_histref.json。
+
+### 36.2 FaceID PlusV2 升级评测（35.4 P1：升级有效但不敌 v2 组合）
+
+模型落地：ip-adapter-faceid-plusv2_sd15.bin（156,558,509 字节 Content-Length 校验；仓库主模型为 .bin 无 safetensors 版）+ 配套 lora 51MB，hf-mirror 下载（直连超时 exit 28）。InstantID/PuLID 勘察：均为 SDXL 专属与 DreamShaper 8（SD15）不兼容，基模迁移独立决策。评测（历史参考系，采样链与生产 adapter 逐参一致）：
+
+| 配置 | mean | min |
+| ---- | ---- | ---- |
+| FaceID PlusV2 单独（fv2.3, w0.8） | 0.7926（较 PLUS FACE 0.67 +12pp） | 0.7368 |
+| LoRA(v2)+FaceID w0.15/fv3.0 | 0.8248 | **0.8036（全实验 min 冠军）** |
+| **v2 组合基线（重测复现历史）** | **0.8672** | 0.7846 |
+
+判定：FaceID 组合 mean 0.8248 < v2 组合 0.8672，**SD15 模型族内 0.85 目标无一达标**——生产锚定维持 v2 组合；FaceID 组合沉淀 min 稳定度备选；adapter 接线留待用户决策（评测先行纪律，drama_stage_adapter 未动）。留证 tc-m3-faceid-plusv2-eval.json + faceid_lora_combo.json + final_eval_histref.json。
+
+### 36.3 v2m777 增量续训 + G5-003 联动复测（35.4 P2）
+
+n1 kohya 真实执行：v2 checkpoint 起步（network_weights 口径）+ 8×777 挖掘样本（27 图，无 caption 走 class token，384 图 LANCZOS 上采样过断言）+ 540 步 2ep（1.14it/s）。离线评测（历史参考系）：v2m777 mean **0.8586 守住 0.85 线**但 777 种子 0.7846→**0.7269 反降**（1ep 中间档 0.7256 同）——777 样本系 v2 自生成同分布，续训为分布巩固非泛化，**生产维持 v2 不替换**。文件减半之谜：keys 792/792 一致仅 fp16 保存口径。G5-003 执行器 35.4 改造复跑：①四档判定全对（v2m777 0.8586 不触发预期正确）准确率 100%/误触发 0；②增量重训 BLOCKED→DONE；③复测 FAIL 如实（min 0.7269<0.85 手册预期未达）→ gate_verdict: FAIL 不虚构。留证 tc-m3-lora-v2m777-eval.json + tc-g5-gate-run-20261002.json + train_v2m777.log。
+
+背景态：G1-004 落位保持 BLOCKED（NAS 未挂载）；主文档 v1.7.0（§23-26）；yyc3-ai-agent-archive 无变更。
+
+### 36.4 下轮起点（TOP 3）
+
+1. **[P1]** FaceID 组合生产接线决策（待用户）：min 稳定度备选（0.8036）是否接入 drama_stage_adapter（mean 口径不优于 v2 组合，仅「防最差帧」场景价值）；若接则 adapter FaceID 分支 + 生产冒烟 + G4-006 对照复跑
+2. **[P1]** HERO 参考系统一治理：run_kohya_lora.py / run_batch_shots.py / run_anchor_domain_recal.py 三脚本 HERO 硬编码 /tmp 迁移至历史设定图锚定（对齐 run_lora_plusface_combo.py 修复模式），消除跨日评测漂移隐患
+3. **[P2]** 基模迁移可行性预研（SDXL 系 InstantID/PuLID 破局 0.85 的唯一路径）：DreamShaper XL 候选评估 + 显存/耗时预算 + 迁移影响面（adapter/LoRA 全链重训评估）；G5-002/005 反哺项启用与夜间窗口复跑并行推进

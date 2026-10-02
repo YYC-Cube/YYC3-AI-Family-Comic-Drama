@@ -1,0 +1,37 @@
+{
+  "testcase": "TC-M3-LoRA-v2m777 增量续训评测（35.4 P2，修正参考系终报）",
+  "reference": "ComfyUI/input/hero_base.png（2026-09-27 历史设定图本体，库存向量校准 1.0）",
+  "protocol": "4 漂移种子（777/888/999/1111）x 512px x PORTRAIT+DRIFT_SUFFIX，combo w0.15 口径，insightface 余弦",
+  "training": {
+    "env": "n1（ssh yyc3-n1）/home/yyc3/venvs/kohya（Py3.10）+ sd-scripts，HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1",
+    "recipe": "v2 checkpoint 起步（network_weights 口径）+ dim32/alpha16 + lr 1e-4 constant AdamW + bf16 + save_precision fp16",
+    "dataset": "27 图（v2 19 张 + mine777 8 张，无 caption 走 class token；9 张 384x384 经 LANCZOS 上采样至 512）",
+    "schedule": "2 epochs = 540/540 步（1.14it/s）",
+    "artifacts": [
+      "sd-hero-v2m777.safetensors（2ep 最终，fp16，37.8MB）",
+      "sd-hero-v2m777-000001.safetensors（1ep 中间档）"
+    ],
+    "log_evidence": "train_v2m777.log"
+  },
+  "file_size_note": "37.8MB vs v2 75.6MB：safetensors keys 完全一致（792/792，TE=0，UNet=576），差异仅 fp16 保存口径，非结构缺失",
+  "eval_groups": [
+    {"tag": "v2_rebase_combo_w015", "role": "v2 基线同参考系重测（复现历史基线）",
+     "per_seed": {"777": 0.7846, "888": 0.8851, "999": 0.892, "1111": 0.9071},
+     "mean": 0.8672, "min": 0.7846, "max": 0.9071,
+     "consistency": "逐点复现历史基线（历史 mean 0.8669/min 0.7846），验证锚定修复有效"},
+    {"tag": "v2m777_combo_w015", "role": "增量续训 2ep 最终档",
+     "per_seed": {"777": 0.7269, "888": 0.9002, "999": 0.898, "1111": 0.9092},
+     "mean": 0.8586, "min": 0.7269, "max": 0.9092},
+    {"tag": "v2m777_ep1_combo_w015", "role": "增量续训 1ep 中间档",
+     "per_seed": {"777": 0.7256, "888": 0.9036, "999": 0.8976, "1111": 0.9136},
+     "mean": 0.8601, "min": 0.7256, "max": 0.9136}
+  ],
+  "verdict": {
+    "mean_gate": "PASS——mean 0.8586 >= 0.85，G5-003 均值口径不触发增量训练（gate 四档判定中预期 False 判定正确）",
+    "min_gate": "FAIL——手册预期 min>=0.85 未达：777 种子 0.7846→0.7269 反降；1ep 中间档 0.7256 同样未达",
+    "decision": "不替换 v2，生产维持 sd-hero-v2 组合；v2m777 归档为增量续训实验结论"
+  },
+  "negative_finding": "777 挖掘样本系 v2 自生成同分布数据，低步数续训表现为分布巩固而非泛化增强——泛化目标（拉高最差种子）未达成，如实记录",
+  "raw_evidence": ["final_eval_histref.json", "train_v2m777.log"],
+  "timestamp": "2026-10-02T00:00:00+08:00"
+}

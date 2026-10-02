@@ -33,7 +33,13 @@ PORTRAIT = ("portrait of a young chinese wuxia heroine, delicate face, "
 DRIFT_SUFFIX = ", smiling, night lantern lighting, different angle"
 NEGATIVE = "低质量、变形、多余手指、水印"
 SEEDS = [777, 888, 999, 1111]
-HERO = Path("/tmp/comfy_out/hero_base.png")
+# 参考图锚定历史设定图本体（2026-10-02 实证：/tmp 重建的 seed42 生成图随 ComfyUI
+# 环境更新漂移，同 seed 复现 sim 仅 0.5675，致评测全线塌方误判——设定图文件
+# 逐字节稳定，为唯一可信参考系锚点；/tmp 产物仅作回落并告警）
+HERO = Path("/Users/yanyu/YYC-Cube/tools/ComfyUI/input/hero_base.png")
+if not HERO.exists():
+    HERO = Path("/tmp/comfy_out/hero_base.png")
+    print(f"[warn] 历史设定图缺失，回落 /tmp 参考系（有漂移风险）：{HERO}")
 
 # 基线（见 tc-m3-lora-crosseed-eval.json / G4 首验记录）
 BASELINES = {"no_anchor_mean": 0.5157, "lora_only_v1_best_mean": 0.6441,

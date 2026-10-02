@@ -1,0 +1,96 @@
+{
+  "testcase": "TC-M3-升级 IP-Adapter FaceID PlusV2 离线域门控评测（HANDOFF 35.4 P1）",
+  "config": {
+    "preset": "FACEID PLUS V2",
+    "lora_strength": 0.6,
+    "provider": "CPU",
+    "weight_type": "linear",
+    "combine_embeds": "concat",
+    "embeds_scaling": "V only",
+    "end_at": 1.0,
+    "workflow": "IPAdapterUnifiedLoaderFaceID + IPAdapterFaceID（官方示例接线）"
+  },
+  "protocol": "与 run_lora_plusface_combo 同参：4 漂移种子(777/888/999/1111) 25步 euler/normal/cfg7/512，PORTRAIT+DRIFT 提示词，insightface 余弦 vs hero_base",
+  "baselines": {
+    "plusface_offline_ipa_only_mean": 0.67,
+    "no_anchor_mean": 0.5157,
+    "combo_v2_offline_w015": {
+      "mean": 0.8669,
+      "min": 0.778
+    },
+    "target_ge_0.85": "生产域 mean>=0.85（PLUS FACE 生产基线 0.7423）"
+  },
+  "probe_single_seed888": [
+    {
+      "fv2": 1.0,
+      "w": 0.8,
+      "sim": 0.5601
+    },
+    {
+      "fv2": 2.0,
+      "w": 0.8,
+      "sim": 0.4934
+    },
+    {
+      "fv2": 2.0,
+      "w": 1.2,
+      "sim": 0.5034
+    },
+    {
+      "fv2": 3.0,
+      "w": 0.8,
+      "sim": 0.5408
+    },
+    {
+      "fv2": 3.0,
+      "w": 1.2,
+      "sim": 0.5456
+    }
+  ],
+  "sweep_4seed": [
+    {
+      "fv2": 3.0,
+      "w": 1.2,
+      "rows": [
+        0.463,
+        0.5456,
+        0.4872,
+        0.4627
+      ],
+      "mean": 0.4896,
+      "min": 0.4627
+    },
+    {
+      "fv2": 3.0,
+      "w": 1.6,
+      "rows": [
+        0.4465,
+        0.4709,
+        0.4436,
+        0.4129
+      ],
+      "mean": 0.4435,
+      "min": 0.4129
+    },
+    {
+      "fv2": 4.0,
+      "w": 1.6,
+      "rows": [
+        0.446,
+        0.451,
+        0.4289,
+        0.414
+      ],
+      "mean": 0.435,
+      "min": 0.414
+    }
+  ],
+  "verdict": {
+    "offline_gate": "FAIL：峰值 4 种子 mean 0.4896（fv2=3.0/w=1.2）< PLUS FACE 基线 0.67 < 目标 0.85",
+    "weight_trend": "w>1.2 与 fv2>3.0 单调退化（过强度破坏构图一致性与身份）",
+    "production_eval": "SKIP（协议门控：离线域未过 → 生产域不评测，节省约 30 分钟 GPU）",
+    "attribution": "FaceID 嵌入训练于真实人脸域，对本项目古风/汉服风格化角色迁移弱；PLUS FACE（CLIP 图像域）仍是 SD15 域最优可得锚定。InstantID/PuLID 均为 SDXL 专属，需基模迁移（下轮独立决策项）"
+  },
+  "evidence_files": "13 张生成产物 /tmp/kohya_out/faceid_v2_*.png（md5 互异、逐张真实生成）",
+  "timestamp": "2026-10-02T10:40:21+0800"
+}

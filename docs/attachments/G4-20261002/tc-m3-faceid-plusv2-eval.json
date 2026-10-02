@@ -1,0 +1,36 @@
+{
+  "testcase": "TC-M3-FaceID-PlusV2 身份保持模型升级评测（35.4 P1，修正参考系终报）",
+  "reference": "ComfyUI/input/hero_base.png（2026-09-27 历史设定图本体，库存向量校准 1.0）",
+  "protocol": "4 漂移种子（777/888/999/1111）x 512px x PORTRAIT+DRIFT_SUFFIX，insightface 余弦 vs 历史设定图",
+  "model_deployment": {
+    "ipadapter": "models/ipadapter/ip-adapter-faceid-plusv2_sd15.bin（156,558,509 字节，与 hf Content-Length 一致；仓库主模型为 .bin 无 safetensors 版）",
+    "lora": "models/loras/ip-adapter-faceid-plusv2_sd15_lora.safetensors（51MB，lora_strength 0.6 自动装配）",
+    "download": "hf-mirror.com（hf 直连超时 exit 28）",
+    "workflow": "IPAdapterUnifiedLoaderFaceID(preset FACEID PLUS V2, provider CPU) -> IPAdapterFaceID(weight_type linear, combine_embeds concat, embeds_scaling 'V only')；采样链与生产 adapter 逐参一致（25 步 euler/normal/cfg7.0）"
+  },
+  "eval_groups": [
+    {"tag": "faceid_fv30_w080", "role": "FaceID PlusV2 单独（fv2.3, w0.8 峰值档）",
+     "per_seed": {"777": 0.7368, "888": 0.8052, "999": 0.81, "1111": 0.8183},
+     "mean": 0.7926, "min": 0.7368, "max": 0.8183,
+     "comparison": "PLUS FACE 旧版单独 mean 0.67 → +12pp，模型升级有效；但仍低于 v2 组合 0.8672"},
+    {"tag": "combo_w010_fv30", "role": "LoRA(v2)+FaceID 组合 w0.1/fv3.0",
+     "per_seed": [0.7477, 0.8444, 0.8667, 0.8981], "mean": 0.8392, "min": 0.7477},
+    {"tag": "combo_w015_fv30", "role": "LoRA(v2)+FaceID 组合 w0.15/fv3.0",
+     "per_seed": [0.8036, 0.8117, 0.8285, 0.8555], "mean": 0.8248, "min": 0.8036,
+     "comparison": "min 0.8036 为全实验最高（v2 组合 min 0.7846、v2m777 min 0.7269）——min 稳定度冠军"},
+    {"tag": "combo_w020_fv30", "role": "LoRA(v2)+FaceID 组合 w0.2/fv3.0",
+     "per_seed": [0.7851, 0.7832, 0.7795, 0.8171], "mean": 0.7912, "min": 0.7795},
+    {"tag": "combo_w015_fv40", "role": "LoRA(v2)+FaceID 组合 w0.15/fv4.0",
+     "per_seed": [0.7246, 0.7781, 0.7792, 0.8129], "mean": 0.7737, "min": 0.7246},
+    {"tag": "combo_w030", "role": "LoRA(v2)+FaceID 组合 w0.3（对照组，权重过强劣化）",
+     "per_seed": [0.7796, 0.6724, 0.656, 0.7093], "mean": 0.7043, "min": 0.656}
+  ],
+  "verdict": {
+    "vs_baseline": "FaceID 组合最优 mean 0.8248 < v2 组合 0.8672（mean 口径无优势）；FaceID 单独 0.7926 亦低于 v2 组合",
+    "target_085": "0.85 目标无一配置达标（mean 口径）——与 PLUS FACE 时代结论一致，模型族内优化已到顶，基模迁移（SDXL 系 InstantID/PuLID）为独立决策项",
+    "decision": "生产锚定维持 v2 组合（mean 口径）；FaceID 组合沉淀为 min 稳定度备选（0.8036 全实验最高），适用于'防最差帧'场景；生产 adapter 接线留待用户决策（评测先行纪律，本轮未动 drama_stage_adapter）"
+  },
+  "misjudgement_note": "错误参考系期初判 FAIL（mean 0.4896）系参考系漂移误判，已由 TC-EVAL-REF-DRIFT 纠正并以历史参考系重评；错误期 raw 报告见 tc-m3-faceid-plusv2-report-raw.json（如实保留）",
+  "raw_evidence": ["final_eval_histref.json", "faceid_lora_combo.json", "rescore_histref.json", "tc-eval-ref-drift-20261002.json"],
+  "timestamp": "2026-10-02T00:00:00+08:00"
+}
