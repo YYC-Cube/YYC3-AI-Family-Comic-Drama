@@ -11,7 +11,7 @@
 from pathlib import Path
 
 import numpy as np
-from PIL import Image, ImageEnhance
+from PIL import Image, ImageEnhance  # pyright: ignore[reportMissingImports] 实存于 manju venv（PIL 12.3.0），LSP 环境解析见 pyrightconfig executionEnvironments
 # 参考图锚定历史设定图本体（2026-10-02 参考系漂移治理：/tmp 纯生成图随 ComfyUI
 # 环境更新漂移禁止作跨日参考系；设定图本体逐字节稳定为唯一锚点；/tmp 仅回落并
 # 告警——对齐 run_lora_plusface_combo.py 修复模式）
@@ -40,8 +40,7 @@ def variants(img: Image.Image) -> dict[str, Image.Image]:
     bright_dn = arr * 0.75
 
     w, h = img.size
-    ch = int(h * 0.8)  # 裁掉 20% 再 resize = 视角/构图变化
-    cw = int(w * 0.8)
+    ch = int(h * 0.8)  # 裁掉 20% 再 resize = 视角/构图变化（crop 仅垂直向）
 
     return {
         "orig": img,

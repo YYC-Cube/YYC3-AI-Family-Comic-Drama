@@ -45,7 +45,7 @@ EVAL_PROMPT = ("portrait of a young chinese wuxia heroine, delicate face, "
 
 def prep():
     """组装 kohya 数据集：<TRAIN_ROOT>/10_hero/*.png + 同名 .txt"""
-    from PIL import Image
+    from PIL import Image  # pyright: ignore[reportMissingImports] 实存于 manju venv
 
     concept = TRAIN_ROOT / "10_hero"
     concept.mkdir(parents=True, exist_ok=True)
@@ -142,7 +142,7 @@ def eval_combo(lora_path: str, ipa_scale: float):
     import json
 
     import torch  # pyright: ignore[reportMissingImports]
-    from PIL import Image
+    from PIL import Image  # pyright: ignore[reportMissingImports] 实存于 manju venv
 
     from diffusers import StableDiffusionPipeline  # pyright: ignore[reportMissingImports]
 

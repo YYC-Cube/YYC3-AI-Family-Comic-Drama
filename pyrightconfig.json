@@ -1,9 +1,16 @@
 {
-  // basedpyright 环境解析：网关子仓 yyc3-0379-world 的依赖安装于其自有 .venv
-  // （fastapi/starlette/sqlalchemy/uvicorn/pydantic/psutil/prometheus-*），
+  // basedpyright 环境解析：按目录分流 venv——
+  //   scripts/（评测/工具脚本）依赖 PIL/numpy/insightface，装于 manju .venv；
+  //   其余（网关子仓 yyc3-0379-world）依赖 fastapi/sqlalchemy 等，装于其自有 .venv；
   // 不指定时 IDE 用全局解释器导致「无法解析导入」误报。
   "venvPath": ".",
   "venv": "yyc3-0379-world/.venv",
+  "executionEnvironments": [
+    {
+      "root": "scripts",
+      "venv": "yyc3-ai-manju-studio/.venv"
+    }
+  ],
   "reportMissingImports": "error",
   "reportMissingModuleSource": "warning",
   "typeCheckingMode": "standard"
