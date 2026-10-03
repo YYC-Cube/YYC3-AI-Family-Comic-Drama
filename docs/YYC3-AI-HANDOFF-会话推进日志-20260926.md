@@ -1151,3 +1151,25 @@ n1 kohya 真实执行：v2 checkpoint 起步（network_weights 口径）+ 8×777
 1. **[P1]** FaceID 组合生产接线决策（待用户）：min 稳定度备选（0.8036）是否接入 drama_stage_adapter（mean 口径不优于 v2 组合，仅「防最差帧」场景价值）；若接则 adapter FaceID 分支 + 生产冒烟 + G4-006 对照复跑
 2. **[P1]** HERO 参考系统一治理：run_kohya_lora.py / run_batch_shots.py / run_anchor_domain_recal.py 三脚本 HERO 硬编码 /tmp 迁移至历史设定图锚定（对齐 run_lora_plusface_combo.py 修复模式），消除跨日评测漂移隐患
 3. **[P2]** 基模迁移可行性预研（SDXL 系 InstantID/PuLID 破局 0.85 的唯一路径）：DreamShaper XL 候选评估 + 显存/耗时预算 + 迁移影响面（adapter/LoRA 全链重训评估）；G5-002/005 反哺项启用与夜间窗口复跑并行推进
+
+## 三十七、FaceID 双档位生产接线 + HERO 参考系统一治理 + 基模迁移预研（2026-10-03 第二十七轮，36.4 TOP3 执行）
+
+### 37.1 FaceID 双档位生产接线（36.4 TOP1，用户决策「双档位接线」）
+
+AskUserQuestion 确认口径后执行：drama_stage_adapter **v1.3**（archive 仓）默认 plus_face 档零变更，新增 faceid 档（IPAdapterFaceID PlusV2 评测冠军配置 w0.15/fv3.0），`ipa_profile` 参数 / `COMFYUI_IPA_PROFILE` 环境变量双通道切换。生产冒烟 + G4-006 对照复跑（run_faceid_adapter_smoke.py，verdict **PASS**）：①缺省零变更断言通过；②plus_face 回归 mean 0.8669（漂移 0.0003，接线无回归）；③faceid 冠军复现 mean 0.8248/min 0.8036 **与评测基线逐点完全一致（漂移 0.0）**；④1024 生产冒烟 ok（27.4s，sim 0.703 信息性；首轮 300s 超时系队列排队，超时参数教训已沉淀：批量护航 1024 faceid 须 COMFYUI_TIMEOUT>=700）。冒烟脚本含断点续跑（--reuse-existing）与 TimeoutError 兜底。留证 tc-g4-006-faceid-adapter-ctrl.json。
+
+### 37.2 HERO 参考系统一治理（36.4 TOP2 收口）
+
+run_kohya_lora.py / run_anchor_domain_recal.py / run_batch_shots.py 三脚本 /tmp 硬编码全部迁移历史设定图本体锚定（对齐 combo 脚本模式，/tmp 回落告警；CHAR_BASE_IMAGE 覆盖语义保留）——§23 参考系漂移治理脚本层全量收口。py_compile 三脚本通过。
+
+### 37.3 基模迁移可行性预研（36.4 TOP3 收口）
+
+结论**可行**（报告 docs/YYC3-62-基模迁移可行性预研-SDXL身份保持-20261002.md）：InstantID（28s/8.5GB）与 PuLID（35s/10.2GB）均为 SDXL 实装；首选 DreamShaper XL（同作者风格断点最小）；核心成本为 SDXL LoRA 全量重训（SD15 UNet 576 keys 不兼容）；评测协议零变更；现役 SD15 全链保留一键回退。三阶段：①纯基模+InstantID 预验（mean>=0.80 门槛）→ ②SDXL LoRA 重训+combo 扫描 → ③双口径切换决策。本轮前置产出：YYC3-61 全链路闭环生产操作指导目录（教科书级六篇二十章，提交 7ec7bdd）。
+
+背景态：ComfyUI 在线（:41888）；G1-004 落位保持 BLOCKED（NAS 未挂载）；主文档 v1.8.0（§27-29）。
+
+### 37.4 下轮起点（TOP 3）
+
+1. **[P1]** 基模迁移阶段 1：DreamShaper XL + InstantID 节点包落地（hf-mirror/civitai 双通道）+ 零 LoRA 纯基模 4 种子预验（单独 mean >= 0.80 门槛，对齐 FaceID PlusV2 先例）
+2. **[P2]** faceid 档生产化观测：夜间批 3 集以 plus_face 默认跑，抽样镜头以 COMFYUI_IPA_PROFILE=faceid 对照（min 稳定度实证）；G5-002/005 反哺项夜间窗口一键复算
+3. **[P2]** G1-004 落位待 /mnt/nas 挂载复验（保持 BLOCKED 留证）；62 号预研报告评审与阶段 2（SDXL LoRA 重训）排期决策

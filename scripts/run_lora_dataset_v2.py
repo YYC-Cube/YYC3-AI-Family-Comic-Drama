@@ -12,8 +12,13 @@ from pathlib import Path
 
 import numpy as np
 from PIL import Image, ImageEnhance
-
-HERO = Path("/tmp/comfy_out/hero_base.png")
+# 参考图锚定历史设定图本体（2026-10-02 参考系漂移治理：/tmp 纯生成图随 ComfyUI
+# 环境更新漂移禁止作跨日参考系；设定图本体逐字节稳定为唯一锚点；/tmp 仅回落并
+# 告警——对齐 run_lora_plusface_combo.py 修复模式）
+HERO = Path("/Users/yanyu/YYC-Cube/tools/ComfyUI/input/hero_base.png")
+if not HERO.exists():
+    HERO = Path("/tmp/comfy_out/hero_base.png")
+    print(f"[warn] 历史设定图缺失，回落 /tmp 参考系（有漂移风险）：{HERO}")
 H3_FRAMES = Path("/tmp/h3_frames")
 OUT = Path("/tmp/kohya_train_v2/train/10_sdhero")
 
