@@ -18,7 +18,13 @@ from pathlib import Path
 
 import numpy as np  # noqa: F401  (PIL 转换用)
 
-HERO = Path("/tmp/comfy_out/hero_base.png")
+# 参考图锚定历史设定图本体（2026-10-02 参考系漂移治理：/tmp 纯生成图随 ComfyUI
+# 环境更新漂移（实证 sim 0.5675）禁止作跨日参考系；设定图本体逐字节稳定为唯一
+# 锚点；/tmp 产物仅作回落并告警——对齐 run_lora_plusface_combo.py 修复模式）
+HERO = Path("/Users/yanyu/YYC-Cube/tools/ComfyUI/input/hero_base.png")
+if not HERO.exists():
+    HERO = Path("/tmp/comfy_out/hero_base.png")
+    print(f"[warn] 历史设定图缺失，回落 /tmp 参考系（有漂移风险）：{HERO}")
 TRAIN_ROOT = Path("/tmp/kohya_train/train")
 OUT_DIR = Path("/tmp/kohya_out")
 LORA_PATH = OUT_DIR / "sd-hero.safetensors"

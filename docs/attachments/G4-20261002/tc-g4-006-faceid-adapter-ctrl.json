@@ -1,0 +1,106 @@
+{
+  "testcase": "TC-G4-006 FaceID 双档位接线生产冒烟 + 对照复跑（adapter v1.3）",
+  "decision": "双档位接线（用户决策）：默认 plus_face 不变，faceid 为 min 稳定度备选",
+  "default_behavior": {
+    "ipa_profile": "plus_face",
+    "assert": "无环境变量时缺省 plus_face，零变更通过"
+  },
+  "plus_face_regression": {
+    "rows": [
+      {
+        "seed": 777,
+        "sim": 0.778,
+        "mode": "insightface",
+        "latency_s": null,
+        "bytes": 350407,
+        "reused": true
+      },
+      {
+        "seed": 888,
+        "sim": 0.8852,
+        "mode": "insightface",
+        "latency_s": null,
+        "bytes": 360805,
+        "reused": true
+      },
+      {
+        "seed": 999,
+        "sim": 0.8943,
+        "mode": "insightface",
+        "latency_s": null,
+        "bytes": 350198,
+        "reused": true
+      },
+      {
+        "seed": 1111,
+        "sim": 0.9103,
+        "mode": "insightface",
+        "latency_s": null,
+        "bytes": 351545,
+        "reused": true
+      }
+    ],
+    "mean": 0.8669,
+    "min": 0.778,
+    "max": 0.9103,
+    "baseline": {
+      "mean": 0.8672,
+      "min": 0.7846
+    },
+    "mean_drift": 0.0003,
+    "verdict": "PASS"
+  },
+  "faceid_champion_repro": {
+    "rows": [
+      {
+        "seed": 777,
+        "sim": 0.8036,
+        "mode": "insightface",
+        "latency_s": null,
+        "bytes": 351760,
+        "reused": true
+      },
+      {
+        "seed": 888,
+        "sim": 0.8117,
+        "mode": "insightface",
+        "latency_s": null,
+        "bytes": 368951,
+        "reused": true
+      },
+      {
+        "seed": 999,
+        "sim": 0.8285,
+        "mode": "insightface",
+        "latency_s": null,
+        "bytes": 358740,
+        "reused": true
+      },
+      {
+        "seed": 1111,
+        "sim": 0.8555,
+        "mode": "insightface",
+        "latency_s": null,
+        "bytes": 362753,
+        "reused": true
+      }
+    ],
+    "mean": 0.8248,
+    "min": 0.8036,
+    "max": 0.8555,
+    "baseline": {
+      "mean": 0.8248,
+      "min": 0.8036
+    },
+    "mean_drift": 0.0,
+    "verdict": "PASS"
+  },
+  "production_1024_smoke": {
+    "status": "ok",
+    "sim": 0.703,
+    "latency_s": 27.4
+  },
+  "protocol": "4 漂移种子 x 512 x PORTRAIT+DRIFT_SUFFIX，insightface 余弦 vs 历史设定图本体（HERO 锚定）",
+  "verdict": "PASS",
+  "timestamp": "2026-10-03T10:03:37+0800"
+}

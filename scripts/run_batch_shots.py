@@ -139,7 +139,11 @@ def main():
     enc = FaceEncoder(library_root=str(LIBRARY))
     if not (LIBRARY / args.char / "feature.npy").exists():
         shutil.rmtree(LIBRARY, ignore_errors=True)
-        src = os.environ.get("CHAR_BASE_IMAGE", f"/tmp/comfy_out/hero_base.png")
+        # 参考图锚定历史设定图本体（2026-10-02 参考系漂移治理：
+        # /tmp 纯生成图禁作跨日参考系；CHAR_BASE_IMAGE 仍可显式覆盖）
+        src = os.environ.get(
+            "CHAR_BASE_IMAGE",
+            "/Users/yanyu/YYC-Cube/tools/ComfyUI/input/hero_base.png")
         enc.save_character(args.char, args.char, src)
     guard = AnchorGuard(library_root=str(LIBRARY))
 

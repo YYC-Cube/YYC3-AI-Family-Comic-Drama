@@ -54,7 +54,13 @@ from extractor import extract_elements  # type: ignore
 from storyboard_schema import draft_storyboard  # type: ignore
 from run_batch_shots import NOVEL, REF_STYLE  # type: ignore  生产 prompt 单一事实源
 
-HERO = Path("/tmp/comfy_out/hero_base.png")
+# 参考图锚定历史设定图本体（2026-10-02 参考系漂移治理：/tmp 纯生成图随 ComfyUI
+# 环境更新漂移禁止作跨日参考系；设定图本体逐字节稳定为唯一锚点；/tmp 仅回落并
+# 告警——对齐 run_lora_plusface_combo.py 修复模式）
+HERO = Path("/Users/yanyu/YYC-Cube/tools/ComfyUI/input/hero_base.png")
+if not HERO.exists():
+    HERO = Path("/tmp/comfy_out/hero_base.png")
+    print(f"[warn] 历史设定图缺失，回落 /tmp 参考系（有漂移风险）：{HERO}")
 OUT_DIR = Path("/tmp/kohya_out")
 # 轴A 权重窗（w0.15 由 combo-ctrl-001 留证覆盖，不重跑）
 WEIGHTS_A = [0.50, 0.85, 1.00]
