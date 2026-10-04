@@ -138,7 +138,10 @@ def main():
     gw = DramaToolGateway()
     enc = FaceEncoder(library_root=str(LIBRARY))
     if not (LIBRARY / args.char / "feature.npy").exists():
-        shutil.rmtree(LIBRARY, ignore_errors=True)
+        # 2026-10-05 加固（首审 P1-11）：原 shutil.rmtree(LIBRARY) 无条件清空整个
+        # 共享特征库——多角色扩产时会互相删除对方档案。改为仅清理并重建本角色
+        # 目录（save_character 覆盖写 feature.npy + manifest.json，两件产物自包含）
+        shutil.rmtree(LIBRARY / args.char, ignore_errors=True)
         # 参考图锚定历史设定图本体（2026-10-02 参考系漂移治理：
         # /tmp 纯生成图禁作跨日参考系；CHAR_BASE_IMAGE 仍可显式覆盖）
         src = os.environ.get(
@@ -171,63 +174,104 @@ def main():
                                   else "ipadapter+seed_lock"},
                 "shots": []}
     t_start = time.time()
+    state_path = proj / "state" / "manifest.json"
+
+    # ── 2026-10-05 加固（首审 P1-11）：断点续跑 + 逐镜增量落盘 ──
+    # 此前 manifest 在循环结束后才统一写盘：单镜异常即丢整批进度记录；
+    # 重跑也无法跳过已达标镜头。现改为：每镜完成即写盘；已 accept 且产物
+    # 在位的镜头重跑时跳过（夜批窗口中断后可续跑）。
+    prev_accepted: set[str] = set()
+    if state_path.exists():
+        try:
+            prev = json.loads(state_path.read_text(encoding="utf-8"))
+        except Exception as exc:
+            print(f"[batch] 警告：既有 manifest 解析失败，忽略续跑（{exc}）")
+            prev = {}
+        if isinstance(prev, dict) and prev.get("char") == args.char:
+            prev_accepted = {
+                s["shot_id"] for s in prev.get("shots", [])
+                if s.get("action") == "accept"
+                and (proj / "images" / f"{s['shot_id']}.png").exists()
+            }
+    if prev_accepted:
+        print(f"[batch] 断点续跑：{len(prev_accepted)} 镜已达标跳过 "
+              f"{sorted(prev_accepted)}")
+
+    def write_manifest() -> None:
+        manifest["elapsed_s"] = round(time.time() - t_start, 1)
+        state_path.write_text(
+            json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+
     for shot in sb["shots"][:args.limit]:
         sid = shot["shot_id"]
         seed = int(sid.split("-")[-1]) * 7 + 1000  # 镜头稳定种子（跨批可复现）
         row = {"shot_id": sid, "seed": seed, "dialogue": shot["dialogue"][:30]}
 
-        pre = guard.pre_anchor(args.char, shot["image_prompt"])
-        if not pre["ok"]:
-            row.update(status="blocked", reason=pre["reason"])
+        if sid in prev_accepted:
+            row.update(action="accept", resumed=True)  # 沿用上次达标结果
             manifest["shots"].append(row)
+            write_manifest()
             continue
 
-        out = proj / "images" / f"{sid}.png"
-        style, style_src = resolve_style(style_cfg, args.episode, sid)
-        row["style_source"] = style_src  # 动态 prompt 定制留证（builtin=三集复用旧口径）
-        gen = gw.text_to_image(f"{style}, {shot['description']}",
-                               ref_assets=[args.char], out_path=str(out),
-                               seed=seed, ref_image=args.ref_image,
-                               lora=args.lora or None,
-                               ipa_weight=args.ipa_weight)
-        row["gen_status"] = gen["status"]
-        attempts = 1
-        base_seed = int(os.environ.get("CHAR_BASE_SEED", "42"))
-        while gen["status"] == "ok" and attempts <= guard.max_attempts:
-            chk = guard.post_check(args.char, str(out), attempts=attempts)
-            row.update(similarity=chk.get("similarity"), action=chk["action"])
-            if chk["action"] == "accept":
-                break
-            if chk["action"] == "redraw":
-                # 生产策略（G3 v1.3/v1.4 实证）：IPAdapter 锚定不足时回退
-                # seed-lock（角色基础种子确定性重绘，同参缓存近零成本）
-                row["redraw"] = "seed_lock"
-                gen = gw.text_to_image(f"{style}, {shot['description']}",
-                                       ref_assets=[args.char], out_path=str(out),
-                                       seed=base_seed, ref_image=args.ref_image,
-                                       lora=args.lora or None,
-                                       ipa_weight=args.ipa_weight)
-                attempts += 1
+        try:
+            pre = guard.pre_anchor(args.char, shot["image_prompt"])
+            if not pre["ok"]:
+                row.update(status="blocked", reason=pre["reason"])
+                manifest["shots"].append(row)
+                write_manifest()
                 continue
-            break  # escalate/blocked
-        if gen["status"] != "ok":
-            row["status"] = gen["status"]  # stub / stub_fallback（降级留证）
 
-        # TTS（有对白且服务在线）
-        if shot["dialogue"] and gw.tts_client.enabled:
-            wav = proj / "audio" / f"{sid}.wav"
-            r = gw.tts(shot["dialogue"], out_path=str(wav))
-            row["tts"] = r.get("status")
+            out = proj / "images" / f"{sid}.png"
+            style, style_src = resolve_style(style_cfg, args.episode, sid)
+            row["style_source"] = style_src  # 动态 prompt 定制留证（builtin=三集复用旧口径）
+            gen = gw.text_to_image(f"{style}, {shot['description']}",
+                                   ref_assets=[args.char], out_path=str(out),
+                                   seed=seed, ref_image=args.ref_image,
+                                   lora=args.lora or None,
+                                   ipa_weight=args.ipa_weight)
+            row["gen_status"] = gen["status"]
+            attempts = 1
+            base_seed = int(os.environ.get("CHAR_BASE_SEED", "42"))
+            while gen["status"] == "ok" and attempts <= guard.max_attempts:
+                chk = guard.post_check(args.char, str(out), attempts=attempts)
+                row.update(similarity=chk.get("similarity"), action=chk["action"])
+                if chk["action"] == "accept":
+                    break
+                if chk["action"] == "redraw":
+                    # 生产策略（G3 v1.3/v1.4 实证）：IPAdapter 锚定不足时回退
+                    # seed-lock（角色基础种子确定性重绘，同参缓存近零成本）
+                    row["redraw"] = "seed_lock"
+                    gen = gw.text_to_image(f"{style}, {shot['description']}",
+                                           ref_assets=[args.char], out_path=str(out),
+                                           seed=base_seed, ref_image=args.ref_image,
+                                           lora=args.lora or None,
+                                           ipa_weight=args.ipa_weight)
+                    attempts += 1
+                    continue
+                break  # escalate/blocked
+            if gen["status"] != "ok":
+                row["status"] = gen["status"]  # stub / stub_fallback（降级留证）
+
+            # TTS（有对白且服务在线）
+            if shot["dialogue"] and gw.tts_client.enabled:
+                wav = proj / "audio" / f"{sid}.wav"
+                r = gw.tts(shot["dialogue"], out_path=str(wav))
+                row["tts"] = r.get("status")
+        except Exception as exc:
+            # 单镜异常不再终止整批（断流不断批）：留证后继续下一镜
+            row["status"] = "error"
+            row["error"] = f"{type(exc).__name__}: {exc}"
+            print(f"[batch] {sid}: ERROR {type(exc).__name__}: {exc}（留证并继续）")
 
         manifest["shots"].append(row)
+        write_manifest()
         print(f"[batch] {sid}: gen={row.get('gen_status')} sim={row.get('similarity')} "
               f"action={row.get('action')} tts={row.get('tts', '-')}")
 
-    manifest["elapsed_s"] = round(time.time() - t_start, 1)
-    (proj / "state" / "manifest.json").write_text(
-        json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+    write_manifest()
     ok = sum(1 for s in manifest["shots"] if s.get("action") == "accept")
     print(json.dumps({"summary": {"shots": len(manifest["shots"]), "accepted": ok,
+                                  "resumed": len(prev_accepted),
                                   "elapsed_s": manifest["elapsed_s"],
                                   "comfy": manifest["comfy"], "tts": manifest["tts"]}},
                      ensure_ascii=False))
