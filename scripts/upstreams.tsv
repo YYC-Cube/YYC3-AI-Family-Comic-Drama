@@ -2,6 +2,12 @@
 # 格式（| 分隔）：上游仓库 | 本地目标目录 | 上游源路径 | 本地目标路径 | 保护文件(逗号分隔,可选) | sparse路径(分号分隔,可选)
 # 规则：保护文件存在时不被覆盖（本地 README/.gitignore/.env.example 为准）；sparse 用于巨型仓库按需拉取
 # YYC3-AI-Agent-Archive 为 3.9 万文件巨型仓库，启用 sparse checkout 仅拉取 packages 核心
+#
+# ── 同步豁免域（2026-10-05 首审 P2-12 治理：以下路径由本地维护，rsync 不覆盖）──
+# · yyc3-ai-agent-archive/components/   参考快照（事实源=yyc3-0379-world/core/agents，见其 __init__ 声明；
+#   漂移治理入口：scripts/check_agent_drift.py --strict）
+# · yyc3-minimax-h3/scripts/pipeline-tools/ 与 packages/manifest-schema  pnpm-workspace.yaml/package.json/pnpm-lock.yaml
+#   已于 2026-10-05 自 .upstream-cache 补齐——上游 sparse 清单若更新请对照本行核销
 YYC3-0379-World | yyc3-0379-world | core | core | |
 YYC3-0379-World | yyc3-0379-world | agents | agents | |
 YYC3-0379-World | yyc3-0379-world | Dockerfile | Dockerfile | |
