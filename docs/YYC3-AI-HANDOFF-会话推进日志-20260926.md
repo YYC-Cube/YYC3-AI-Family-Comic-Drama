@@ -1173,3 +1173,25 @@ run_kohya_lora.py / run_anchor_domain_recal.py / run_batch_shots.py 三脚本 /t
 1. **[P1]** 基模迁移阶段 1：DreamShaper XL + InstantID 节点包落地（hf-mirror/civitai 双通道）+ 零 LoRA 纯基模 4 种子预验（单独 mean >= 0.80 门槛，对齐 FaceID PlusV2 先例）
 2. **[P2]** faceid 档生产化观测：夜间批 3 集以 plus_face 默认跑，抽样镜头以 COMFYUI_IPA_PROFILE=faceid 对照（min 稳定度实证）；G5-002/005 反哺项夜间窗口一键复算
 3. **[P2]** G1-004 落位待 /mnt/nas 挂载复验（保持 BLOCKED 留证）；62 号预研报告评审与阶段 2（SDXL LoRA 重训）排期决策
+
+## 三十八、开源对标功能演进审核（2026-10-03 第三十八轮，用户指令：MiraFrame/OnlyShot 分析 + 同类检索 + 适用性审核）
+
+### 38.1 调研执行
+
+- **双仓库实态核实**（GitHub API + raw README 全文）：MiraFrame（TS 全栈/LangGraph.js/71 star/MIT/**维护停滞约 4 个月**；简报外新发现 CRITIQUE 自批判环）；OnlyShot（Python Skill/302 star/MIT/v0.6.1；简报外新发现 --no-fingerprint 指纹隔离、multimodal stuck 回捞、evals 18 断言）。
+- **同类检索**（GitHub Search API 三轮）：huobao-drama 核实 15,670 star（赛道最高，**license NOASSERTION 与简报 MIT 不符，代码借鉴前须澄清**）；**新发现 Jellyfish（6,607 star/Apache-2.0，一致性管理独立成层，与 anchor_guard 同向）**；BigBanana/Toonflow/ArcReel/ManjuForge/AIMangaStudio 未核实（简报转述口径，不作采纳依据）。
+- 产出 [YYC3-63-开源对标功能演进审核-AI漫剧全链路-20261003.md](YYC3-63-开源对标功能演进审核-AI漫剧全链路-20261003.md)：审核矩阵 15 项（采纳 6/部分采纳 5/不采纳 4）+ 三阶段演进推进流程图。
+
+### 38.2 核心结论
+
+本项目差异化壁垒在指标化质量门禁与治理体系（四对标项目均无）；演进方向为补内容运营层（A1 市场情报/A2 节奏地图 90s 折算/A6 自批判环）与工作流显性化（A3 选帧闸门/A4 故障手册/A5 合规预检/A7 Fake 冒烟），**不重构已闭环工程链路**（LangGraph/消息队列/Web UI 均判不采纳，防过度工程）。
+
+### 38.3 背景态
+
+ComfyUI 在线（:41888）；G1-004 保持 BLOCKED；YYC3-62 基模迁移阶段 1 未启动（E1 演进项优先级高于基模迁移排期，经本轮审核调整——E1 均为零/低 GPU 成本治理与运营加固）。
+
+### 38.4 下轮起点（TOP 3）
+
+1. **[P1]** E1 第一轮（治理加固）：A4 故障模式手册成册（37 轮教训结构化 >=11 条）+ A5 敏感词预检 + manifest AIGC 字段 + A7 全链 Fake 冒烟预检
+2. **[P1]** E1 第二轮（内容运营）：A2 节奏地图 schema 与 90s 折算校准 + A3 候选选帧闸门（anchor_guard 预打分复用）+ A6 分镜 6 维自批判环
+3. **[P2]** A9 H3 frames2video 能力勘察（E2 前置）+ Jellyfish 一致性管理层深读 + 基模迁移阶段 1（37.4 遗留，排期待定）
