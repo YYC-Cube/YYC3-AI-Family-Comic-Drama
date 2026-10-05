@@ -1,0 +1,262 @@
+{
+  "testcase": "SDXL 阶段 2 组合扫描（DreamShaperXL_Lightning + LoRA + InstantID）",
+  "lora": "sd-hero-xl-v1.safetensors",
+  "ckpt": "DreamShaperXL_Lightning.safetensors",
+  "sampling": {
+    "steps": 8,
+    "cfg": 1.8,
+    "size": "1024x1024"
+  },
+  "grid": [
+    {
+      "lora_strength": 0.6,
+      "instantid_weight": 0.6,
+      "rows": [
+        {
+          "seed": 777,
+          "sim": 0.9329
+        },
+        {
+          "seed": 888,
+          "sim": 0.9358
+        },
+        {
+          "seed": 999,
+          "sim": 0.9265
+        },
+        {
+          "seed": 1111,
+          "sim": 0.9343
+        }
+      ],
+      "mean": 0.9324,
+      "min": 0.9265
+    },
+    {
+      "lora_strength": 0.6,
+      "instantid_weight": 0.8,
+      "rows": [
+        {
+          "seed": 777,
+          "sim": 0.9186
+        },
+        {
+          "seed": 888,
+          "sim": 0.9192
+        },
+        {
+          "seed": 999,
+          "sim": 0.9152
+        },
+        {
+          "seed": 1111,
+          "sim": 0.9108
+        }
+      ],
+      "mean": 0.916,
+      "min": 0.9108
+    },
+    {
+      "lora_strength": 0.6,
+      "instantid_weight": 1.0,
+      "rows": [
+        {
+          "seed": 777,
+          "sim": 0.8961
+        },
+        {
+          "seed": 888,
+          "sim": 0.8894
+        },
+        {
+          "seed": 999,
+          "sim": 0.8966
+        },
+        {
+          "seed": 1111,
+          "sim": 0.8843
+        }
+      ],
+      "mean": 0.8916,
+      "min": 0.8843
+    },
+    {
+      "lora_strength": 0.8,
+      "instantid_weight": 0.6,
+      "rows": [
+        {
+          "seed": 777,
+          "sim": 0.9372
+        },
+        {
+          "seed": 888,
+          "sim": 0.9303
+        },
+        {
+          "seed": 999,
+          "sim": 0.9293
+        },
+        {
+          "seed": 1111,
+          "sim": 0.9303
+        }
+      ],
+      "mean": 0.9318,
+      "min": 0.9293
+    },
+    {
+      "lora_strength": 0.8,
+      "instantid_weight": 0.8,
+      "rows": [
+        {
+          "seed": 777,
+          "sim": 0.9246
+        },
+        {
+          "seed": 888,
+          "sim": 0.9154
+        },
+        {
+          "seed": 999,
+          "sim": 0.9114
+        },
+        {
+          "seed": 1111,
+          "sim": 0.9198
+        }
+      ],
+      "mean": 0.9178,
+      "min": 0.9114
+    },
+    {
+      "lora_strength": 0.8,
+      "instantid_weight": 1.0,
+      "rows": [
+        {
+          "seed": 777,
+          "sim": 0.9096
+        },
+        {
+          "seed": 888,
+          "sim": 0.8915
+        },
+        {
+          "seed": 999,
+          "sim": 0.9024
+        },
+        {
+          "seed": 1111,
+          "sim": 0.8952
+        }
+      ],
+      "mean": 0.8997,
+      "min": 0.8915
+    },
+    {
+      "lora_strength": 1.0,
+      "instantid_weight": 0.6,
+      "rows": [
+        {
+          "seed": 777,
+          "sim": 0.9291
+        },
+        {
+          "seed": 888,
+          "sim": 0.9229
+        },
+        {
+          "seed": 999,
+          "sim": 0.9268
+        },
+        {
+          "seed": 1111,
+          "sim": 0.9313
+        }
+      ],
+      "mean": 0.9275,
+      "min": 0.9229
+    },
+    {
+      "lora_strength": 1.0,
+      "instantid_weight": 0.8,
+      "rows": [
+        {
+          "seed": 777,
+          "sim": 0.9159
+        },
+        {
+          "seed": 888,
+          "sim": 0.9143
+        },
+        {
+          "seed": 999,
+          "sim": 0.9035
+        },
+        {
+          "seed": 1111,
+          "sim": 0.9144
+        }
+      ],
+      "mean": 0.912,
+      "min": 0.9035
+    },
+    {
+      "lora_strength": 1.0,
+      "instantid_weight": 1.0,
+      "rows": [
+        {
+          "seed": 777,
+          "sim": 0.9008
+        },
+        {
+          "seed": 888,
+          "sim": 0.9021
+        },
+        {
+          "seed": 999,
+          "sim": 0.8879
+        },
+        {
+          "seed": 1111,
+          "sim": 0.8995
+        }
+      ],
+      "mean": 0.8976,
+      "min": 0.8879
+    }
+  ],
+  "best": {
+    "lora_strength": 0.6,
+    "instantid_weight": 0.6,
+    "rows": [
+      {
+        "seed": 777,
+        "sim": 0.9329
+      },
+      {
+        "seed": 888,
+        "sim": 0.9358
+      },
+      {
+        "seed": 999,
+        "sim": 0.9265
+      },
+      {
+        "seed": 1111,
+        "sim": 0.9343
+      }
+    ],
+    "mean": 0.9324,
+    "min": 0.9265
+  },
+  "baseline": {
+    "sdxl_instantid_only(阶段1)": 0.8446,
+    "sd15_v2_combo_prod": 0.8672,
+    "sd15_min_champion": 0.8036
+  },
+  "gate": {
+    "mean_ge_0.85": true,
+    "min_ge_0.8036": true
+  },
+  "production_switch_review": true
+}
