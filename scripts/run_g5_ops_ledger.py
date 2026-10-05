@@ -51,6 +51,22 @@ PLAN = {
     "assets": {"local": "~/YYC-Cube/YYC3-assets/projects/",
                "n1": "~/yyc3-archive/projects/",
                "note": "六集成片双端归档（2026-10-05，MD5 核对）"},
+    # ── 平台矩阵定案（2026-10-05 用户批复「执行推荐」多选多推） ──
+    "platforms": {
+        "decision": "2026-10-05 用户批复执行多选多推推荐组合",
+        "g5_primary": "bilibili",
+        "reason_primary": "成片 1920x1080 横屏——B站原生适配零转制；"
+                          "创作者中心完播数据最细；充电付费已被 AI 漫剧验证",
+        "domestic_traffic": ["douyin"],
+        "domestic_note": "抖音竖版分发（涨粉蓄水），数据不入 P0/P1 判定",
+        "overseas": ["tiktok", "youtube_shorts"],
+        "overseas_note": "竖版+英配字幕待产出后开号分发",
+        "longterm_pitch": ["dramabox", "yourchannel"],
+        "longterm_note": "成片积累后 portal 投递（无需先行开号）",
+        "account_policy": "全部新建专号（G5 归因纯净 + AI漫剧垂类标签 + 品牌统一）",
+        "vertical_assets": "六集 1080x1920 竖版已产出（*_vertical.mp4，"
+                           "blur-pad 零画面损失，run_vertical_transcode.py）",
+    },
 }
 
 
