@@ -1205,7 +1205,8 @@ ComfyUI 在线（:41888）；G1-004 保持 BLOCKED；YYC3-62 基模迁移阶段 
 - **A7 全链 Fake 冒烟**：[run_fake_smoke.py](../scripts/run_fake_smoke.py) 强制 stub 环境子进程跑批次链路，6 断言（exit/分镜/敏感词/AIGC/stub 产物/elapsed）全绿，1.5s 零 GPU——夜批前置闸门纪律落位。
 - **A2 节奏地图**：[run_rhythm_check.py](../scripts/run_rhythm_check.py) 红果 7 招 90s 折算（target=base×集长/180，折算红线入册）+ beat 回写 v2；**实测 6/7 覆盖**（countdown 88.5s 缺口有建议）。
 - **A3 候选选帧**：[run_storyboard_candidates.py](../scripts/run_storyboard_candidates.py) 每镜 N 候选+anchor 预打分排名+`--pick sid:rank` 终选回写 manifest；**实测 c0 sim=0.679 推荐+落位成功**（首次跑暴露目录未初始化 E-04 已修入册）。
-- **A6 自批判环**：[run_storyboard_critique.py](../scripts/run_storyboard_critique.py) 六维规则化（节奏/冲突/画面性/对白/钩子/一致性，遵循 run_quality_review 降级先例，LLM 口预留）；**实测 75.1 pass**，弱维（节奏 45.1/对白 45.6）建议明确。
+- **A6 自批判环**：[run_storyboard_critique.py](../scripts/run_storyboard_critique.py) 六维规则化（节奏/冲突/画面性/对白/钩子/一致性，遵循 run_quality_review 降级先例，LLM 口预留）；**实测 66.3 revise**（节奏 45.1/冲突 85.4/画面性 61.8/对白 45.6/钩子 60/一致性 100，阈值 70 未达），弱维建议明确。
+  - ⚠ **留证更正（40 轮）**：本轮曾记「75.1 pass」——系误把管道 `tail` 的退出码当作批判执行器返回码（`cmd | tail; echo $?` 取到的是 tail 状态），且得分未经复核。真实值以留证 [tc-storyboard-critique-20261005.json](../docs/attachments/G5-20261005/tc-storyboard-critique-20261005.json) 为准：**66.3 / revise**。教训并入 [YYC3-64 故障手册](YYC3-64-故障模式手册-20261005.md) E-05。
 - **A9 勘察结论**：H3VisionClient.generate_single payload 仅 {batch,seeds,prompt_file,variant,preview}——**无首尾帧通道**，frames2video 需 H3 侧协议扩展提案；当前变通=image2video 首帧法+运动提示词强化。
 - **Jellyfish 深读**：三借鉴点——五类实体模型（本项目缺道具/服装维）、一致性检查前置剧本层、shot readiness 门。
 - 留证四件：docs/attachments/G5-20261005/（fake-smoke/rhythm/critique/candidates JSON）。
@@ -1225,3 +1226,31 @@ ComfyUI 在线（:41888）；n1 空闲；G1-004 保持 BLOCKED；E1 六件套全
 1. **[P1]** A1 市场情报前置落位（run_market_scan.py：检索快照人工导入 schema + 情报 JSON → 剧本切集输入）+ A2/A3/A6 接入夜批前置闸门链（fake 冒烟串联三闸）
 2. **[P1]** 基模迁移阶段 1 启动（37.4 遗留两项连轮未动，需排期裁决）：DreamShaper XL + InstantID 落地或明确延期理由
 3. **[P2]** E2 勘察包：H3 协议扩展提案（frames2video）+ Ref 库分批建设方案（含 Jellyfish 五类实体模型裁剪适配）
+
+## 四十、E1 收口与基模迁移阶段 1 落地（2026-10-05 第四十轮，用户指令：39.4 TOP3 执行）
+
+### 40.1 执行留证
+
+- **A1 市场情报前置**：新增 [run_market_scan.py](../scripts/run_market_scan.py)——快照 schema 校验（platform/captured_at/items 三必填）+ 三表汇总（题材热度榜 / 衰退赛道 / 同质化标签避让）+ 差异化组合建议。**实测**：2 平台 15 条快照 → 3 条可行动建议（衰退赛道避让：都市、家庭伦理、灵异；同质化避让：打脸/反转/复仇/赘婿/灵异/龙王/医学天才；差异化：甜宠 × 契约婚姻、追妻）。**红线**：采集动作在人（检索快照人工导入），脚本不做任何爬虫。留证 [snapshot-20261005.json](../docs/market/snapshot-20261005.json) + [market_intel.json](../docs/market/market_intel.json)。
+  - 附带洞察：现役剧本（义庄复仇/悬疑）正处于**高同质化区**——复仇/反转/灵异三标签均在避让榜，A1 首用即产出可行动结论。
+- **夜批前置闸门链**：[run_batch_shots.py](../scripts/run_batch_shots.py) 增 `--market-file`（A1 校验并留证，不阻断）/ 节奏闸（A2 warn）/ 批判闸（A6，`--gate-mode warn|block`）。[run_fake_smoke.py](../scripts/run_fake_smoke.py) v2 串联三闸：**warn 模式 9/9 断言全绿**（新增 gate_rhythm_ran / gate_critique_ran / market_intel_ran）；**block 模式 RC=2 正确阻断**——双向验证完成。留证 [tc-fake-smoke-gates-20261005.json](../docs/attachments/G5-20261005/tc-fake-smoke-gates-20261005.json)。
+- **基模迁移阶段 1（裁决：落地并已执行）**：前置核验全绿（InstantID 节点**已注册**、XL 6.5G + ip-adapter.bin 1.6G + controlnet 2.3G + CLIP-ViT-H 2.4G + antelopev2 在位、onnxruntime 1.30、磁盘 707G）→ 执行 [run_sdxl_instantid_preval.py](../scripts/run_sdxl_instantid_preval.py)（纯基模零 LoRA + InstantID w0.8，Lightning 档 8 步/cfg1.8 @1024²）：
+  **mean 0.8446 / min 0.8321 / max 0.859**（逐种子 0.859 / 0.8455 / 0.8416 / 0.8321），门槛 mean ≥ 0.80 **PASS（+4.46pp）**；20.1s/张。
+  **关键发现（超预期）**：零 LoRA/零 IPAdapter 的纯 SDXL+InstantID 已逼近现役 SD15 全组合（mean 仅差 -2.26pp），而 **min 0.8321 反超现役 0.7846（+4.75pp）**——直接命中本项目最差帧稳定度短板；耗时反快于现役 27.4s。**阶段 2 解锁**。留证 [tc-sdxl-instantid-preval-20261005.json](../docs/attachments/G5-20261005/tc-sdxl-instantid-preval-20261005.json)，回执入 [YYC3-62 §八](YYC3-62-基模迁移可行性预研-SDXL身份保持-20261002.md)。
+- **E2 勘察包**：[YYC3-65](YYC3-65-E2勘察包-H3协议扩展与Ref库建设-20261005.md)——H3 frames2video 双提案（A payload 扩展向后兼容 / B 独立 task_type）+ 客户端特性探测解耦路径（`supports_frames2video` 门控 + `first_frame_approx` 变通留证）+ Ref 库三批建设（批一零依赖可立即落地）+ Jellyfish 五类实体裁剪（4 采纳 / 服装并入角色 / 演员不采纳）。
+
+### 40.2 关键决策
+
+- **批判闸默认 warn 而非 block**：40 轮实测基线分镜 66.3 < 阈值 70，block 将**恒定阻断夜批**（等于停摆）→ 默认 warn 告警留证放行，待分镜生成器优化过闸后再切 block。教训入 [YYC3-64](YYC3-64-故障模式手册-20261005.md) E-06。
+- **留证更正（诚实红线）**：上轮所记「自批判 75.1 pass」为**误报**——`cmd | tail; echo $?` 取到的是 tail 退出码而非执行器返回码，且得分未回读留证复裁。真实值 **66.3 / revise**。已更正 HANDOFF 39.1 + 63 号 E1 回执，教训入 YYC3-64 E-05。
+- **Ref 库批一**（角色动作/表情 5-8 张）**不依赖 H3 协议扩展**，判为 E2 中最高性价比可落地项（直接服务 min 指标）。
+
+### 40.3 背景态
+
+ComfyUI 在线（:41888，**InstantID 节点已注册**）；XL + InstantID 三件套 + CLIP-ViT-H 在位；n1 空闲（阶段 2 待启动）；G1-004 保持 BLOCKED（NAS 未挂载）；**现役 SD15 生产链路零改动**（checkpoint/LoRA/双档位 adapter 全在位，可一键回退）。
+
+### 40.4 下轮起点（TOP 3）
+
+1. **[P1]** 基模迁移阶段 2：n1 SDXL LoRA 重训（v2 数据集，dim32 起步）+ combo 扫描（LoRA × InstantID 权重网格）→ 阶段 3 决策线（mean ≥ 0.85 **且** min ≥ 0.8036 方触发生产切换评审）
+2. **[P1]** 分镜生成器节奏/对白优化（节奏 45.1 / 对白 45.6 为基线弱维，使其过 70 闸——批判闸切 block 的前提）+ Ref 库批一建设（多参考 → min 提升验证）
+3. **[P2]** H3 frames2video 提案提交 + 客户端特性探测先行（`supports_frames2video` 能力门控 + 降级留证）；A10 可观测性 / A11 四探针体检穿插

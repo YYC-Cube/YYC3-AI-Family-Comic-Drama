@@ -1,0 +1,50 @@
+{
+  "testcase": "SDXL 基模迁移阶段 1 预验（DreamShaperXL_Lightning + InstantID 单独）",
+  "ckpt": "DreamShaperXL_Lightning.safetensors",
+  "instantid_weight": 0.8,
+  "sampling": {
+    "steps": 8,
+    "cfg": 1.8,
+    "size": "1024x1024",
+    "note": "Lightning 蒸馏档适配；评分协议（4 漂移种子 × insightface 512d 余弦 vs 设定图本体）零变更复用"
+  },
+  "rows": [
+    {
+      "seed": 777,
+      "sim": 0.859,
+      "mode": "insightface",
+      "latency_s": 20.1,
+      "reused": false
+    },
+    {
+      "seed": 888,
+      "sim": 0.8455,
+      "mode": "insightface",
+      "latency_s": 20.1,
+      "reused": false
+    },
+    {
+      "seed": 999,
+      "sim": 0.8416,
+      "mode": "insightface",
+      "latency_s": 20.1,
+      "reused": false
+    },
+    {
+      "seed": 1111,
+      "sim": 0.8321,
+      "mode": "insightface",
+      "latency_s": 20.1,
+      "reused": false
+    }
+  ],
+  "mean": 0.8446,
+  "min": 0.8321,
+  "max": 0.859,
+  "baseline": {
+    "sd15_plusface_only": 0.67,
+    "sd15_faceid_only": 0.7926,
+    "sd15_v2_combo_prod": 0.8672
+  },
+  "gate_mean_ge_0.80": true
+}

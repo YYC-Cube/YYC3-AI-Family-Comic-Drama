@@ -57,6 +57,12 @@ try:
     from sensitive_scan import scan_storyboard, apply_declaration  # 63 号 A5 合规预检
 except ImportError:  # 直接路径运行时 sys.path[0]=scripts 可导入；异常环境降级跳过
     scan_storyboard = apply_declaration = None
+try:
+    # 63 号 A2/A6：夜批前置闸门链（节奏 warn + 批判硬闸）
+    from run_rhythm_check import build_rhythm_map
+    from run_storyboard_critique import critique_storyboard
+except ImportError:
+    build_rhythm_map = critique_storyboard = None
 
 # 三章各 ~220 字：章末残留 ≥183 字独立成集（plan_episodes budget=367/2 门槛），
 # 两章累计 <367 字不提前合并 → 严格切出 3 集（扩产 ≥3 集样片前提）
@@ -125,6 +131,14 @@ def main():
     ap.add_argument("--root", default=os.getenv("PROJECT_ROOT", "/tmp/yyc3_projects"))
     ap.add_argument("--style-file", default=os.getenv("STYLE_FILE", ""),
                     help="动态 prompt 定制 JSON（按集/按镜覆盖样式，缺省复用内置 REF_STYLE）")
+    ap.add_argument("--market-file", default=os.getenv("MARKET_FILE", ""),
+                    help="市场情报 JSON（63 号 A1：run_market_scan.py 产出，前置留证）")
+    ap.add_argument("--allow-revise", action="store_true",
+                    help="批判闸 revise 时显式放行（等效 --gate-mode warn）")
+    ap.add_argument("--gate-mode", choices=("warn", "block"), default="warn",
+                    help="批判闸模式：warn=告警留证放行（默认——40 轮实测基线"
+                         "分镜 66.3 < 70，block 将恒定阻断夜批）；block=revise "
+                         "硬阻断（分镜生成器优化过闸后启用）")
     ap.add_argument("--lora", default=os.getenv("CHAR_LORA", ""),
                     help="combo 生产配置：LoRA 文件名（ComfyUI/models/loras/ 内；"
                          "缺省空=纯 IPAdapter 旧口径）")
@@ -216,6 +230,54 @@ def main():
         manifest["elapsed_s"] = round(time.time() - t_start, 1)
         state_path.write_text(
             json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    # ── 40 轮：夜批前置闸门链（63 号 A1/A2/A6）──
+    # A1 市场情报：存在即校验并留证（采集动作在人，快照人工导入）
+    if args.market_file:
+        try:
+            from run_market_scan import validate_intel  # noqa: PLC0415 按需导入
+            mi = validate_intel(Path(args.market_file))
+            manifest["market_intel"] = {"source": args.market_file,
+                                        "ok": mi["ok"],
+                                        "advice": mi["advice"]}
+            if not mi["ok"]:
+                print(f"[batch] 市场情报校验失败（缺 {mi['missing']}），"
+                      f"留证后继续（不阻断）")
+            else:
+                for a in mi["advice"]:
+                    print(f"[batch] 市场情报：{a}")
+        except Exception as exc:  # noqa: BLE001 留证不阻断
+            manifest["market_intel"] = {"source": args.market_file,
+                                        "ok": False,
+                                        "error": str(exc)}
+    # A2 节奏闸：缺口仅告警（节奏可人工补拍，非硬阻断）
+    if build_rhythm_map is not None:
+        rhythm = build_rhythm_map(sb["shots"])
+        manifest["gate_rhythm"] = {"coverage": rhythm["coverage"],
+                                   "suggestions": rhythm["suggestions"]}
+        if rhythm["suggestions"]:
+            print(f"[batch] 节奏闸 warn：{len(rhythm['suggestions'])} 条缺口 "
+                  f"（{'; '.join(rhythm['suggestions'][:2])}）")
+    # A6 批判闸：默认 warn 留证放行；block 模式 revise 硬阻断（防带病生成）
+    if critique_storyboard is not None:
+        gate = critique_storyboard(sb, float(os.getenv(
+            "GATE_CRITIQUE_THRESHOLD", "70")))
+        blocking = args.gate_mode == "block" and not args.allow_revise
+        manifest["gate_critique"] = {"verdict": gate["verdict"],
+                                     "total": gate["total"],
+                                     "mode": args.gate_mode,
+                                     "suggestions": gate["suggestions"]}
+        if gate["verdict"] != "pass" and blocking:
+            write_manifest()
+            print(f"[batch] 批判闸阻断：{gate['total']} < 阈值，verdict="
+                  f"{gate['verdict']}；建议：{'; '.join(gate['suggestions'])}；"
+                  f"改进分镜后重跑，或 --gate-mode warn 放行")
+            return 2
+        if gate["verdict"] != "pass":
+            print(f"[batch] 批判闸 warn：{gate['total']} < 阈值（{args.gate_mode}"
+                  f" 模式放行）；建议：{gate['suggestions'][0] if gate['suggestions'] else '-'}")
+        else:
+            print(f"[batch] 批判闸通过：{gate['verdict']} {gate['total']}")
 
     for shot in sb["shots"][:args.limit]:
         sid = shot["shot_id"]

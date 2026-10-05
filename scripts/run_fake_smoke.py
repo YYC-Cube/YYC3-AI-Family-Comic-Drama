@@ -36,14 +36,18 @@ def main() -> int:
     ap.add_argument("--limit", type=int, default=2,
                     help="冒烟镜头数（链路验证无需全量）")
     ap.add_argument("--out", default="", help="留证 JSON 路径")
+    ap.add_argument("--market-file", default="",
+                    help="市场情报 JSON（A1 闸：存在即校验并留证）")
     args = ap.parse_args()
 
     env = {**os.environ, **FAKE_ENV}
+    cmd = [str(PY), str(BATCH), "--project", args.project,
+           "--episode", str(args.episode), "--limit", str(args.limit)]
+    if args.market_file:
+        cmd += ["--market-file", args.market_file]
     t0 = time.time()
-    proc = subprocess.run(
-        [str(PY), str(BATCH), "--project", args.project,
-         "--episode", str(args.episode), "--limit", str(args.limit)],
-        capture_output=True, text=True, timeout=300, env=env)
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=300,
+                          env=env)
     elapsed = round(time.time() - t0, 1)
 
     # 断点定位：解析 manifest 链路产物
@@ -58,15 +62,23 @@ def main() -> int:
         "storyboard_written": bool(sb.get("shots")),
         "sensitive_scan_ran": "sensitive_scan" in mf,
         "aigc_declared": bool(mf.get("aigc", {}).get("declared")),
+        "gate_rhythm_ran": "gate_rhythm" in mf,
+        "gate_critique_ran": "gate_critique" in mf,
         "stub_shots_present": any(
             s.get("gen_status", "").startswith("stub")
             for s in mf.get("shots", [])),
         "manifest_elapsed": bool(mf.get("elapsed_s") is not None),
     }
+    # A1 闸仅在实际传入情报时断言（可选闸位）
+    if args.market_file:
+        checks["market_intel_ran"] = "market_intel" in mf
     ok = all(checks.values())
     report = {"fake_smoke": ok, "checks": checks,
               "exit_code": proc.returncode, "elapsed_s": elapsed,
               "episode": args.episode, "project": args.project,
+              "gate_critique": mf.get("gate_critique"),
+              "gate_rhythm": (mf.get("gate_rhythm") or {}).get("coverage"),
+              "market_intel": mf.get("market_intel"),
               "shots_in_storyboard": len(sb.get("shots", [])),
               "manifest_shots": len(mf.get("shots", [])),
               "stdout_tail": proc.stdout.strip().splitlines()[-6:],

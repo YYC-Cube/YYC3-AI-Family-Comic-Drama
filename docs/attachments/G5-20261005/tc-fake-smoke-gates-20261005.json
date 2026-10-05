@@ -1,0 +1,48 @@
+{
+  "fake_smoke": true,
+  "checks": {
+    "process_exit_0": true,
+    "storyboard_written": true,
+    "sensitive_scan_ran": true,
+    "aigc_declared": true,
+    "gate_rhythm_ran": true,
+    "gate_critique_ran": true,
+    "stub_shots_present": true,
+    "manifest_elapsed": true,
+    "market_intel_ran": true
+  },
+  "exit_code": 0,
+  "elapsed_s": 0.6,
+  "episode": 1,
+  "project": "fake-smoke",
+  "gate_critique": {
+    "verdict": "revise",
+    "total": 66.3,
+    "mode": "warn",
+    "suggestions": [
+      "「节奏」维度最低（45.1）——调 duration_sec 形成 1-3s 变奏，并保证镜数密度",
+      "「对白」维度最低（45.6）——对白占比向 40% 靠拢，长句拆短句（<=30 字）"
+    ]
+  },
+  "gate_rhythm": "6/7",
+  "market_intel": {
+    "source": "docs/market/market_intel.json",
+    "ok": true,
+    "advice": [
+      "衰退赛道避让：都市、家庭伦理、灵异",
+      "同质化标签避让：打脸、反转、复仇、赘婿、灵异、龙王、医学天才",
+      "差异化组合：甜宠 × 契约婚姻、追妻（题材热度 92.0，标签未拥挤）"
+    ]
+  },
+  "shots_in_storyboard": 80,
+  "manifest_shots": 2,
+  "stdout_tail": [
+    "[batch] 市场情报：差异化组合：甜宠 × 契约婚姻、追妻（题材热度 92.0，标签未拥挤）",
+    "[batch] 节奏闸 warn：1 条缺口 （countdown 节点 88.5s 未被镜头覆盖——建议在时间轴 88.5s 附近镜头标注 beat（或调时长命中））",
+    "[batch] 批判闸 warn：66.3 < 阈值（warn 模式放行）；建议：「节奏」维度最低（45.1）——调 duration_sec 形成 1-3s 变奏，并保证镜数密度",
+    "[batch] shot-ep01-001: gen=stub sim=None action=None tts=-",
+    "[batch] shot-ep01-002: gen=stub sim=None action=None tts=-",
+    "{\"summary\": {\"shots\": 2, \"accepted\": 0, \"resumed\": 0, \"elapsed_s\": 0.0, \"comfy\": false, \"tts\": false}}"
+  ],
+  "stderr_tail": []
+}
