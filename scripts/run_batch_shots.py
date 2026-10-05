@@ -145,7 +145,16 @@ def main():
     ap.add_argument("--ipa-weight", type=float,
                     default=float(os.getenv("IPA_WEIGHT", "0.15")),
                     help="IPAdapter 权重（M3 二轮 combo 实证：LoRA 组合时 0.15 最优，"
-                         "历史默认 0.85 为负交互区）")
+                         "历史默认 0.85 为负交互区；instantid 档冠军配置 0.6）")
+    ap.add_argument("--ipa-profile", default=os.getenv("COMFYUI_IPA_PROFILE", "plus_face"),
+                    choices=("plus_face", "faceid", "instantid"),
+                    help="身份锚定档位（adapter v1.4）：plus_face=SD15 生产默认/"
+                         "faceid=SD15 min 备选/instantid=SDXL 生产域达标档"
+                         "（需 COMFYUI_MODEL=DreamShaperXL_Lightning.safetensors）")
+    ap.add_argument("--lora-strength", type=float,
+                    default=float(os.getenv("LORA_STRENGTH", "1.0")),
+                    help="LoRA 强度（默认 1.0 历史口径；instantid 档冠军配置 0.6，"
+                         "G4 §三十一 网格峰值 lora0.6×iid0.6）")
     args = ap.parse_args()
     style_cfg = load_style_file(args.style_file)
 
@@ -187,7 +196,9 @@ def main():
                 "comfy": gw.comfy.enabled, "tts": gw.tts_client.enabled,
                 "style_file": args.style_file or None,
                 "anchor_config": {"lora": args.lora or None,
+                                  "lora_strength": args.lora_strength,
                                   "ipa_weight": args.ipa_weight,
+                                  "ipa_profile": args.ipa_profile,
                                   "strategy": "combo+seed_lock" if args.lora
                                   else "ipadapter+seed_lock"},
                 "shots": []}
@@ -305,7 +316,9 @@ def main():
                                    ref_assets=[args.char], out_path=str(out),
                                    seed=seed, ref_image=args.ref_image,
                                    lora=args.lora or None,
-                                   ipa_weight=args.ipa_weight)
+                                   ipa_weight=args.ipa_weight,
+                                   ipa_profile=args.ipa_profile,
+                                   lora_strength=args.lora_strength)
             row["gen_status"] = gen["status"]
             attempts = 1
             base_seed = int(os.environ.get("CHAR_BASE_SEED", "42"))
@@ -322,7 +335,9 @@ def main():
                                            ref_assets=[args.char], out_path=str(out),
                                            seed=base_seed, ref_image=args.ref_image,
                                            lora=args.lora or None,
-                                           ipa_weight=args.ipa_weight)
+                                           ipa_weight=args.ipa_weight,
+                                           ipa_profile=args.ipa_profile,
+                                           lora_strength=args.lora_strength)
                     attempts += 1
                     continue
                 break  # escalate/blocked

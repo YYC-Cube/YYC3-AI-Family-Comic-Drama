@@ -1,0 +1,53 @@
+{
+  "testcase": "SDXL instantid 档产线启用实跑（run_batch_shots 参数化首发）",
+  "date": "2026-10-05",
+  "config": {
+    "ckpt": "DreamShaperXL_Lightning.safetensors",
+    "lora": "sd-hero-xl-v1.safetensors",
+    "lora_strength": 0.6,
+    "ipa_weight": 0.6,
+    "ipa_profile": "instantid",
+    "strategy": "combo+seed_lock"
+  },
+  "rows": [
+    {
+      "shot_id": "shot-ep01-001",
+      "seed": 1007,
+      "gen_status": "ok",
+      "similarity": 0.9301,
+      "action": "accept",
+      "style_source": "builtin"
+    },
+    {
+      "shot_id": "shot-ep01-002",
+      "seed": 1014,
+      "gen_status": "ok",
+      "similarity": 0.9397,
+      "action": "accept",
+      "style_source": "builtin"
+    },
+    {
+      "shot_id": "shot-ep01-003",
+      "seed": 1021,
+      "gen_status": "ok",
+      "similarity": 0.9134,
+      "action": "accept",
+      "style_source": "builtin"
+    }
+  ],
+  "summary": {
+    "shots": 3,
+    "accepted_first_draw": 3,
+    "redraw": 0,
+    "escalate": 0,
+    "elapsed_s": 58.8,
+    "per_shot_s": 19.6
+  },
+  "baseline_sd15_same_shots": {
+    "source": "G4 §17.2/§二十：同生产链 SD15 纯 IPA（w0.15）",
+    "sims": "0.5906-0.7163",
+    "first_draw_accept": "0/9（历史批次 9/9 escalate）",
+    "per_shot_s": 886
+  },
+  "verdict": "3/3 首绘直通（sim 全 ≥0.9134）——SDXL 产线正式可用"
+}
