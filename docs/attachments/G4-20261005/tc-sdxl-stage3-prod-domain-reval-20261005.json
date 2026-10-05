@@ -1,0 +1,66 @@
+{
+  "testcase": "SDXL 阶段 3① 生产域复验（场景叙事 prompt @1024，Lightning 档）",
+  "config": {
+    "ckpt": "DreamShaperXL_Lightning.safetensors",
+    "lora": "sd-hero-xl-v1.safetensors",
+    "lora_strength": 0.6,
+    "instantid_weight": 0.6,
+    "sampling": "steps8/cfg1.8/euler+sgm_uniform/1024"
+  },
+  "rows": [
+    {
+      "shot": "shot-ep01-001",
+      "seed_tag": "sid",
+      "seed": 1007,
+      "sim": 0.9301,
+      "mode": "insightface",
+      "latency_s": 20.1
+    },
+    {
+      "shot": "shot-ep01-001",
+      "seed_tag": "s42",
+      "seed": 42,
+      "sim": 0.9327,
+      "mode": "insightface",
+      "latency_s": 20.2
+    },
+    {
+      "shot": "shot-ep01-002",
+      "seed_tag": "sid",
+      "seed": 1014,
+      "sim": 0.9397,
+      "mode": "insightface",
+      "latency_s": 20.1
+    },
+    {
+      "shot": "shot-ep01-002",
+      "seed_tag": "s42",
+      "seed": 42,
+      "sim": 0.9327,
+      "mode": "insightface",
+      "latency_s": 20.1
+    }
+  ],
+  "primary_sid_seed": {
+    "sims": [
+      0.9301,
+      0.9397
+    ],
+    "mean": 0.9349,
+    "min": 0.9301
+  },
+  "extra_seeds_stability": {
+    "sims": [
+      0.9327,
+      0.9327
+    ]
+  },
+  "baseline": {
+    "source": "SD15 纯 IPA w0.15 @1024（combo-ctrl-001/recal 留证）",
+    "shot-ep01-001": 0.7793,
+    "shot-ep01-002": 0.7053,
+    "mean": 0.7423
+  },
+  "gate_per_shot_ge_0.85": true,
+  "production_wiring_unlocked": true
+}
