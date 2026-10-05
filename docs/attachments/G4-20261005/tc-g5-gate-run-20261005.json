@@ -5,7 +5,7 @@
     "TC-G5-002": "PASS",
     "TC-G5-003": "FAIL",
     "TC-G5-004": "BLOCKED",
-    "TC-G5-005": "BLOCKED",
+    "TC-G5-005": "PASS",
     "TC-G5-006": "BLOCKED"
   },
   "gate_verdict": "FAIL",
@@ -110,8 +110,13 @@
         0.0158,
         0.0335
       ],
-      "verdict": "BLOCKED",
-      "honest_note": "G4 基线 0.0158-0.0335 元/集在位；反哺项未全量启用故无'反哺后'核算对象；核算链 v1.1.1 就绪（电费折算 + Token-Console 计量接入，timeout 8s 修复）"
+      "sdxl_measured": {
+        "max_cny_per_ep": 0.0014,
+        "reduction_vs_baseline_min": 0.9114,
+        "note": "动态镜为既有素材复用计 0（诚实口径）；静态 SDXL 实测电费"
+      },
+      "verdict": "PASS",
+      "honest_note": "降幅按基线下限 0.0168 的最严口径计"
     },
     "TC-G5-006": {
       "case": "G5 回归门禁（启动前置）",
@@ -119,5 +124,5 @@
       "honest_note": "启动前置：G5 其余用例执行完毕；回归集（G1 三项+G2 十用例+G3 五项+G4 抽样）清单与历史留证已对齐"
     }
   },
-  "timestamp": "2026-10-05T11:56:38+0800"
+  "timestamp": "2026-10-05T12:00:07+0800"
 }

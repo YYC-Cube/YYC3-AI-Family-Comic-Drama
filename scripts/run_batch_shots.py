@@ -89,6 +89,24 @@ NOVEL = ("第一章 夜雨叩门\n"
 REF_STYLE = "portrait of a young chinese wuxia heroine, ancient hanfu, ink wash background"
 
 
+def load_novel(path: str | None) -> str:
+    """加载外部章节文本（②b 内容供给扩容，2026-10-05）；缺省返回内置 NOVEL。
+
+    文件格式：纯文本，「第N章 标题」行起始各章（与内置三章同构；
+    章末残留 ≥183 字独立成集的切集约束由 plan_episodes 保证）。
+    """
+    if not path:
+        return NOVEL
+    p = Path(path)
+    if not p.exists():
+        print(f"[batch] 警告：--novel-file 不存在，回退内置三章 NOVEL：{path}")
+        return NOVEL
+    text = p.read_text(encoding="utf-8")
+    print(f"[batch] 外部章节文本已加载：{path}（{len(text)} 字，"
+          f"{text.count('第')} 章标记）")
+    return text
+
+
 def load_style_file(path: str | None) -> dict:
     """加载动态 prompt 定制配置（生产化：按集/按镜覆盖样式提示词）。
 
@@ -155,8 +173,11 @@ def main():
                     default=float(os.getenv("LORA_STRENGTH", "1.0")),
                     help="LoRA 强度（默认 1.0 历史口径；instantid 档冠军配置 0.6，"
                          "G4 §三十一 网格峰值 lora0.6×iid0.6）")
+    ap.add_argument("--novel-file", default=os.getenv("NOVEL_FILE", ""),
+                    help="外部章节文本（内容供给扩容；缺省内置三章 NOVEL 零变更）")
     args = ap.parse_args()
     style_cfg = load_style_file(args.style_file)
+    novel_text = load_novel(args.novel_file)
 
     proj = Path(args.root) / args.project
     for sub in ("storyboard", "images", "audio", "state", "output"):
@@ -178,8 +199,8 @@ def main():
     guard = AnchorGuard(library_root=str(LIBRARY))
 
     # 1) 分镜（--episode 取对应集；分集计划按章节流 105s 预算切分）
-    els = extract_elements(NOVEL)
-    eps = plan_episodes(split_chapters(NOVEL))
+    els = extract_elements(novel_text)
+    eps = plan_episodes(split_chapters(novel_text))
     ep_idx = args.episode - 1
     if ep_idx < 0 or ep_idx >= len(eps):
         print(f"[batch] 错误：--episode {args.episode} 超界（分集计划共 {len(eps)} 集）")

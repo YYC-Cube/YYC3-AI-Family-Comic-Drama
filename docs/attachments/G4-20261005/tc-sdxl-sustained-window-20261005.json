@@ -1,0 +1,24 @@
+{
+  "testcase": "SDXL 持续窗口复核（G5-002 400 集投影的诚实复核，六集两窗口）",
+  "window1": {
+    "eps": 3,
+    "per_episode_s": 71.9,
+    "source": "tc-sdxl-nightly-stats-20261005"
+  },
+  "window2_sustained": {
+    "eps": 3,
+    "window_s": 246,
+    "per_episode_s": 82.0,
+    "content": "新章节 ch4-6（novel-ext-ch4-6.txt，--novel-file 外置化首发）",
+    "variance_note": "ep06 静态 106.2s 单集波动（前两集 55.8/65.9）——吞吐方差 ~±30%，质量零衰减（sims 0.9121-0.9394，9/9 直通）"
+  },
+  "six_episode_total": {
+    "eps": 6,
+    "all_first_draw_accept": "18/18",
+    "review": "ep01-03 3×100 / ep04-06 均分 95（全过 80 红线）"
+  },
+  "projection_recheck": {
+    "8h_at_w2_worst": 351,
+    "honest_conclusion": "按持续窗口最差口径 82s/集，8h 仍 ≥350 集；400 投影量级成立（实际瓶颈=内容供给与人工抽检，非产线）"
+  }
+}

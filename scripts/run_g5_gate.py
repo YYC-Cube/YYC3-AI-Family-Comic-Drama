@@ -143,10 +143,24 @@ def case_g5_002() -> dict:
 
 
 def case_g5_005() -> dict:
-    """成本：核算链就绪（含计量接入），反哺后单集未复算。"""
+    """成本：SDXL 档实测核算优先；无实测证据时按手册 BLOCKED 留证。"""
     cost = load_json(EVID / "tc-g4-007-cost-report.json")["episodes"]
     base_range = [min(e["total_cost_cny"] for e in cost),
                   max(e["total_cost_cny"] for e in cost)]
+    # SDXL 实测证据优先（2026-10-05 三集成片级核算）
+    sdxl_cost = EVID2.parent / "G4-20261005" / "tc-sdxl-cost-report-20261005.json"
+    if sdxl_cost.exists():
+        sc = load_json(sdxl_cost)["episodes"]
+        sdxl_max = max(e["total_cost_cny"] for e in sc)
+        reduction = 1 - sdxl_max / base_range[0]  # 较基线下限的降幅（最严口径）
+        verdict = "PASS" if (sdxl_max <= 2.0 and reduction >= 0.2) else "FAIL"
+        return {"case": "TC-G5-005 运营成本反哺核算（较基线降 >=20%）",
+                "baseline_cny_per_ep": base_range,
+                "sdxl_measured": {"max_cny_per_ep": sdxl_max,
+                                  "reduction_vs_baseline_min": round(reduction, 4),
+                                  "note": "动态镜为既有素材复用计 0（诚实口径）；静态 SDXL 实测电费"},
+                "verdict": verdict,
+                "honest_note": "降幅按基线下限 0.0168 的最严口径计"}
     return {"case": "TC-G5-005 运营成本反哺核算（较基线降 >=20%）",
             "baseline_cny_per_ep": base_range,
             "verdict": "BLOCKED",

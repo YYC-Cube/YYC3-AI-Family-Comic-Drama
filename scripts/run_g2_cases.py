@@ -6,6 +6,7 @@
 # ==============================================================
 import importlib.util
 import json
+import os
 import statistics
 import sys
 import time
@@ -268,8 +269,18 @@ def main():
     n_partial = sum(1 for r in RESULTS if r["status"] == "PARTIAL")
     n_fail = sum(1 for r in RESULTS if r["status"] == "FAIL")
     print(f"\n=== G2 十用例汇总：PASS {n_pass} / PARTIAL {n_partial} / FAIL {n_fail}（共 {len(RESULTS)}）===")
-    print(json.dumps({"summary": {"pass": n_pass, "partial": n_partial, "fail": n_fail},
-                      "results": RESULTS}, ensure_ascii=False, indent=2))
+    report = {"summary": {"pass": n_pass, "partial": n_partial, "fail": n_fail},
+              "results": RESULTS,
+              "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S%z")}
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+    # P2-11 修复（2026-10-05 首审）：留证落盘（--out / G2_OUT env），与 g5 --out 范式对齐
+    out = os.getenv("G2_OUT", "")
+    if "--out" in sys.argv:
+        out = sys.argv[sys.argv.index("--out") + 1]
+    if out:
+        Path(out).write_text(json.dumps(report, ensure_ascii=False, indent=2),
+                             encoding="utf-8")
+        print(f"[g2] 留证已落盘 {out}")
     return 0 if n_fail == 0 else 1
 
 

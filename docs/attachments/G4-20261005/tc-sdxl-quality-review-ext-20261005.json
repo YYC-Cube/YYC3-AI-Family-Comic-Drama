@@ -1,0 +1,138 @@
+{
+  "testcase": "TC-G4-005 内容质检评审 + TC-G4-008 交付物规范",
+  "executor": "run_quality_review.py（格物宗师 validate 规则化降级实现）",
+  "red_line": 80.0,
+  "episodes": [
+    {
+      "episode": "sdxl-prod-004",
+      "full": "/tmp/yyc3_projects/sdxl-prod-004/output/sdxl-prod-004_full.mp4",
+      "dims": {
+        "规格": {
+          "score": 20,
+          "spec": {
+            "codec": "h264",
+            "width": 1920,
+            "height": 1080,
+            "fps": "30/1",
+            "duration": 7.716
+          },
+          "audio": "aac"
+        },
+        "时长": {
+          "score": 20,
+          "duration": 7.716,
+          "window": "3s-120s"
+        },
+        "元数据": {
+          "score": 15,
+          "trace_id": "trace-BATCH-EP01",
+          "shots": 3
+        },
+        "质量": {
+          "score": 20,
+          "dynamic_conf": 6.413,
+          "static_sim": [
+            0.9283,
+            0.938,
+            0.9124
+          ]
+        },
+        "交付": {
+          "score": 20,
+          "layout_ok": true,
+          "full_exists": true
+        }
+      },
+      "score": 95,
+      "passed": true
+    },
+    {
+      "episode": "sdxl-prod-005",
+      "full": "/tmp/yyc3_projects/sdxl-prod-005/output/sdxl-prod-005_full.mp4",
+      "dims": {
+        "规格": {
+          "score": 20,
+          "spec": {
+            "codec": "h264",
+            "width": 1920,
+            "height": 1080,
+            "fps": "30/1",
+            "duration": 9.899
+          },
+          "audio": "aac"
+        },
+        "时长": {
+          "score": 20,
+          "duration": 9.899,
+          "window": "3s-120s"
+        },
+        "元数据": {
+          "score": 15,
+          "trace_id": "trace-BATCH-EP02",
+          "shots": 3
+        },
+        "质量": {
+          "score": 20,
+          "dynamic_conf": 8.14,
+          "static_sim": [
+            0.9284,
+            0.939,
+            0.9121
+          ]
+        },
+        "交付": {
+          "score": 20,
+          "layout_ok": true,
+          "full_exists": true
+        }
+      },
+      "score": 95,
+      "passed": true
+    },
+    {
+      "episode": "sdxl-prod-006",
+      "full": "/tmp/yyc3_projects/sdxl-prod-006/output/sdxl-prod-006_full.mp4",
+      "dims": {
+        "规格": {
+          "score": 20,
+          "spec": {
+            "codec": "h264",
+            "width": 1920,
+            "height": 1080,
+            "fps": "30/1",
+            "duration": 13.289
+          },
+          "audio": "aac"
+        },
+        "时长": {
+          "score": 20,
+          "duration": 13.289,
+          "window": "3s-120s"
+        },
+        "元数据": {
+          "score": 15,
+          "trace_id": "trace-BATCH-EP03",
+          "shots": 3
+        },
+        "质量": {
+          "score": 20,
+          "dynamic_conf": 4.963,
+          "static_sim": [
+            0.929,
+            0.9394,
+            0.9139
+          ]
+        },
+        "交付": {
+          "score": 20,
+          "layout_ok": true,
+          "full_exists": true
+        }
+      },
+      "score": 95,
+      "passed": true
+    }
+  ],
+  "avg_score": 95.0,
+  "all_passed": true
+}
