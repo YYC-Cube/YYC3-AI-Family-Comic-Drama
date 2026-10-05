@@ -52,6 +52,18 @@ def audio_codec(path: str) -> str:
         return ""
 
 
+def audio_bitrate(path: str) -> "int | None":
+    """音频流实际码率 bps（A2 码率校验数据源，YYC3-72 M1 决议）。"""
+    try:
+        r = subprocess.run(
+            ["ffprobe", "-v", "error", "-select_streams", "a:0",
+             "-show_entries", "stream=bit_rate", "-of", "csv=p=0", path],
+            capture_output=True, text=True, timeout=30)
+        return int(r.stdout.strip()) if r.stdout.strip().isdigit() else None
+    except Exception:  # noqa: BLE001
+        return None
+
+
 def frame_brightness(path: str, t: float) -> int:
     """单帧平均亮度（0-255）——scale=1:1 缩成单像素取 Y（纯 ffmpeg 零依赖）。"""
     try:
@@ -92,8 +104,12 @@ def audio_level(path: str) -> dict:
         return {"mean_db": None, "max_db": None, "error": str(e)}
 
 
-def review_episode(proj_dir: Path, dynamic_conf: "float | None" = None) -> dict:
-    """单集五维评审（各维 20 分），返回明细与得分。"""
+def review_episode(proj_dir: Path, dynamic_conf: "float | None" = None,
+                   audio_hq: bool = False) -> dict:
+    """单集五维评审（各维 20 分），返回明细与得分。
+
+    audio_hq：A2 高音质分支开关（YYC3-72 M1 决议；对齐 batches.audio_high_quality）。
+    """
     name = proj_dir.name
     # 集号解析（2026-10-05 通用化）：取项目名末段数字（g4-ep01→1，
     # sdxl-prod-001→1）；无数字回退整名去非数字（保持旧口径行为）
@@ -153,9 +169,21 @@ def review_episode(proj_dir: Path, dynamic_conf: "float | None" = None) -> dict:
     # ——只采集不扣分（红线仍由五维分数承担）；black_count>0 或 mean_db 异常
     #   （<-40dB 近无声）留人工复核，后续视数据积累升计分
     if full.exists():
+        # A2 音频码率分层校验（YYC3-72 M1 决议 · 甲方案）：基线 ≥120k（目标 128k
+        # 带 AAC VBR 容差——六集三版 12 产物实测 127,295-128,578，9/12 低于
+        # 128,000，严格阈值会误杀）；--audio-hq 启用高音质分支 ≥184k（目标 192k）
+        abr = audio_bitrate(str(full))
+        hq_cut, base_cut = 184_000, 120_000
         d["diagnostics"] = {
             "black_frames_5pt": black_frames_5pt(str(full), dur),
             "audio_level": audio_level(str(full)),
+            "audio_bitrate": {
+                "bitrate_bps": abr,
+                "rule_version": "m1_final_20261005",
+                "branch": "high_quality" if audio_hq else "baseline",
+                "threshold_bps": hq_cut if audio_hq else base_cut,
+                "passed": (abr is not None and abr >= (hq_cut if audio_hq else base_cut)),
+            },
         }
 
     d["score"] = sum(v["score"] for v in d["dims"].values())
@@ -175,10 +203,13 @@ def main():
     ap.add_argument("--human-agree", type=int, default=0, help="人工与自动结论一致镜头数")
     ap.add_argument("--human-total", type=int, default=0, help="人工抽检镜头总数")
     ap.add_argument("--out", default=None, help="评审结果 JSON 落盘路径")
+    ap.add_argument("--audio-hq", action="store_true",
+                    help="A2 高音质分支（≥184k，YYC3-72 M1 决议；缺省基线 ≥120k）")
     args = ap.parse_args()
 
     conf_map = json.loads(args.dynamic_conf)
-    results = [review_episode(Path(args.root) / p.strip(), conf_map.get(p.strip()))
+    results = [review_episode(Path(args.root) / p.strip(), conf_map.get(p.strip()),
+                              audio_hq=args.audio_hq)
                for p in args.projects.split(",") if p.strip()]
 
     report = {"testcase": "TC-G4-005 内容质检评审 + TC-G4-008 交付物规范",
