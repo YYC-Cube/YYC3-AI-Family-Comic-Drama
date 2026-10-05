@@ -1,0 +1,411 @@
+{
+  "testcase": "TC-G4-005 内容质检评审 + TC-G4-008 交付物规范",
+  "executor": "run_quality_review.py（格物宗师 validate 规则化降级实现）",
+  "red_line": 80.0,
+  "episodes": [
+    {
+      "episode": "sdxl-prod-001",
+      "full": "/Users/yanyu/YYC-Cube/YYC3-assets/projects/sdxl-prod-001/output/sdxl-prod-001_full.mp4",
+      "dims": {
+        "规格": {
+          "score": 20,
+          "spec": {
+            "codec": "h264",
+            "width": 1920,
+            "height": 1080,
+            "fps": "30/1",
+            "duration": 13.104
+          },
+          "audio": "aac"
+        },
+        "时长": {
+          "score": 20,
+          "duration": 13.104,
+          "window": "3s-120s"
+        },
+        "元数据": {
+          "score": 20,
+          "trace_id": "trace-BATCH-EP01",
+          "shots": 3
+        },
+        "质量": {
+          "score": 10,
+          "dynamic_conf": null,
+          "static_sim": [
+            0.9301,
+            0.9397,
+            0.9134
+          ]
+        },
+        "交付": {
+          "score": 20,
+          "layout_ok": true,
+          "full_exists": true
+        }
+      },
+      "diagnostics": {
+        "black_frames_5pt": {
+          "points": [
+            1.31,
+            3.93,
+            6.55,
+            9.17,
+            11.79
+          ],
+          "brightness": [
+            129,
+            129,
+            130,
+            130,
+            32
+          ],
+          "black_count": 0,
+          "note": "亮度带 28-36 为本剧暗调画风正常范围（六集实测）"
+        },
+        "audio_level": {
+          "mean_db": -19.5,
+          "max_db": -1.7
+        }
+      },
+      "score": 90,
+      "passed": true
+    },
+    {
+      "episode": "sdxl-prod-002",
+      "full": "/Users/yanyu/YYC-Cube/YYC3-assets/projects/sdxl-prod-002/output/sdxl-prod-002_full.mp4",
+      "dims": {
+        "规格": {
+          "score": 20,
+          "spec": {
+            "codec": "h264",
+            "width": 1920,
+            "height": 1080,
+            "fps": "30/1",
+            "duration": 12.778
+          },
+          "audio": "aac"
+        },
+        "时长": {
+          "score": 20,
+          "duration": 12.778,
+          "window": "3s-120s"
+        },
+        "元数据": {
+          "score": 20,
+          "trace_id": "trace-BATCH-EP02",
+          "shots": 3
+        },
+        "质量": {
+          "score": 10,
+          "dynamic_conf": null,
+          "static_sim": [
+            0.9265,
+            0.9398,
+            0.9109
+          ]
+        },
+        "交付": {
+          "score": 20,
+          "layout_ok": true,
+          "full_exists": true
+        }
+      },
+      "diagnostics": {
+        "black_frames_5pt": {
+          "points": [
+            1.28,
+            3.83,
+            6.39,
+            8.94,
+            11.5
+          ],
+          "brightness": [
+            129,
+            129,
+            129,
+            129,
+            33
+          ],
+          "black_count": 0,
+          "note": "亮度带 28-36 为本剧暗调画风正常范围（六集实测）"
+        },
+        "audio_level": {
+          "mean_db": -19.0,
+          "max_db": -0.5
+        }
+      },
+      "score": 90,
+      "passed": true
+    },
+    {
+      "episode": "sdxl-prod-003",
+      "full": "/Users/yanyu/YYC-Cube/YYC3-assets/projects/sdxl-prod-003/output/sdxl-prod-003_full.mp4",
+      "dims": {
+        "规格": {
+          "score": 20,
+          "spec": {
+            "codec": "h264",
+            "width": 1920,
+            "height": 1080,
+            "fps": "30/1",
+            "duration": 10.874
+          },
+          "audio": "aac"
+        },
+        "时长": {
+          "score": 20,
+          "duration": 10.874,
+          "window": "3s-120s"
+        },
+        "元数据": {
+          "score": 20,
+          "trace_id": "trace-BATCH-EP03",
+          "shots": 3
+        },
+        "质量": {
+          "score": 10,
+          "dynamic_conf": null,
+          "static_sim": [
+            0.929,
+            0.9391,
+            0.913
+          ]
+        },
+        "交付": {
+          "score": 20,
+          "layout_ok": true,
+          "full_exists": true
+        }
+      },
+      "diagnostics": {
+        "black_frames_5pt": {
+          "points": [
+            1.09,
+            3.26,
+            5.44,
+            7.61,
+            9.79
+          ],
+          "brightness": [
+            129,
+            129,
+            130,
+            130,
+            36
+          ],
+          "black_count": 0,
+          "note": "亮度带 28-36 为本剧暗调画风正常范围（六集实测）"
+        },
+        "audio_level": {
+          "mean_db": -18.2,
+          "max_db": -0.7
+        }
+      },
+      "score": 90,
+      "passed": true
+    },
+    {
+      "episode": "sdxl-prod-004",
+      "full": "/Users/yanyu/YYC-Cube/YYC3-assets/projects/sdxl-prod-004/output/sdxl-prod-004_full.mp4",
+      "dims": {
+        "规格": {
+          "score": 20,
+          "spec": {
+            "codec": "h264",
+            "width": 1920,
+            "height": 1080,
+            "fps": "30/1",
+            "duration": 7.716
+          },
+          "audio": "aac"
+        },
+        "时长": {
+          "score": 20,
+          "duration": 7.716,
+          "window": "3s-120s"
+        },
+        "元数据": {
+          "score": 15,
+          "trace_id": "trace-BATCH-EP01",
+          "shots": 3
+        },
+        "质量": {
+          "score": 10,
+          "dynamic_conf": null,
+          "static_sim": [
+            0.9283,
+            0.938,
+            0.9124
+          ]
+        },
+        "交付": {
+          "score": 20,
+          "layout_ok": true,
+          "full_exists": true
+        }
+      },
+      "diagnostics": {
+        "black_frames_5pt": {
+          "points": [
+            0.77,
+            2.31,
+            3.86,
+            5.4,
+            6.94
+          ],
+          "brightness": [
+            129,
+            129,
+            130,
+            31,
+            31
+          ],
+          "black_count": 0,
+          "note": "亮度带 28-36 为本剧暗调画风正常范围（六集实测）"
+        },
+        "audio_level": {
+          "mean_db": -18.2,
+          "max_db": -1.8
+        }
+      },
+      "score": 85,
+      "passed": true
+    },
+    {
+      "episode": "sdxl-prod-005",
+      "full": "/Users/yanyu/YYC-Cube/YYC3-assets/projects/sdxl-prod-005/output/sdxl-prod-005_full.mp4",
+      "dims": {
+        "规格": {
+          "score": 20,
+          "spec": {
+            "codec": "h264",
+            "width": 1920,
+            "height": 1080,
+            "fps": "30/1",
+            "duration": 9.899
+          },
+          "audio": "aac"
+        },
+        "时长": {
+          "score": 20,
+          "duration": 9.899,
+          "window": "3s-120s"
+        },
+        "元数据": {
+          "score": 15,
+          "trace_id": "trace-BATCH-EP02",
+          "shots": 3
+        },
+        "质量": {
+          "score": 10,
+          "dynamic_conf": null,
+          "static_sim": [
+            0.9284,
+            0.939,
+            0.9121
+          ]
+        },
+        "交付": {
+          "score": 20,
+          "layout_ok": true,
+          "full_exists": true
+        }
+      },
+      "diagnostics": {
+        "black_frames_5pt": {
+          "points": [
+            0.99,
+            2.97,
+            4.95,
+            6.93,
+            8.91
+          ],
+          "brightness": [
+            129,
+            130,
+            130,
+            32,
+            33
+          ],
+          "black_count": 0,
+          "note": "亮度带 28-36 为本剧暗调画风正常范围（六集实测）"
+        },
+        "audio_level": {
+          "mean_db": -18.4,
+          "max_db": -0.5
+        }
+      },
+      "score": 85,
+      "passed": true
+    },
+    {
+      "episode": "sdxl-prod-006",
+      "full": "/Users/yanyu/YYC-Cube/YYC3-assets/projects/sdxl-prod-006/output/sdxl-prod-006_full.mp4",
+      "dims": {
+        "规格": {
+          "score": 20,
+          "spec": {
+            "codec": "h264",
+            "width": 1920,
+            "height": 1080,
+            "fps": "30/1",
+            "duration": 13.289
+          },
+          "audio": "aac"
+        },
+        "时长": {
+          "score": 20,
+          "duration": 13.289,
+          "window": "3s-120s"
+        },
+        "元数据": {
+          "score": 15,
+          "trace_id": "trace-BATCH-EP03",
+          "shots": 3
+        },
+        "质量": {
+          "score": 10,
+          "dynamic_conf": null,
+          "static_sim": [
+            0.929,
+            0.9394,
+            0.9139
+          ]
+        },
+        "交付": {
+          "score": 20,
+          "layout_ok": true,
+          "full_exists": true
+        }
+      },
+      "diagnostics": {
+        "black_frames_5pt": {
+          "points": [
+            1.33,
+            3.99,
+            6.64,
+            9.3,
+            11.96
+          ],
+          "brightness": [
+            128,
+            128,
+            130,
+            130,
+            36
+          ],
+          "black_count": 0,
+          "note": "亮度带 28-36 为本剧暗调画风正常范围（六集实测）"
+        },
+        "audio_level": {
+          "mean_db": -19.3,
+          "max_db": -0.7
+        }
+      },
+      "score": 85,
+      "passed": true
+    }
+  ],
+  "avg_score": 87.5,
+  "all_passed": true
+}

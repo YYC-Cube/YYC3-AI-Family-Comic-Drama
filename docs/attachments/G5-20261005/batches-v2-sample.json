@@ -1,0 +1,69 @@
+{
+  "schema_version": 2,
+  "generated_at": "2026-10-05T16:00:00",
+  "score_scale": "0-1",
+  "batches": [
+    {
+      "id": "b-20261005-01",
+      "time": "2026-10-05T15:00:00",
+      "ended": null,
+      "model": "Ref2VA-NF4",
+      "pipeline": "ref2va",
+      "refImages": 3,
+      "seeds": 6,
+      "success": 6,
+      "failed": 0,
+      "skipped": 0,
+      "avgScore": 0.93,
+      "maxScore": 0.95,
+      "status": "done",
+      "videos": [
+        {
+          "name": "ep01",
+          "ref": "hero.png",
+          "seed": 1007,
+          "score": 0.93,
+          "source": "sd",
+          "tags": [
+            "ep01"
+          ]
+        }
+      ],
+      "defects": {
+        "black": 0
+      },
+      "params": {},
+      "seed_list": [
+        1007,
+        1014,
+        1021
+      ],
+      "aspect_profiles": {
+        "16:9": {
+          "w": 1920,
+          "h": 1080
+        },
+        "9:16": {
+          "w": 1080,
+          "h": 1920
+        }
+      },
+      "active_profiles": [
+        "16:9",
+        "9:16"
+      ],
+      "quality_gate": {
+        "red_line": 80.0,
+        "review_cmd": "run_quality_review.py",
+        "recheck_max": 2
+      },
+      "schedule": {
+        "window": "2026-10-06-night",
+        "slots": [
+          "19:00-21:00"
+        ]
+      }
+    }
+  ],
+  "top10": []
+}

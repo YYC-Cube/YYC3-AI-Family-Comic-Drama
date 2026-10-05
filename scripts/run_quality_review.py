@@ -52,6 +52,46 @@ def audio_codec(path: str) -> str:
         return ""
 
 
+def frame_brightness(path: str, t: float) -> int:
+    """单帧平均亮度（0-255）——scale=1:1 缩成单像素取 Y（纯 ffmpeg 零依赖）。"""
+    try:
+        r = subprocess.run(
+            ["ffmpeg", "-v", "error", "-ss", f"{t:.3f}", "-i", path,
+             "-frames:v", "1", "-vf", "scale=1:1", "-pix_fmt", "gray",
+             "-f", "rawvideo", "-"],
+            capture_output=True, timeout=30)
+        return r.stdout[0] if r.stdout else -1
+    except Exception:  # noqa: BLE001
+        return -1
+
+
+def black_frames_5pt(path: str, duration: float) -> dict:
+    """5 位等距抽帧黑场扫（YYC3-68 §8.4 P0 · Phase A1 诊断字段，不计分）。"""
+    pts = [duration * f for f in (0.1, 0.3, 0.5, 0.7, 0.9)]
+    vals = [frame_brightness(path, t) for t in pts]
+    # 阈值 ≤25/255 视为黑帧——严格对齐 blackdetect pix_th=0.10（25.5）；
+    # 六集实测暗调画风亮度带 28-36（夜戏场景），松阈值会把暗场误标为黑帧
+    cut = 25
+    return {"points": [round(p, 2) for p in pts], "brightness": vals,
+            "black_count": sum(1 for v in vals if 0 <= v <= cut),
+            "note": "亮度带 28-36 为本剧暗调画风正常范围（六集实测）"}
+
+
+def audio_level(path: str) -> dict:
+    """volumedetect 音频电平 mean/max dB（Phase A1 诊断字段，不计分）。"""
+    import re
+    try:
+        r = subprocess.run(
+            ["ffmpeg", "-i", path, "-vn", "-af", "volumedetect",
+             "-f", "null", "-"], capture_output=True, text=True, timeout=60)
+        mean = re.search(r"mean_volume:\s*(-?[\d.]+)\s*dB", r.stderr)
+        peak = re.search(r"max_volume:\s*(-?[\d.]+)\s*dB", r.stderr)
+        return {"mean_db": float(mean.group(1)) if mean else None,
+                "max_db": float(peak.group(1)) if peak else None}
+    except Exception as e:  # noqa: BLE001
+        return {"mean_db": None, "max_db": None, "error": str(e)}
+
+
 def review_episode(proj_dir: Path, dynamic_conf: "float | None" = None) -> dict:
     """单集五维评审（各维 20 分），返回明细与得分。"""
     name = proj_dir.name
@@ -108,6 +148,15 @@ def review_episode(proj_dir: Path, dynamic_conf: "float | None" = None) -> dict:
                     for sub in ("storyboard", "images", "audio", "state", "output"))
     s5 = (10 if layout_ok else 0) + (10 if full.exists() else 0)
     d["dims"]["交付"] = {"score": s5, "layout_ok": layout_ok, "full_exists": full.exists()}
+
+    # 诊断节（2026-10-05 Phase A1 · YYC3-68 §8.4 P0）：5 位抽帧黑场扫 + 音频电平
+    # ——只采集不扣分（红线仍由五维分数承担）；black_count>0 或 mean_db 异常
+    #   （<-40dB 近无声）留人工复核，后续视数据积累升计分
+    if full.exists():
+        d["diagnostics"] = {
+            "black_frames_5pt": black_frames_5pt(str(full), dur),
+            "audio_level": audio_level(str(full)),
+        }
 
     d["score"] = sum(v["score"] for v in d["dims"].values())
     d["passed"] = d["score"] >= RED_LINE
