@@ -1,0 +1,40 @@
+{
+  "verdict": "revise",
+  "total": 66.3,
+  "threshold": 70.0,
+  "dims": {
+    "节奏": {
+      "score": 45.1,
+      "duration_variance": 0.086,
+      "shots": 80
+    },
+    "冲突": {
+      "score": 85.4,
+      "conflict_shots": 41
+    },
+    "画面性": {
+      "score": 61.8,
+      "shot_type_entropy": 0.84,
+      "prompt_coverage": "80/80"
+    },
+    "对白": {
+      "score": 45.6,
+      "dialogue_ratio": 0.04,
+      "short_line_rate": 1.0
+    },
+    "钩子": {
+      "score": 60,
+      "hook_shots": 3
+    },
+    "一致性": {
+      "score": 100.0,
+      "anchored": "80/80"
+    }
+  },
+  "suggestions": [
+    "「节奏」维度最低（45.1）——调 duration_sec 形成 1-3s 变奏，并保证镜数密度",
+    "「对白」维度最低（45.6）——对白占比向 40% 靠拢，长句拆短句（<=30 字）"
+  ],
+  "llm_enhance": "预留口：vLLM 后端就绪后接入语义批判（接口不变）",
+  "storyboard": "/tmp/yyc3_fake_smoke/fake-smoke/storyboard/storyboard.v1.json"
+}

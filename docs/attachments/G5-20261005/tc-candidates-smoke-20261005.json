@@ -1,0 +1,38 @@
+{
+  "project": "cand-smoke",
+  "episode": 1,
+  "candidates_per_shot": 2,
+  "ref_image": "hero_base.png",
+  "lora": null,
+  "ipa_weight": 0.15,
+  "shots": [
+    {
+      "shot_id": "shot-ep01-001",
+      "base_seed": 1007,
+      "candidates": [
+        {
+          "candidate": 0,
+          "seed": 1007,
+          "status": "ok",
+          "similarity": 0.679,
+          "action": "redraw",
+          "rank": 1
+        },
+        {
+          "candidate": 1,
+          "seed": 1008,
+          "status": "ok",
+          "similarity": 0.6126,
+          "action": "redraw",
+          "rank": 2
+        }
+      ],
+      "recommended": {
+        "rank": 1,
+        "seed": 1007,
+        "similarity": 0.679
+      }
+    }
+  ],
+  "generated_at": "2026-10-05T08:43:51"
+}

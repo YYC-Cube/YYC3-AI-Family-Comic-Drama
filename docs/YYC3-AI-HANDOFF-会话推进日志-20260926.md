@@ -1195,3 +1195,33 @@ ComfyUI 在线（:41888）；G1-004 保持 BLOCKED；YYC3-62 基模迁移阶段 
 1. **[P1]** E1 第一轮（治理加固）：A4 故障模式手册成册（37 轮教训结构化 >=11 条）+ A5 敏感词预检 + manifest AIGC 字段 + A7 全链 Fake 冒烟预检
 2. **[P1]** E1 第二轮（内容运营）：A2 节奏地图 schema 与 90s 折算校准 + A3 候选选帧闸门（anchor_guard 预打分复用）+ A6 分镜 6 维自批判环
 3. **[P2]** A9 H3 frames2video 能力勘察（E2 前置）+ Jellyfish 一致性管理层深读 + 基模迁移阶段 1（37.4 遗留，排期待定）
+
+## 三十九、E1 治理加固与内容运营落位（2026-10-05 第三十九轮，用户指令：38.4 TOP3 执行）
+
+### 39.1 执行留证
+
+- **A4 故障手册**：[YYC3-64-故障模式手册-20261005.md](YYC3-64-故障模式手册-20261005.md) 成册——20 条四系列（基础设施 I-01~07/生成模型 M-01~05/数据产物 D-01~05/工程管线 E-01~04），每条现象/根因/解法/预防/出处五要素，M-01/M-03 关联八项证伪红线。
+- **A5 合规预检**：[sensitive_scan.py](../scripts/sensitive_scan.py) 模块+CLI（15 条替换表克制原则）；run_batch_shots 低侵入集成（敏感词扫描 manifest.sensitive_scan + apply_declaration 回写 AIGC 标识）；**实测命中「暴毙→离世」**（shot-ep01-012）。
+- **A7 全链 Fake 冒烟**：[run_fake_smoke.py](../scripts/run_fake_smoke.py) 强制 stub 环境子进程跑批次链路，6 断言（exit/分镜/敏感词/AIGC/stub 产物/elapsed）全绿，1.5s 零 GPU——夜批前置闸门纪律落位。
+- **A2 节奏地图**：[run_rhythm_check.py](../scripts/run_rhythm_check.py) 红果 7 招 90s 折算（target=base×集长/180，折算红线入册）+ beat 回写 v2；**实测 6/7 覆盖**（countdown 88.5s 缺口有建议）。
+- **A3 候选选帧**：[run_storyboard_candidates.py](../scripts/run_storyboard_candidates.py) 每镜 N 候选+anchor 预打分排名+`--pick sid:rank` 终选回写 manifest；**实测 c0 sim=0.679 推荐+落位成功**（首次跑暴露目录未初始化 E-04 已修入册）。
+- **A6 自批判环**：[run_storyboard_critique.py](../scripts/run_storyboard_critique.py) 六维规则化（节奏/冲突/画面性/对白/钩子/一致性，遵循 run_quality_review 降级先例，LLM 口预留）；**实测 75.1 pass**，弱维（节奏 45.1/对白 45.6）建议明确。
+- **A9 勘察结论**：H3VisionClient.generate_single payload 仅 {batch,seeds,prompt_file,variant,preview}——**无首尾帧通道**，frames2video 需 H3 侧协议扩展提案；当前变通=image2video 首帧法+运动提示词强化。
+- **Jellyfish 深读**：三借鉴点——五类实体模型（本项目缺道具/服装维）、一致性检查前置剧本层、shot readiness 门。
+- 留证四件：docs/attachments/G5-20261005/（fake-smoke/rhythm/critique/candidates JSON）。
+
+### 39.2 关键决策
+
+- 自批判环**规则化优先**（确定性可复现、零外部依赖），LLM 语义批判留增强口——与 G4-005 五维评审同架构。
+- 候选选帧与生产**同口径**（1024px/同 anchor 配置），可比性优先于成本最优（512px 档留后续压测）。
+- A1 市场情报本轮未落（需数据源合规设计），顺延 40 轮。
+
+### 39.3 背景态
+
+ComfyUI 在线（:41888）；n1 空闲；G1-004 保持 BLOCKED；E1 六件套全部落位，E2（Ref 库/四模视频/可观测性/Provider 体检）待勘察与排期。
+
+### 39.4 下轮起点（TOP 3）
+
+1. **[P1]** A1 市场情报前置落位（run_market_scan.py：检索快照人工导入 schema + 情报 JSON → 剧本切集输入）+ A2/A3/A6 接入夜批前置闸门链（fake 冒烟串联三闸）
+2. **[P1]** 基模迁移阶段 1 启动（37.4 遗留两项连轮未动，需排期裁决）：DreamShaper XL + InstantID 落地或明确延期理由
+3. **[P2]** E2 勘察包：H3 协议扩展提案（frames2video）+ Ref 库分批建设方案（含 Jellyfish 五类实体模型裁剪适配）

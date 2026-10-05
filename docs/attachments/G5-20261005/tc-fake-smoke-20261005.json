@@ -1,0 +1,26 @@
+{
+  "fake_smoke": true,
+  "checks": {
+    "process_exit_0": true,
+    "storyboard_written": true,
+    "sensitive_scan_ran": true,
+    "aigc_declared": true,
+    "stub_shots_present": true,
+    "manifest_elapsed": true
+  },
+  "exit_code": 0,
+  "elapsed_s": 1.5,
+  "episode": 1,
+  "project": "fake-smoke",
+  "shots_in_storyboard": 80,
+  "manifest_shots": 2,
+  "stdout_tail": [
+    "[batch] fake-smoke ep1: 章节=- 镜头池=80 trace=trace-BATCH-EP01",
+    "[batch] 敏感词命中：暴毙 → 建议「离世」（shot-ep01-012/image_prompt）",
+    "[batch] 敏感词命中：暴毙 → 建议「离世」（shot-ep01-012/description）",
+    "[batch] shot-ep01-001: gen=stub sim=None action=None tts=-",
+    "[batch] shot-ep01-002: gen=stub sim=None action=None tts=-",
+    "{\"summary\": {\"shots\": 2, \"accepted\": 0, \"resumed\": 0, \"elapsed_s\": 0.0, \"comfy\": false, \"tts\": false}}"
+  ],
+  "stderr_tail": []
+}

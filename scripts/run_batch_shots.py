@@ -53,6 +53,10 @@ from splitter import split_chapters  # type: ignore
 from episode_planner import plan_episodes  # type: ignore
 from extractor import extract_elements  # type: ignore
 from storyboard_schema import draft_storyboard  # type: ignore
+try:
+    from sensitive_scan import scan_storyboard, apply_declaration  # 63 号 A5 合规预检
+except ImportError:  # 直接路径运行时 sys.path[0]=scripts 可导入；异常环境降级跳过
+    scan_storyboard = apply_declaration = None
 
 # 三章各 ~220 字：章末残留 ≥183 字独立成集（plan_episodes budget=367/2 门槛），
 # 两章累计 <367 字不提前合并 → 严格切出 3 集（扩产 ≥3 集样片前提）
@@ -173,6 +177,17 @@ def main():
                                   "strategy": "combo+seed_lock" if args.lora
                                   else "ipadapter+seed_lock"},
                 "shots": []}
+    # 63 号 A5：敏感词预检（命中仅告警留证，替换决策留人工）+ AIGC 标识回写
+    if scan_storyboard is not None:
+        sc = scan_storyboard(sb)
+        manifest["sensitive_scan"] = {"scanned": sc["scanned"],
+                                      "hits": len(sc["hits"]),
+                                      "detail": sc["hits"] or None}
+        for h in sc["hits"]:
+            print(f"[batch] 敏感词命中：{h['word']} → 建议「{h['suggest']}」"
+                  f"（{h['source']}）")
+    if apply_declaration is not None:
+        apply_declaration(manifest)
     t_start = time.time()
     state_path = proj / "state" / "manifest.json"
 

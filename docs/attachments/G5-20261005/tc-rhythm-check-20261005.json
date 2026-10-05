@@ -1,0 +1,623 @@
+{
+  "timeline": [
+    {
+      "shot_id": "shot-ep01-001",
+      "start": 0.0,
+      "end": 2.0,
+      "duration": 2.0,
+      "hook_flag": true
+    },
+    {
+      "shot_id": "shot-ep01-002",
+      "start": 2.0,
+      "end": 4.0,
+      "duration": 2.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-003",
+      "start": 4.0,
+      "end": 5.5,
+      "duration": 1.5,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-004",
+      "start": 5.5,
+      "end": 7.0,
+      "duration": 1.5,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-005",
+      "start": 7.0,
+      "end": 9.0,
+      "duration": 2.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-006",
+      "start": 9.0,
+      "end": 11.0,
+      "duration": 2.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-007",
+      "start": 11.0,
+      "end": 12.5,
+      "duration": 1.5,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-008",
+      "start": 12.5,
+      "end": 13.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-009",
+      "start": 13.5,
+      "end": 15.5,
+      "duration": 2.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-010",
+      "start": 15.5,
+      "end": 17.5,
+      "duration": 2.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-011",
+      "start": 17.5,
+      "end": 18.5,
+      "duration": 1.0,
+      "hook_flag": true
+    },
+    {
+      "shot_id": "shot-ep01-012",
+      "start": 18.5,
+      "end": 19.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-013",
+      "start": 19.5,
+      "end": 21.5,
+      "duration": 2.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-014",
+      "start": 21.5,
+      "end": 22.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-015",
+      "start": 22.5,
+      "end": 23.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-016",
+      "start": 23.5,
+      "end": 24.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-017",
+      "start": 24.5,
+      "end": 25.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-018",
+      "start": 25.5,
+      "end": 26.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-019",
+      "start": 26.5,
+      "end": 27.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-020",
+      "start": 27.5,
+      "end": 28.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-021",
+      "start": 28.5,
+      "end": 29.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-022",
+      "start": 29.5,
+      "end": 30.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-023",
+      "start": 30.5,
+      "end": 31.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-024",
+      "start": 31.5,
+      "end": 32.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-025",
+      "start": 32.5,
+      "end": 33.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-026",
+      "start": 33.5,
+      "end": 34.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-027",
+      "start": 34.5,
+      "end": 35.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-028",
+      "start": 35.5,
+      "end": 36.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-029",
+      "start": 36.5,
+      "end": 37.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-030",
+      "start": 37.5,
+      "end": 38.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-031",
+      "start": 38.5,
+      "end": 39.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-032",
+      "start": 39.5,
+      "end": 40.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-033",
+      "start": 40.5,
+      "end": 41.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-034",
+      "start": 41.5,
+      "end": 42.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-035",
+      "start": 42.5,
+      "end": 43.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-036",
+      "start": 43.5,
+      "end": 44.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-037",
+      "start": 44.5,
+      "end": 45.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-038",
+      "start": 45.5,
+      "end": 46.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-039",
+      "start": 46.5,
+      "end": 47.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-040",
+      "start": 47.5,
+      "end": 48.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-041",
+      "start": 48.5,
+      "end": 49.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-042",
+      "start": 49.5,
+      "end": 50.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-043",
+      "start": 50.5,
+      "end": 51.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-044",
+      "start": 51.5,
+      "end": 52.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-045",
+      "start": 52.5,
+      "end": 53.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-046",
+      "start": 53.5,
+      "end": 54.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-047",
+      "start": 54.5,
+      "end": 55.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-048",
+      "start": 55.5,
+      "end": 56.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-049",
+      "start": 56.5,
+      "end": 57.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-050",
+      "start": 57.5,
+      "end": 58.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-051",
+      "start": 58.5,
+      "end": 59.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-052",
+      "start": 59.5,
+      "end": 60.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-053",
+      "start": 60.5,
+      "end": 61.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-054",
+      "start": 61.5,
+      "end": 62.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-055",
+      "start": 62.5,
+      "end": 63.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-056",
+      "start": 63.5,
+      "end": 64.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-057",
+      "start": 64.5,
+      "end": 65.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-058",
+      "start": 65.5,
+      "end": 66.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-059",
+      "start": 66.5,
+      "end": 67.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-060",
+      "start": 67.5,
+      "end": 68.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-061",
+      "start": 68.5,
+      "end": 69.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-062",
+      "start": 69.5,
+      "end": 70.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-063",
+      "start": 70.5,
+      "end": 71.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-064",
+      "start": 71.5,
+      "end": 72.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-065",
+      "start": 72.5,
+      "end": 73.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-066",
+      "start": 73.5,
+      "end": 74.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-067",
+      "start": 74.5,
+      "end": 75.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-068",
+      "start": 75.5,
+      "end": 76.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-069",
+      "start": 76.5,
+      "end": 77.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-070",
+      "start": 77.5,
+      "end": 78.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-071",
+      "start": 78.5,
+      "end": 79.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-072",
+      "start": 79.5,
+      "end": 80.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-073",
+      "start": 80.5,
+      "end": 81.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-074",
+      "start": 81.5,
+      "end": 82.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-075",
+      "start": 82.5,
+      "end": 83.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-076",
+      "start": 83.5,
+      "end": 84.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-077",
+      "start": 84.5,
+      "end": 85.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-078",
+      "start": 85.5,
+      "end": 86.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-079",
+      "start": 86.5,
+      "end": 87.5,
+      "duration": 1.0,
+      "hook_flag": false
+    },
+    {
+      "shot_id": "shot-ep01-080",
+      "start": 87.5,
+      "end": 88.5,
+      "duration": 1.0,
+      "hook_flag": true
+    }
+  ],
+  "ep_len_s": 88.5,
+  "ratio_vs_180s": 0.492,
+  "beats": [
+    {
+      "beat": "cold_open",
+      "base_s": 0.0,
+      "target_s": 0.0,
+      "covered_by": "shot-ep01-001",
+      "ok": true
+    },
+    {
+      "beat": "blast",
+      "base_s": 30.0,
+      "target_s": 14.75,
+      "covered_by": "shot-ep01-009",
+      "ok": true
+    },
+    {
+      "beat": "satisfaction_1",
+      "base_s": 60.0,
+      "target_s": 29.5,
+      "covered_by": "shot-ep01-022",
+      "ok": true
+    },
+    {
+      "beat": "twist",
+      "base_s": 90.0,
+      "target_s": 44.25,
+      "covered_by": "shot-ep01-036",
+      "ok": true
+    },
+    {
+      "beat": "satisfaction_2",
+      "base_s": 120.0,
+      "target_s": 59.0,
+      "covered_by": "shot-ep01-051",
+      "ok": true
+    },
+    {
+      "beat": "hook",
+      "base_s": 150.0,
+      "target_s": 73.75,
+      "covered_by": "shot-ep01-066",
+      "ok": true
+    },
+    {
+      "beat": "countdown",
+      "base_s": 180.0,
+      "target_s": 88.5,
+      "covered_by": null,
+      "ok": false
+    }
+  ],
+  "coverage": "6/7",
+  "duration_variance": 0.086,
+  "suggestions": [
+    "countdown 节点 88.5s 未被镜头覆盖——建议在时间轴 88.5s 附近镜头标注 beat（或调时长命中）"
+  ],
+  "storyboard": "/tmp/yyc3_fake_smoke/fake-smoke/storyboard/storyboard.v1.json"
+}
