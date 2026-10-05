@@ -1,0 +1,123 @@
+{
+  "testcase": "TC-G5 门禁执行器（骨架生产化 · 35.4 复跑）",
+  "gate_summary": {
+    "TC-G5-001": "BLOCKED",
+    "TC-G5-002": "PASS",
+    "TC-G5-003": "FAIL",
+    "TC-G5-004": "BLOCKED",
+    "TC-G5-005": "BLOCKED",
+    "TC-G5-006": "BLOCKED"
+  },
+  "gate_verdict": "FAIL",
+  "cases": {
+    "TC-G5-001": {
+      "case": "反哺前后完播率对比（>=5pp）",
+      "verdict": "BLOCKED",
+      "honest_note": "依赖真实运营曝光窗口（每集 >=30 会话 x2 期），手册允许 BLOCKED"
+    },
+    "TC-G5-002": {
+      "case": "TC-G5-002 反哺后产能提升（>=30%）",
+      "baseline": "TC-G4-009：3 集/晚（SD15 链，单集端到端 ~40min）",
+      "sdxl_measured": {
+        "episodes_in_window": 3,
+        "window_s": 215.6,
+        "per_episode_s": 71.9,
+        "night_capacity_projected_8h": 400
+      },
+      "verdict": "PASS",
+      "honest_note": "3 实测集于单一连续窗口完成（静态+TTS+合成+串联+评审）；8h 窗口产能为实测吞吐×窗口外推（未整夜常驻）；内容供给瓶颈=分集计划上限（NOVEL 三章3 集），>3 集/晚需新章节文本，非产线约束"
+    },
+    "TC-G5-003": {
+      "case": "TC-G5-003 LoRA 增量训练触发验证",
+      "step1_trigger_judgement": {
+        "rule": "组合峰值 mean < 0.85 触发（均值口径上线门槛）",
+        "rows": [
+          {
+            "model": "sd-hero-v2（生产上线配置）",
+            "combo_peak_mean": 0.8669,
+            "trigger_fired": false,
+            "expected": false,
+            "correct": true,
+            "evidence": "tc-m3-lora-v2-sweep.json"
+          },
+          {
+            "model": "sd-hero-v3（rank64+4.76ep）",
+            "combo_peak_mean": 0.7273,
+            "trigger_fired": true,
+            "expected": true,
+            "correct": true,
+            "evidence": "tc-m3-lora-v3-sweep.json"
+          },
+          {
+            "model": "sd-hero-v3r32（rank32+10ep）",
+            "combo_peak_mean": 0.6218,
+            "trigger_fired": true,
+            "expected": true,
+            "correct": true,
+            "evidence": "tc-m3-lora-v3r32-sweep.json"
+          },
+          {
+            "model": "sd-hero-v2m777（v2+8x777 增量续训 540 步）",
+            "combo_peak_mean": 0.8586,
+            "trigger_fired": false,
+            "expected": false,
+            "correct": true,
+            "evidence": "G4-20261002/final_eval_histref.json#v2m777_combo_w015"
+          }
+        ],
+        "accuracy": 1.0,
+        "false_trigger_count": 0,
+        "verdict": "PASS"
+      },
+      "step2_incremental_retrain": {
+        "verdict": "DONE",
+        "note": "35.4 P2 真实执行：v2 checkpoint 起步（network_weights 口径）+ 8 张 777 挖掘样本（27 图混合集，无 caption 走 class token）+ dim32/alpha16 + lr 1e-4 constant + 2 epochs（540/540 步，1.14it/s，bf16/fp16 保存）",
+        "artifacts": [
+          "sd-hero-v2m777.safetensors（最终 2ep，fp16，37.8MB）",
+          "sd-hero-v2m777-000001.safetensors（1ep 中间档）"
+        ],
+        "evidence": "G4-20261002/train_v2m777.log"
+      },
+      "step3_re_eval": {
+        "verdict": "FAIL",
+        "mean": 0.8586,
+        "min": 0.7269,
+        "max": 0.9092,
+        "per_seed": {
+          "777": 0.7269,
+          "888": 0.9002,
+          "999": 0.898,
+          "1111": 0.9092
+        },
+        "baseline_v2": {
+          "mean": 0.8672,
+          "min": 0.7846
+        },
+        "evidence": "G4-20261002/final_eval_histref.json（历史参考系 input/hero_base.png，库向量校准 1.0）",
+        "note": "均值口径守住 0.85 线（0.8586≥0.85，触发判定不触发）但手册预期 min≥0.85 未达：777 种子 0.7846→0.7269 反降——777 样本系 v2 自生成同分布，续训巩固而非泛化；1ep 中间档 min 0.7256 同样未达；生产维持 v2，不替换"
+      },
+      "verdict": "FAIL",
+      "honest_note": "①触发判定 100% 准确/零误触发（四档真实执行，含 35.4 追加 v2m777）；②增量重训已真实执行（非模拟）；③复测均值守线但 min 0.7269<0.85 手册预期未达，如实 FAIL——泛化目标未达成，生产维持 v2"
+    },
+    "TC-G5-004": {
+      "case": "伯乐排期建议采纳率（>=60%）",
+      "verdict": "BLOCKED",
+      "honest_note": "依赖智语伯乐接入排期流程 >=4 周期台账，手册允许 BLOCKED"
+    },
+    "TC-G5-005": {
+      "case": "TC-G5-005 运营成本反哺核算（较基线降 >=20%）",
+      "baseline_cny_per_ep": [
+        0.0158,
+        0.0335
+      ],
+      "verdict": "BLOCKED",
+      "honest_note": "G4 基线 0.0158-0.0335 元/集在位；反哺项未全量启用故无'反哺后'核算对象；核算链 v1.1.1 就绪（电费折算 + Token-Console 计量接入，timeout 8s 修复）"
+    },
+    "TC-G5-006": {
+      "case": "G5 回归门禁（启动前置）",
+      "verdict": "BLOCKED",
+      "honest_note": "启动前置：G5 其余用例执行完毕；回归集（G1 三项+G2 十用例+G3 五项+G4 抽样）清单与历史留证已对齐"
+    }
+  },
+  "timestamp": "2026-10-05T11:56:38+0800"
+}

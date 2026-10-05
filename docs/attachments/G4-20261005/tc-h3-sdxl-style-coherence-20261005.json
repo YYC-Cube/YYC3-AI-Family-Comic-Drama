@@ -1,0 +1,28 @@
+{
+  "testcase": "H3 动态镜 × SDXL 静态镜风格衔接验证（style_keeper 30 维向量逐字同口径）",
+  "method": "RGB均值3+std3+8bin直方图24（64×64/0-1归一/hist按总计数归一），余弦",
+  "rows": [
+    {
+      "ep": 1,
+      "h3_seed": 42,
+      "cos_h3_vs_sdxl_static": 0.6127,
+      "cos_h3_vs_sd15_ref": 0.6336
+    },
+    {
+      "ep": 2,
+      "h3_seed": 43,
+      "cos_h3_vs_sdxl_static": 0.6382,
+      "cos_h3_vs_sd15_ref": 0.6598
+    },
+    {
+      "ep": 3,
+      "h3_seed": 44,
+      "cos_h3_vs_sdxl_static": 0.6179,
+      "cos_h3_vs_sd15_ref": 0.6416
+    }
+  ],
+  "mean_h3_vs_sdxl": 0.6229,
+  "mean_h3_vs_sd15": 0.645,
+  "verdict_note": "H3 动态素材系 SD15 域参考生成（2026-09-29 batch9001/9003）；与 SDXL 静态镜的余弦差即跨域风格 gap 量化——为「H3 以 SDXL 帧为参考重生」需求提供基线数据；另附 H3↔SD15 同域对照",
+  "timestamp": "2026-10-05"
+}

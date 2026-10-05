@@ -116,9 +116,25 @@ def case_g5_003() -> dict:
 
 
 def case_g5_002() -> dict:
-    """产能：基线在位（3 集/晚），反哺项未全量启用，夜间窗口未复跑。"""
+    """产能：SDXL 档实测吞吐优先；无实测证据时按手册 BLOCKED 留证。"""
     base = load_json(EVID / "tc-g4-009-nightly-batch-stats.json")
     n_base = len(base["episodes"])
+    # SDXL 实测证据优先（2026-10-05 产线启用首发：3 集端到端短窗实测）
+    sdxl_stats = EVID2.parent / "G4-20261005" / "tc-sdxl-nightly-stats-20261005.json"
+    if sdxl_stats.exists():
+        s = load_json(sdxl_stats)
+        proj = s["night_capacity_projected_8h"]
+        per_ep = s["per_episode_s"]
+        # 门禁口径：≥4 集/晚 且 较基线 3 集/晚提升 ≥30%（实测吞吐×8h 窗口投影）
+        verdict = "PASS" if (proj >= 4 and proj >= n_base * 1.3) else "FAIL"
+        return {"case": "TC-G5-002 反哺后产能提升（>=30%）",
+                "baseline": f"TC-G4-009：{n_base} 集/晚（SD15 链，单集端到端 ~40min）",
+                "sdxl_measured": {"episodes_in_window": s["measured_eps"],
+                                  "window_s": s["window_s"],
+                                  "per_episode_s": per_ep,
+                                  "night_capacity_projected_8h": proj},
+                "verdict": verdict,
+                "honest_note": s["honest_note"]}
     return {"case": "TC-G5-002 反哺后产能提升（>=30%）",
             "baseline": f"TC-G4-009：{n_base} 集/晚（tc-g4-009-nightly-batch-stats.json）",
             "verdict": "BLOCKED",

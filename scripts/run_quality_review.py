@@ -51,8 +51,13 @@ def audio_codec(path: str) -> str:
 def review_episode(proj_dir: Path, dynamic_conf: "float | None" = None) -> dict:
     """单集五维评审（各维 20 分），返回明细与得分。"""
     name = proj_dir.name
-    ep_no = name.replace("g4-ep", "")
-    full = proj_dir / "output" / f"g4_ep{ep_no}_full.mp4"
+    # 集号解析（2026-10-05 通用化）：取项目名末段数字（g4-ep01→1，
+    # sdxl-prod-001→1）；无数字回退整名去非数字（保持旧口径行为）
+    tail = "".join(ch for ch in name.split("-")[-1] if ch.isdigit())
+    ep_no = tail or "".join(ch for ch in name if ch.isdigit())
+    full = proj_dir / "output" / f"{name}_full.mp4"
+    if not full.exists():  # 兼容旧命名产物 g4_epNN_full.mp4
+        full = proj_dir / "output" / f"g4_ep{ep_no}_full.mp4"
     manifest_p = proj_dir / "state" / "manifest.json"
     sb_p = proj_dir / "storyboard" / "storyboard.v1.json"
     d = {"episode": name, "full": str(full), "dims": {}}

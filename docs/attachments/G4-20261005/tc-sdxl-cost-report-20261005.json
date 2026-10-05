@@ -1,0 +1,87 @@
+{
+  "testcase": "TC-G4-007 单集成本核算",
+  "executor": "run_cost_report.py",
+  "口径说明": "全本地链零外部 API 成本；电费按实测功率折算（Mac 55W/DGX 传入功率）；网关可达时 Token-Console 真实计量均摊入各集",
+  "gateway_metering": {
+    "reachable": false,
+    "source": "未配置 --gateway-url（沿用全本地链口径）",
+    "token_cost_cny": null,
+    "models": []
+  },
+  "episodes": [
+    {
+      "episode": "sdxl-prod-001",
+      "stages": {
+        "脚本分镜+图像+TTS（manifest.elapsed_s）": 58.8,
+        "合成+串联+评分（补录）": 90.0,
+        "H3 动态镜头生成（DGX）": 0
+      },
+      "counts": {
+        "shots": 3,
+        "image_ok": 3,
+        "tts_ok": 0
+      },
+      "external_api_cost_cny": 0.0,
+      "external_api_note": "全本地链零外部 API",
+      "local_compute": {
+        "mac_seconds": 148.8,
+        "dgx_seconds": 0,
+        "kwh": 0.00227,
+        "electricity_cny": 0.0014
+      },
+      "total_cost_cny": 0.0014,
+      "budget_cny": 2.0,
+      "passed": true
+    },
+    {
+      "episode": "sdxl-prod-002",
+      "stages": {
+        "脚本分镜+图像+TTS（manifest.elapsed_s）": 58.8,
+        "合成+串联+评分（补录）": 90.0,
+        "H3 动态镜头生成（DGX）": 0
+      },
+      "counts": {
+        "shots": 3,
+        "image_ok": 3,
+        "tts_ok": 0
+      },
+      "external_api_cost_cny": 0.0,
+      "external_api_note": "全本地链零外部 API",
+      "local_compute": {
+        "mac_seconds": 148.8,
+        "dgx_seconds": 0,
+        "kwh": 0.00227,
+        "electricity_cny": 0.0014
+      },
+      "total_cost_cny": 0.0014,
+      "budget_cny": 2.0,
+      "passed": true
+    },
+    {
+      "episode": "sdxl-prod-003",
+      "stages": {
+        "脚本分镜+图像+TTS（manifest.elapsed_s）": 66.0,
+        "合成+串联+评分（补录）": 90.0,
+        "H3 动态镜头生成（DGX）": 0
+      },
+      "counts": {
+        "shots": 3,
+        "image_ok": 3,
+        "tts_ok": 0
+      },
+      "external_api_cost_cny": 0.0,
+      "external_api_note": "全本地链零外部 API",
+      "local_compute": {
+        "mac_seconds": 156.0,
+        "dgx_seconds": 0,
+        "kwh": 0.00238,
+        "electricity_cny": 0.0014
+      },
+      "total_cost_cny": 0.0014,
+      "budget_cny": 2.0,
+      "passed": true
+    }
+  ],
+  "max_cost": 0.0014,
+  "all_passed": true
+}

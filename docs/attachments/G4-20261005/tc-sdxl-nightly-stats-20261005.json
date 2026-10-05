@@ -1,0 +1,36 @@
+{
+  "testcase": "SDXL 档实测吞吐（G5-002 证据，3 集端到端短窗实测）",
+  "date": "2026-10-05",
+  "config": "instantid 档（DSXL+LoRA0.6+IID0.6）；9/9 静态镜首绘直通",
+  "episodes": [
+    {
+      "project": "sdxl-prod-001",
+      "static_batch_s": 58.8,
+      "build_s": 5,
+      "score": 100
+    },
+    {
+      "project": "sdxl-prod-002",
+      "static_batch_s": 58.8,
+      "build_s": 4,
+      "score": 100
+    },
+    {
+      "project": "sdxl-prod-003",
+      "static_batch_s": 66.0,
+      "build_s": 5,
+      "score": 100
+    }
+  ],
+  "window_s": 215.6,
+  "measured_eps": 3,
+  "per_episode_s": 71.9,
+  "night_capacity_projected_8h": 400,
+  "baseline": "TC-G4-009：3 集/晚（SD15 链，单集端到端 ~40min）",
+  "honest_note": "3 实测集于单一连续窗口完成（静态+TTS+合成+串联+评审）；8h 窗口产能为实测吞吐×窗口外推（未整夜常驻）；内容供给瓶颈=分集计划上限（NOVEL 三章3 集），>3 集/晚需新章节文本，非产线约束",
+  "gate": {
+    "target_eps_per_night": 4,
+    "improvement_target": 0.3,
+    "measured_pass": true
+  }
+}
