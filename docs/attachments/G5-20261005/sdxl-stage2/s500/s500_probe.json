@@ -1,0 +1,70 @@
+{
+  "testcase": "SDXL 阶段 2 组合扫描（DreamShaperXL_Lightning + LoRA + InstantID）",
+  "lora": "sd-hero-xl-v1-step00000500.safetensors",
+  "ckpt": "DreamShaperXL_Lightning.safetensors",
+  "sampling": {
+    "steps": 8,
+    "cfg": 1.8,
+    "size": "1024x1024"
+  },
+  "grid": [
+    {
+      "lora_strength": 0.8,
+      "instantid_weight": 0.8,
+      "rows": [
+        {
+          "seed": 777,
+          "sim": 0.8756
+        },
+        {
+          "seed": 888,
+          "sim": 0.8781
+        },
+        {
+          "seed": 999,
+          "sim": 0.8726
+        },
+        {
+          "seed": 1111,
+          "sim": 0.8724
+        }
+      ],
+      "mean": 0.8747,
+      "min": 0.8724
+    }
+  ],
+  "best": {
+    "lora_strength": 0.8,
+    "instantid_weight": 0.8,
+    "rows": [
+      {
+        "seed": 777,
+        "sim": 0.8756
+      },
+      {
+        "seed": 888,
+        "sim": 0.8781
+      },
+      {
+        "seed": 999,
+        "sim": 0.8726
+      },
+      {
+        "seed": 1111,
+        "sim": 0.8724
+      }
+    ],
+    "mean": 0.8747,
+    "min": 0.8724
+  },
+  "baseline": {
+    "sdxl_instantid_only(阶段1)": 0.8446,
+    "sd15_v2_combo_prod": 0.8672,
+    "sd15_min_champion": 0.8036
+  },
+  "gate": {
+    "mean_ge_0.85": true,
+    "min_ge_0.8036": true
+  },
+  "production_switch_review": true
+}
