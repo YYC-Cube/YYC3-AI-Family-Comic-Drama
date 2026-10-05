@@ -1,5 +1,61 @@
 {
   "_schema": "YYC3-63 v1.0.0（completion/scheduling 契约见方案 §2.3/§3.2）",
   "completion": [],
-  "scheduling": []
+  "scheduling": [],
+  "plan": {
+    "status": "P0 待启动（投放平台账号选定后开窗，YYC3-63 §五步骤 1）",
+    "phases": [
+      {
+        "phase": "P0",
+        "episodes": [
+          "sdxl-prod-001",
+          "sdxl-prod-002",
+          "sdxl-prod-003"
+        ],
+        "window": null,
+        "note": "基线期 7 天：旧三章（未启用运营建议）"
+      },
+      {
+        "phase": "P1",
+        "episodes": [
+          "sdxl-prod-004",
+          "sdxl-prod-005",
+          "sdxl-prod-006"
+        ],
+        "window": null,
+        "note": "反哺期 7 天：新三章 + 伯乐建议注入位"
+      }
+    ],
+    "bole_placeholder": {
+      "source": "manual",
+      "upgrade_to": "bole-agent",
+      "note": "占位建议先以 manual 录入台账；zhiyu_bole 接入后切换 source",
+      "first_suggestions": [
+        {
+          "episode_id": "sdxl-prod-004",
+          "style": "夜雨悬疑",
+          "slot": "19:00-21:00",
+          "order": 1
+        },
+        {
+          "episode_id": "sdxl-prod-005",
+          "style": "夜雨悬疑",
+          "slot": "19:00-21:00",
+          "order": 2
+        },
+        {
+          "episode_id": "sdxl-prod-006",
+          "style": "情感反转",
+          "slot": "20:00-22:00",
+          "order": 3
+        }
+      ]
+    },
+    "assets": {
+      "local": "~/YYC-Cube/YYC3-assets/projects/",
+      "n1": "~/yyc3-archive/projects/",
+      "note": "六集成片双端归档（2026-10-05，MD5 核对）"
+    },
+    "created": "2026-10-05T14:39:51+0800"
+  }
 }

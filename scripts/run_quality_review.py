@@ -16,6 +16,10 @@ import subprocess
 import sys
 from pathlib import Path
 
+# 集中配置（P2 专项 2026-10-05 迁移）：生产根单一出口 scripts/env.py
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from env import PROJECT_ROOT  # noqa: E402
+
 RED_LINE = 80.0
 
 
@@ -112,7 +116,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--projects", default="g4-ep01,g4-ep02,g4-ep03",
                     help="逗号分隔的集目录名")
-    ap.add_argument("--root", default="/tmp/yyc3_projects")
+    ap.add_argument("--root", default=str(PROJECT_ROOT))
     ap.add_argument("--dynamic-conf", default="{}",
                     help='JSON：{集名: 动态镜 SyncNet conf}（如 {"g4-ep01":6.413}）')
     ap.add_argument("--human-check", default=None,

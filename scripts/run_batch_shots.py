@@ -3,8 +3,9 @@
 # 链路（逐镜）：剧本→分镜（script_engine）→ pre_anchor → text_to_image
 #   （IPAdapter 锚定 + 镜头稳定种子）→ post_check 打回（≤2）→ 落盘
 #   + 对白 TTS（tts_service 在线时）→ manifest + 汇总报告
-# 目录：镜像 NAS 规范 projects/{id}/{images,audio,state,output}（本地根
-#   /tmp/yyc3_projects，NAS 就绪后改 PROJECT_ROOT=/mnt/nas/projects）
+# 目录：镜像 NAS 规范 projects/{id}/{images,audio,state,output}（生产根默认
+#   ~/yyc3_projects，见 scripts/env.py 的 PROJECT_ROOT；NAS 就绪后设
+#   YYC3_PROJECT_ROOT=/mnt/nas/projects 切换）
 # 降级：ComfyUI/TTS 未配置 → stub 记入 manifest（流水线不断流）
 # 运行：COMFYUI_MODEL=DreamShaper_8_pruned.safetensors \
 #   yyc3-ai-manju-studio/.venv/bin/python scripts/run_batch_shots.py \

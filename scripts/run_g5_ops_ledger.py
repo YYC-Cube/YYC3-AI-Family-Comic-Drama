@@ -1,14 +1,16 @@
 # ==============================================================
 # run_g5_ops_ledger.py — G5 运营反哺账本（TC-G5-001/004 前置机制）
-# 职责（YYC3-63 §四）：
+# 职责（YYC3-63 §四/§五）：
 #   init   — 初始化 docs/ops/g5-ops-ledger.json（空账本骨架）
+#   plan   — 窗口启动机制侧：落 P0/P1 分组 + 伯乐建议占位到 plan 字段
+#            （判定域 completion/scheduling 不写入——不虚构数据）
 #   judge  — 两用例真实判定：
 #     TC-G5-001 完播率对比：P0/P1 两期各 ≥1 集 × ≥30 有效会话，
 #              mean(P1) − mean(P0) ≥ 5pp → PASS（逐集+均值双报）
 #     TC-G5-004 排期采纳率：≥4 周期且 采纳/建议 ≥60% → PASS
 #   数据不足 → BLOCKED 如实留证（不虚构，G 门禁口径）
 # 账本契约见 YYC3-63 §2.3/§3.2（completion / scheduling 字段）
-# 运行：yyc3-ai-manju-studio/.venv/bin/python scripts/run_g5_ops_ledger.py init|judge
+# 运行：yyc3-ai-manju-studio/.venv/bin/python scripts/run_g5_ops_ledger.py init|plan|judge
 # ==============================================================
 import argparse
 import json
@@ -27,6 +29,29 @@ COMPLETION_DELTA_PP = 5.0      # ≥5 个百分点
 MIN_SESSIONS_PER_EP = 30       # 每集有效会话下限
 ADOPT_RATE = 0.60              # 采纳率 ≥60%
 MIN_CYCLES = 4                 # ≥4 周期
+
+# ── 窗口计划骨架（YYC3-63 §2.2 分组 + §五排期；plan 为非判定域） ──
+PLAN = {
+    "status": "P0 待启动（投放平台账号选定后开窗，YYC3-63 §五步骤 1）",
+    "phases": [
+        {"phase": "P0", "episodes": ["sdxl-prod-001", "sdxl-prod-002", "sdxl-prod-003"],
+         "window": None, "note": "基线期 7 天：旧三章（未启用运营建议）"},
+        {"phase": "P1", "episodes": ["sdxl-prod-004", "sdxl-prod-005", "sdxl-prod-006"],
+         "window": None, "note": "反哺期 7 天：新三章 + 伯乐建议注入位"},
+    ],
+    "bole_placeholder": {
+        "source": "manual", "upgrade_to": "bole-agent",
+        "note": "占位建议先以 manual 录入台账；zhiyu_bole 接入后切换 source",
+        "first_suggestions": [
+            {"episode_id": "sdxl-prod-004", "style": "夜雨悬疑", "slot": "19:00-21:00", "order": 1},
+            {"episode_id": "sdxl-prod-005", "style": "夜雨悬疑", "slot": "19:00-21:00", "order": 2},
+            {"episode_id": "sdxl-prod-006", "style": "情感反转", "slot": "20:00-22:00", "order": 3},
+        ],
+    },
+    "assets": {"local": "~/YYC-Cube/YYC3-assets/projects/",
+               "n1": "~/yyc3-archive/projects/",
+               "note": "六集成片双端归档（2026-10-05，MD5 核对）"},
+}
 
 
 def load() -> dict:
@@ -87,11 +112,21 @@ def judge_004(cycles: list) -> dict:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("mode", choices=["init", "judge"])
+    ap.add_argument("mode", choices=["init", "plan", "judge"])
     args = ap.parse_args()
     if args.mode == "init":
         save(dict(EMPTY))
         print(f"[ledger] 空账本已初始化：{LEDGER}")
+        return 0
+    if args.mode == "plan":
+        data = load()
+        data["plan"] = dict(PLAN)
+        data["plan"]["created"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
+        save(data)
+        print(f"[ledger] 窗口计划已落账（plan 域，判定域保持空）：\n"
+              f"  P0 = ep01-03 基线期 | P1 = ep04-06 反哺期\n"
+              f"  伯乐占位建议 {len(PLAN['bole_placeholder']['first_suggestions'])} 条"
+              f"（source=manual）\n  下一步：平台账号选定 → 开 P0 窗口采集")
         return 0
     data = load()
     r1, r4 = judge_001(data.get("completion", [])), \

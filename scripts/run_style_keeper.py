@@ -24,6 +24,10 @@ REPO = Path(__file__).resolve().parents[1]
 MANJU = REPO / "yyc3-ai-manju-studio"
 sys.path.insert(0, str(MANJU / "backend"))
 
+# 集中配置（P2 专项 2026-10-05 迁移）：生产根单一出口 scripts/env.py
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from env import PROJECT_ROOT  # noqa: E402
+
 from app.modules.consistency_engine.style_keeper import (  # noqa: E402 # pyright: ignore[reportMissingImports]
     MAX_ATTEMPTS, STYLE_SIM_THRESHOLD, StyleKeeper)
 
@@ -97,7 +101,7 @@ def run_closure(keeper: StyleKeeper, project_id: str, anchor: Path,
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--project", default="g4-ep01")
-    ap.add_argument("--anchor", default="/tmp/yyc3_projects/g4-ep01/images/shot-ep01-003.png",
+    ap.add_argument("--anchor", default=str(PROJECT_ROOT / "g4-ep01" / "images" / "shot-ep01-003.png"),
                     help="风格基准帧（已产真实镜帧）")
     ap.add_argument("--demo-dir", default="/tmp/style_keeper_demo")
     ap.add_argument("--profiles-root", default="/tmp/style_keeper_demo/profiles",

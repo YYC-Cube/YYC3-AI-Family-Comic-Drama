@@ -22,15 +22,15 @@ import sys
 import time
 from pathlib import Path
 
+# 集中配置（P2 专项 2026-10-05 迁移）：路径/端口/生产根单一出口 scripts/env.py
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from env import (COMPONENTS, MANJU, SCRIPT_ENGINE,  # noqa: E402
+                 HERO, PROJECT_ROOT, comfy_env)
+
 REPO = Path(__file__).resolve().parents[1]
-MANJU = REPO / "yyc3-ai-manju-studio"
-COMPONENTS = REPO / "yyc3-ai-agent-archive" / "components"
-SCRIPT_ENGINE = MANJU / "backend" / "app" / "modules" / "script_engine"
 LIBRARY = MANJU / "backend" / "face_library_sd"
 
-os.environ.setdefault("COMFYUI_URL", "http://localhost:41888")
-os.environ.setdefault("COMFYUI_MODEL", "DreamShaper_8_pruned.safetensors")
-os.environ.setdefault("COMFYUI_TIMEOUT", "900")
+comfy_env()  # COMFYUI_URL/MODEL/TIMEOUT 统一 setdefault（env.py）
 
 import types  # noqa: E402
 _m = types.ModuleType("milvus_retriever")
@@ -158,8 +158,7 @@ def main() -> int:
     ap.add_argument("--lora", default=os.getenv("CHAR_LORA", ""))
     ap.add_argument("--ipa-weight", type=float,
                     default=float(os.getenv("IPA_WEIGHT", "0.15")))
-    ap.add_argument("--root", default=os.getenv("PROJECT_ROOT",
-                                                "/tmp/yyc3_projects"))
+    ap.add_argument("--root", default=str(PROJECT_ROOT))
     ap.add_argument("--pick", default="",
                     help="人工终选：shot_id:rank（如 shot-EP01-001:1）")
     args = ap.parse_args()
@@ -180,9 +179,7 @@ def main() -> int:
     # 特征库保障（与 run_batch_shots 同口径）
     if not (LIBRARY / args.char / "feature.npy").exists():
         shutil.rmtree(LIBRARY / args.char, ignore_errors=True)
-        src = os.environ.get(
-            "CHAR_BASE_IMAGE",
-            "/Users/yanyu/YYC-Cube/tools/ComfyUI/input/hero_base.png")
+        src = os.environ.get("CHAR_BASE_IMAGE", str(HERO))
         FaceEncoder(library_root=str(LIBRARY)).save_character(
             args.char, args.char, src)
 

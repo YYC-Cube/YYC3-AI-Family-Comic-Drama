@@ -22,6 +22,10 @@ import sys
 import urllib.request
 from pathlib import Path
 
+# 集中配置（P2 专项 2026-10-05 迁移）：生产根单一出口 scripts/env.py
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from env import PROJECT_ROOT  # noqa: E402
+
 # 单集综合成本红线（YYC3-60 TC-G4-007）
 BUDGET_CNY = 2.0
 
@@ -109,7 +113,7 @@ def episode_cost(proj_dir: Path, dynamic_seconds: float,
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--projects", default="g4-ep01,g4-ep02,g4-ep03")
-    ap.add_argument("--root", default="/tmp/yyc3_projects")
+    ap.add_argument("--root", default=str(PROJECT_ROOT))
     ap.add_argument("--dynamic-seconds", default="{}",
                     help='JSON：{集名: H3 动态镜头生成秒}')
     ap.add_argument("--compose-seconds", type=float, default=30.0,
