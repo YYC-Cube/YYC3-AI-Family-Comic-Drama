@@ -67,10 +67,12 @@ def review_episode(proj_dir: Path, dynamic_conf: "float | None" = None) -> dict:
     d = {"episode": name, "full": str(full), "dims": {}}
 
     # 维度1 规格维（20）：成片 1080p30 h264（12）+ aac 音轨（4）+ 时长>0（4）
+    # 画幅三档（2026-10-05 平台适配）：16:9 横 / 9:16 竖 / 1:1 方均认可
     spec = ffprobe(str(full)) if full.exists() else {"error": "成片不存在"}
     s1 = 0
-    ok_video = (spec.get("codec") == "h264" and spec.get("width") == 1920
-                and spec.get("height") == 1080 and spec.get("fps") == "30/1")
+    ok_video = (spec.get("codec") == "h264" and spec.get("fps") == "30/1"
+                and (spec.get("width"), spec.get("height"))
+                in {(1920, 1080), (1080, 1920), (1080, 1080)})
     s1 += 12 if ok_video else 0
     s1 += 4 if audio_codec(str(full)) == "aac" else 0
     s1 += 4 if float(spec.get("duration") or 0) > 0 else 0

@@ -25,11 +25,21 @@ OUT="${@: -1}"
 CLIPS=("${@:1:$#-1}")
 N=${#CLIPS[@]}
 
-# 1) 构造 concat filter（解码域拼接：视频统一 1080p30 CFR，音频统一 32k stereo）
+# 画幅可选（2026-10-05 平台适配）：与 run_clip_compose.sh 同款（16:9 默认/9:16/1:1）
+# 混排镜（静态/动态）须同 ASPECT 产出，串联层统一画幅 CFR
+ASPECT="${ASPECT:-16:9}"
+case "$ASPECT" in
+  16:9) W=1920; H=1080 ;;
+  9:16) W=1080; H=1920 ;;
+  1:1)  W=1080; H=1080 ;;
+  *) echo "ASPECT 仅支持 16:9|9:16|1:1（当前：$ASPECT）"; exit 1 ;;
+esac
+
+# 1) 构造 concat filter（解码域拼接：视频统一目标画幅 30fps CFR，音频统一 32k stereo）
 FC=""
 IDX=""
 for ((i=0; i<N; i++)); do
-  FC+="[$i:v]fps=30,scale=1920:1080,setsar=1[v$i];"
+  FC+="[$i:v]fps=30,scale=${W}:${H},setsar=1[v$i];"
   FC+="[$i:a]aresample=32000,aformat=sample_fmts=fltp:channel_layouts=stereo[a$i];"
   IDX+="[v$i][a$i]"
 done

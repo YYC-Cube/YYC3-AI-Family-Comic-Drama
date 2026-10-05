@@ -13,11 +13,22 @@ set -euo pipefail
 SRC="${1:?用法: run_dynamic_clip.sh <h3_clip.mp4> <out.mp4>}"
 OUT="${2:?缺少输出路径}"
 
-echo "[1/2] 动态镜头规格适配（H.264+AAC → 1920x1080@30，等比覆盖居中裁切）…"
+# 画幅可选（2026-10-05 平台适配）：与 run_clip_compose.sh 同款（16:9 默认/9:16/1:1）
+# 注意：H3 源为 ~5:3 横画幅，9:16 档下裁切左右损失约 48% 宽度——
+#       动态镜竖版建议优先 blur-pad 转制（run_vertical_transcode.py）
+ASPECT="${ASPECT:-16:9}"
+case "$ASPECT" in
+  16:9) W=1920; H=1080 ;;
+  9:16) W=1080; H=1920 ;;
+  1:1)  W=1080; H=1080 ;;
+  *) echo "ASPECT 仅支持 16:9|9:16|1:1（当前：$ASPECT）"; exit 1 ;;
+esac
+
+echo "[1/2] 动态镜头规格适配（H.264+AAC → ${W}x${H}@30（ASPECT=${ASPECT}），等比覆盖居中裁切）…"
 # 音频 32kHz → 128k AAC 重编；时长以源为准（H3 为音视频联合生成，内生同步）
 ffmpeg -y -i "$SRC" \
   -c:v libx264 -pix_fmt yuv420p -r 30 \
-  -vf "scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080" \
+  -vf "scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H}" \
   -c:a aac -b:a 128k "$OUT" 2>&1 | tail -2
 
 echo "[2/2] 校验产物（TC-G4-001 交付规格）…"
