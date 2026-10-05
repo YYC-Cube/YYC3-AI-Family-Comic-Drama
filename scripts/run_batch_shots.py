@@ -18,26 +18,27 @@ import sys
 import time
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[1]
-MANJU = REPO / "yyc3-ai-manju-studio"
-COMPONENTS = REPO / "yyc3-ai-agent-archive" / "components"
-SCRIPT_ENGINE = MANJU / "backend" / "app" / "modules" / "script_engine"
+# 集中配置（P2 专项 2026-10-05）：路径/端口/生产根单一出口（scripts/env.py），
+# 替代散装派生 + 字面绝对路径；其余脚本渐进迁移至同范式
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from env import (COMFYUI_DIR, MANJU, COMPONENTS, PORTS,  # noqa: E402
+                 PROJECT_ROOT, SCRIPT_ENGINE, HERO, comfy_env, ensure_project_root)
+
 LIBRARY = MANJU / "backend" / "face_library_sd"
 
-os.environ.setdefault("COMFYUI_URL", "http://localhost:41888")
-os.environ.setdefault("COMFYUI_MODEL", "DreamShaper_8_pruned.safetensors")
-os.environ.setdefault("COMFYUI_TIMEOUT", "900")
-os.environ.setdefault("TTS_API_URL", "http://localhost:42118")
+comfy_env()  # COMFYUI_URL/MODEL/TIMEOUT 统一 setdefault（env.py）
+os.environ.setdefault("TTS_API_URL",
+                      f"http://localhost:{PORTS['tts']}")
 
 import types  # noqa: E402
 _m = types.ModuleType("milvus_retriever")
 
 
 class _S:
-    def __init__(self, *_args, **_kwargs):
+    def __init__(self, *_args, **kwargs):
         pass
 
-    def search(self, *_args, **_kwargs):
+    def search(self, *_args, **kwargs):
         raise ConnectionError("stub")
 
 
@@ -146,7 +147,9 @@ def main():
     ap.add_argument("--limit", type=int, default=2, help="本次批量镜头数")
     ap.add_argument("--episode", type=int, default=1,
                     help="集号（1 起，取分集计划第 N 集；扩产 ≥3 集用）")
-    ap.add_argument("--root", default=os.getenv("PROJECT_ROOT", "/tmp/yyc3_projects"))
+    ap.add_argument("--root", default=str(PROJECT_ROOT),
+                    help="生产项目根（默认 env.PROJECT_ROOT=~/yyc3_projects，"
+                         "2026-10-05 迁出 /tmp；YYC3_PROJECT_ROOT 可覆盖）")
     ap.add_argument("--style-file", default=os.getenv("STYLE_FILE", ""),
                     help="动态 prompt 定制 JSON（按集/按镜覆盖样式，缺省复用内置 REF_STYLE）")
     ap.add_argument("--market-file", default=os.getenv("MARKET_FILE", ""),
@@ -179,6 +182,7 @@ def main():
     style_cfg = load_style_file(args.style_file)
     novel_text = load_novel(args.novel_file)
 
+    ensure_project_root()  # 生产根幂等创建 + 旧 /tmp 产物迁移提示（env.py）
     proj = Path(args.root) / args.project
     for sub in ("storyboard", "images", "audio", "state", "output"):
         (proj / sub).mkdir(parents=True, exist_ok=True)
@@ -191,10 +195,9 @@ def main():
         # 目录（save_character 覆盖写 feature.npy + manifest.json，两件产物自包含）
         shutil.rmtree(LIBRARY / args.char, ignore_errors=True)
         # 参考图锚定历史设定图本体（2026-10-02 参考系漂移治理：
-        # /tmp 纯生成图禁作跨日参考系；CHAR_BASE_IMAGE 仍可显式覆盖）
-        src = os.environ.get(
-            "CHAR_BASE_IMAGE",
-            "/Users/yanyu/YYC-Cube/tools/ComfyUI/input/hero_base.png")
+        # /tmp 纯生成图禁作跨日参考系；CHAR_BASE_IMAGE 仍可显式覆盖；
+        # 路径经 env.HERO 单一出口，2026-10-05 弃字面绝对路径）
+        src = os.environ.get("CHAR_BASE_IMAGE", str(HERO))
         enc.save_character(args.char, args.char, src)
     guard = AnchorGuard(library_root=str(LIBRARY))
 

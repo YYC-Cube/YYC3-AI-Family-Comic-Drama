@@ -14,6 +14,7 @@
 # ==============================================================
 import argparse
 import json
+import sys
 import time
 from pathlib import Path
 
@@ -186,18 +187,42 @@ def case_g5_005() -> dict:
                            "（电费折算 + Token-Console 计量接入，timeout 8s 修复）"}
 
 
+def _ledger_judgements() -> dict | None:
+    """运营账本判定（YYC3-63 §四，2026-10-05 接入）：账本在位即返回 001/004 实测判定。"""
+    ledger = REPO / "docs" / "ops" / "g5-ops-ledger.json"
+    if not ledger.exists():
+        return None
+    sys.path.insert(0, str(REPO / "scripts"))
+    from run_g5_ops_ledger import judge_001, judge_004, load  # noqa: E402
+    data = load()
+    return {"001": judge_001(data.get("completion", [])),
+            "004": judge_004(data.get("scheduling", []))}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=str(EVID / "tc-g5-gate-run.json"))
     args = ap.parse_args()
 
+    # 运营账本实测优先（YYC3-63）：无账本时回退手册 BLOCKED 口径
+    led = _ledger_judgements()
+
+    def ops_case(cid: str, fallback_note: str) -> dict:
+        if led and cid in led:
+            return led[cid]
+        return {"case": {"001": "反哺前后完播率对比（>=5pp）",
+                         "004": "伯乐排期建议采纳率（>=60%）"}[cid],
+                "verdict": "BLOCKED", "honest_note": fallback_note}
+
     cases = {
-        "TC-G5-001": {"case": "反哺前后完播率对比（>=5pp）", "verdict": "BLOCKED",
-                      "honest_note": "依赖真实运营曝光窗口（每集 >=30 会话 x2 期），手册允许 BLOCKED"},
+        "TC-G5-001": ops_case(
+            "001", "依赖真实运营曝光窗口（每集 >=30 会话 x2 期），手册允许 BLOCKED；"
+                    "窗口排期与账本机制已就绪（YYC3-63 + run_g5_ops_ledger.py）"),
         "TC-G5-002": case_g5_002(),
         "TC-G5-003": case_g5_003(),
-        "TC-G5-004": {"case": "伯乐排期建议采纳率（>=60%）", "verdict": "BLOCKED",
-                      "honest_note": "依赖智语伯乐接入排期流程 >=4 周期台账，手册允许 BLOCKED"},
+        "TC-G5-004": ops_case(
+            "004", "依赖智语伯乐接入排期流程 >=4 周期台账，手册允许 BLOCKED；"
+                    "台账契约与判定器已就绪（YYC3-63 §3.2）"),
         "TC-G5-005": case_g5_005(),
         "TC-G5-006": {"case": "G5 回归门禁（启动前置）", "verdict": "BLOCKED",
                       "honest_note": "启动前置：G5 其余用例执行完毕；回归集（G1 三项+G2 十用例"
