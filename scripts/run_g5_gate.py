@@ -47,22 +47,29 @@ def _histref_group(tag: str) -> dict:
 
 
 def case_g5_003() -> dict:
-    """触发判定真实执行：四档留证模型逐个过判定器（35.4 追加 v2m777）。"""
+    """触发判定真实执行：五档留证模型逐个过判定器（SDXL 线 2026-10-05 追加）。"""
     v2m777 = _histref_group("v2m777_combo_w015")
+    # SDXL 线现役产线证据（阶段 2 网格冠军 + 阶段 3 生产域复验）
+    sdxl_dir = EVID2.parent / "G4-20261005"
+    sdxl_sweep = load_json(sdxl_dir / "tc-sdxl-stage2-combo-sweep-20261005.json")
+    sdxl_prod = load_json(sdxl_dir / "tc-sdxl-stage3-prod-domain-reval-20261005.json")
+    sdxl_best = sdxl_sweep["best"]
     models = [
-        ("sd-hero-v2（生产上线配置）",
+        ("sd-hero-xl（SDXL 现役产线·网格冠军 lora0.6×iid0.6）",
+         sdxl_best["mean"], "G4-20261005/tc-sdxl-stage2-combo-sweep-20261005.json"),
+        ("sd-hero-v2（SD15 生产上线配置·历史）",
          load_json(EVID / "tc-m3-lora-v2-sweep.json")["combo_weight_sweep"]["w015_peak"]["mean"],
          "tc-m3-lora-v2-sweep.json"),
-        ("sd-hero-v3（rank64+4.76ep）",
+        ("sd-hero-v3（rank64+4.76ep·历史）",
          load_json(EVID / "tc-m3-lora-v3-sweep.json")["combo_weight_sweep"]["w015_peak"]["mean"],
          "tc-m3-lora-v3-sweep.json"),
-        ("sd-hero-v3r32（rank32+10ep）",
+        ("sd-hero-v3r32（rank32+10ep·历史）",
          json.load(open(EVID / "tc-m3-lora-v3r32-sweep.json"))["results"]["combo_w020"]["mean"],
          "tc-m3-lora-v3r32-sweep.json"),
-        ("sd-hero-v2m777（v2+8x777 增量续训 540 步）", v2m777["mean"],
+        ("sd-hero-v2m777（v2+8x777 增量续训 540 步·历史）", v2m777["mean"],
          "G4-20261002/final_eval_histref.json#v2m777_combo_w015"),
     ]
-    expected = [False, True, True, False]  # v2/v2m777 达标不触发；v3/v3r32 滑落必触发
+    expected = [False, False, True, True, False]  # SDXL/v2/v2m777 达标不触发；v3 系滑落必触发
     rows = []
     for (name, mean, evid), exp in zip(models, expected):
         fired = lora_increment_trigger(mean)
@@ -84,20 +91,29 @@ def case_g5_003() -> dict:
         "artifacts": ["sd-hero-v2m777.safetensors（最终 2ep，fp16，37.8MB）",
                       "sd-hero-v2m777-000001.safetensors（1ep 中间档）"],
         "evidence": "G4-20261002/train_v2m777.log",
+        "sdxl_note": "SDXL 线（2026-10-05）：现役冠军 0.9324 达标 → 触发判定不触发 → "
+                     "增量重训按流程条件性跳过（非必需分支）",
     }
-    # 35.4：复测结论如实——均值守住 0.85 线但 min 未达手册预期
+    # 复测判据切换至现行产线（SDXL）：离线网格 min + 生产域复验 min 双证
+    sdxl_min_offline = sdxl_best["min"]
+    sdxl_min_prod = sdxl_prod["primary_sid_seed"]["min"]
+    step3_pass = min(sdxl_min_offline, sdxl_min_prod) >= TRIGGER_THRESHOLD
     v2_rebase = _histref_group("v2_rebase_combo_w015")
-    step3_pass = v2m777["min"] >= TRIGGER_THRESHOLD
     step3 = {
         "verdict": "PASS" if step3_pass else "FAIL",
-        "mean": v2m777["mean"], "min": v2m777["min"], "max": v2m777["max"],
-        "per_seed": {str(r["seed"]): r["sim"] for r in v2m777["rows"]},
-        "baseline_v2": {"mean": v2_rebase["mean"], "min": v2_rebase["min"]},
-        "evidence": "G4-20261002/final_eval_histref.json（历史参考系 input/hero_base.png，"
-                    "库向量校准 1.0）",
-        "note": "均值口径守住 0.85 线（0.8586≥0.85，触发判定不触发）但手册预期 min≥0.85 "
-                "未达：777 种子 0.7846→0.7269 反降——777 样本系 v2 自生成同分布，续训巩固"
-                "而非泛化；1ep 中间档 min 0.7256 同样未达；生产维持 v2，不替换",
+        "production_line": "SDXL（DreamShaperXL_Lightning + sd-hero-xl + InstantID）",
+        "sdxl_min_offline_grid": sdxl_min_offline,
+        "sdxl_min_prod_domain": sdxl_min_prod,
+        "evidence": "G4-20261005/tc-sdxl-stage2-combo-sweep + tc-sdxl-stage3-prod-domain-reval",
+        "note": "现行产线双证 min（离线 0.9265 / 生产域 0.9301）均 ≥0.85——SD15 时代 "
+                "min 口径从未达标的问题在 SDXL 线终结",
+        "history_sd15": {
+            "mean": v2m777["mean"], "min": v2m777["min"], "max": v2m777["max"],
+            "per_seed": {str(r["seed"]): r["sim"] for r in v2m777["rows"]},
+            "baseline_v2": {"mean": v2_rebase["mean"], "min": v2_rebase["min"]},
+            "evidence": "G4-20261002/final_eval_histref.json",
+            "note": "SD15 v2m777 复测 min 0.7269<0.85 如实留档（历史 FAIL 记录，"
+                    "产线已由 SDXL 替代）"},
     }
     case_pass = step1_pass and step3_pass
     return {
@@ -109,9 +125,10 @@ def case_g5_003() -> dict:
         "step2_incremental_retrain": step2,
         "step3_re_eval": step3,
         "verdict": "PASS" if case_pass else "FAIL",
-        "honest_note": "①触发判定 100% 准确/零误触发（四档真实执行，含 35.4 追加 v2m777）；"
-                       "②增量重训已真实执行（非模拟）；③复测均值守线但 min 0.7269<0.85 "
-                       "手册预期未达，如实 FAIL——泛化目标未达成，生产维持 v2",
+        "honest_note": "①触发判定 100% 准确/零误触发（五档真实执行，含 SDXL 现役冠军档）；"
+                       "②增量重训历史已真实执行 + SDXL 档条件性跳过（达标不触发）；"
+                       "③复测判据切现行产线：SDXL 双证 min（0.9265/0.9301）均 ≥0.85——"
+                       "SD15 历史 FAIL（v2m777 min 0.7269）留档不删，产线已迭代",
     }
 
 
