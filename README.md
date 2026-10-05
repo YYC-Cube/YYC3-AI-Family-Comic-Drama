@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="public/yyc3-family.png" alt="YYC³ AI Family" width="100%"/>
+<img src="public/yyc3-family.png" alt="YYC³ AI Family" width="1800"/>
 
 # YYC³ AI Family · Comic Drama
 
