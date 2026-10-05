@@ -12,7 +12,7 @@
 ---
 
 [![Version](https://img.shields.io/badge/version-v1.0.0-blue?style=for-the-badge&logo=semver&logoColor=white)](docs/YYC3-AI-HANDOFF-会话推进日志-20260924.md)
-[![Gate](https://img.shields.io/badge/门禁-G0✅_G1🔄-orange?style=for-the-badge)](docs/YYC3-60-测试与验收执行手册.md)
+[![Gate](https://img.shields.io/badge/门禁-G0~G4✅_G5🔄-orange?style=for-the-badge)](docs/YYC3-60-测试与验收执行手册.md)
 [![North Star](https://img.shields.io/badge/North%20Star-90天3集·≤2元%2F集·一致性≥80%25-red?style=for-the-badge)](docs/YYC3-09-自研内容项目落地规划与里程碑总表.md)
 [![Feasibility](https://img.shields.io/badge/可行性论证-88.4%2F100_通过-brightgreen?style=for-the-badge)](docs/YYC3-07-大数据与多Agent协同架构-技术可行性论证报告.md)
 
@@ -169,11 +169,15 @@ gantt
 | 门禁 | 验收锚点 | 状态 |
 | ---- | -------- | ---- |
 | G0 文档地基 | 九域 P0 清零 | ✅ 已达成 |
-| G1 底座可用 | 网关 `/v1/chat` 200 · 三端路径互写 · 首 token ≤3s | 🔄 当前前沿 |
-| G2 编排贯通 | 九步闭环 6 场景 · 分镜 12 字段 Schema | ⬜ |
-| G3 产能达标 | 一致性 ≥80% · SyncNet ≥0.75 · 单镜 ≤5min | ⬜ |
-| G4 样片交付 | 3 集样片 · 成本 ≤2 元/集 · 零人工闭环 | ⬜ |
-| G5 运营反哺 | 完播率基线 · 产能提升 ≥30% | ⬜ |
+| G1 底座可用 | 网关 `/v1/chat` 200 · 三端路径互写 · 首 token ≤3s | ✅ 已达成（单测+E2E 三探针 200） |
+| G2 编排贯通 | 九步闭环 6 场景 · 分镜 12 字段 Schema | ✅ 已达成（十用例 7P+3PA 零 FAIL） |
+| G3 产能达标 | 一致性 ≥80% · SyncNet ≥0.75 · 单镜 ≤5min | ✅ 已达成（热批 434s/镜；720p conf 6.74） |
+| G4 样片交付 | 3 集样片 · 成本 ≤2 元/集 · 零人工闭环 | ✅ 已达成（TC-G4-001~010 全 PASS；0.016-0.034 元/集） |
+| G5 运营反哺 | 完播率基线 · 产能提升 ≥30% | 🔄 BLOCKED-partial（002/003/005 PASS；001/004/006 运营依赖） |
+
+> 2026-10-05 追记：SDXL 基模迁移三阶段当日闭环（G4 §三十~三十六）——产线一致性
+> min 0.9301 全镜直通、六集成片 18/18 首绘直通、0.0014-0.0018 元/集、
+> 最差口径 ≥351 集/晚（G5-002 实测收割）。
 
 ---
 
