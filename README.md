@@ -17,15 +17,15 @@
 [![Feasibility](https://img.shields.io/badge/可行性论证-88.4%2F100_通过-brightgreen?style=for-the-badge)](docs/YYC3-07-大数据与多Agent协同架构-技术可行性论证报告.md)
 
 [![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat-square&logo=python&logoColor=white)](docs/YYC3-AI-Family-Comic-Drama-Agent/README.md)
-[![Next.js](https://img.shields.io/badge/Next.js-App_Router-000000?style=flat-square&logo=next.js&logoColor=white)](yyc3-ai-manju-studio/frontend)
-[![FastAPI](https://img.shields.io/badge/FastAPI-Celery-009688?style=flat-square&logo=fastapi&logoColor=white)](yyc3-ai-manju-studio/backend)
+[![Next.js](https://img.shields.io/badge/Next.js-App_Router-000000?style=flat-square&logo=next.js&logoColor=white)](docs/YYC3-01-全栈统一架构总纲.md)
+[![FastAPI](https://img.shields.io/badge/FastAPI-编排引擎-009688?style=flat-square&logo=fastapi&logoColor=white)](docs/YYC3-03-AI漫剧智能体编排方案.md)
 [![Milvus](https://img.shields.io/badge/Milvus-2.4.5-00A1EA?style=flat-square&logo=milvus&logoColor=white)](docs/YYC3-AI-Family-Comic-Drama-Agent/90-公共RAG-知识库)
 [![Redis](https://img.shields.io/badge/Redis-Stream_A2A-DC382D?style=flat-square&logo=redis&logoColor=white)](docs/YYC3-AI-Family-Comic-Drama-Agent/91-A2A-通信协议)
-[![vLLM](https://img.shields.io/badge/vLLM-72B_推理-7C3AED?style=flat-square&logo=nvidia&logoColor=white)](docs/YYC3-04-AI漫剧本地硬件部署方案.md)
+[![vLLM](https://img.shields.io/badge/vLLM-72B_推理·规划中-7C3AED?style=flat-square&logo=nvidia&logoColor=white)](docs/YYC3-04-AI漫剧本地硬件部署方案.md)
 [![ComfyUI](https://img.shields.io/badge/ComfyUI-SDXL%2FFlux-FF6B6B?style=flat-square)](docs/YYC3-05-AI漫剧开源生态与自研路径.md)
 [![DGX Spark](https://img.shields.io/badge/DGX_Spark-GB10×2-76B900?style=flat-square&logo=nvidia&logoColor=white)](docs/YYC3-04-AI漫剧本地硬件部署方案.md)
 [![Mac M4](https://img.shields.io/badge/Mac_M4-128GB-000000?style=flat-square&logo=apple&logoColor=white)](docs/YYC3-04-AI漫剧本地硬件部署方案.md)
-![License](https://img.shields.io/badge/©-2025--2026_YYC³-lightgrey?style=flat-square)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
 </div>
 
@@ -144,10 +144,10 @@ flowchart TB
 
 | 仓库 | 定位 | 里程碑挂钩 |
 | ---- | ---- | ---------- |
-| 🎬 [yyc3-ai-manju-studio](yyc3-ai-manju-studio) | 主仓：六大引擎模块 + FastAPI 后端 + Next.js 前端 | M1/M3/M4 |
-| 🚪 [yyc3-0379-world](yyc3-0379-world) | 网关仓：上游池 · 鉴权 · 路径归一 · DGX compose | M1 |
-| 🧠 [yyc3-ai-agent-archive](yyc3-ai-agent-archive) | 编排仓：8 Agent prompt 契约 + conductor 六阶段 YAML | M2 |
-| 🎞️ [yyc3-minimax-h3](yyc3-minimax-h3) | 生成仓：图生视频批量 · SyncNet 评分 | M3 |
+| 🎬 `yyc3-ai-manju-studio` | 主仓：六大引擎模块 + FastAPI 后端 + Next.js 前端（独立私有仓，不入本仓） | M1/M3/M4 |
+| 🚪 `yyc3-0379-world` | 网关仓：上游池 · 鉴权 · 路径归一 · DGX compose（独立私有仓） | M1 |
+| 🧠 `yyc3-ai-agent-archive` | 编排仓：8 Agent prompt 契约 + conductor 六阶段 YAML（独立私有仓） | M2 |
+| 🎞️ `yyc3-minimax-h3` | 生成仓：图生视频批量 · SyncNet 评分（独立私有仓） | M3 |
 
 ---
 
@@ -158,12 +158,12 @@ gantt
     dateFormat  YYYY-MM-DD
     axisFormat  %m-%d
     section 90天North Star
-    M0 文档地基 ✅G0    :done, m0, 2026-09-24, 14d
-    M1 底座通电 G1      :active, m1, after m0, 14d
-    M2 编排贯通 G2      :m2, after m1, 21d
-    M3 视听产能 G3      :m3, after m2, 21d
-    M4 样片闭环 G4      :m4, after m3, 21d
-    M5 运营迭代 G5      :m5, after m4, 14d
+    M0 文档地基 G0 ✅    :done, m0, 2026-09-24, 2026-09-26
+    M1 底座通电 G1 ✅    :done, m1, 2026-09-26, 2026-09-27
+    M2 编排贯通 G2 ✅    :done, m2, 2026-09-27, 2026-09-28
+    M3 视听产能 G3 ✅    :done, m3, 2026-09-27, 2026-09-29
+    M4 样片闭环 G4 ✅    :done, m4, 2026-09-28, 2026-09-30
+    M5 运营迭代 G5 🔄    :active, m5, 2026-09-29, 30d
 ```
 
 | 门禁 | 验收锚点 | 状态 |
@@ -223,6 +223,6 @@ gantt
 
 🌹 **YYC³ AI Family** · 人从众曌众从人 · 亦师亦友亦伯乐 · 一言一语一协同
 
-**© 2025-2026 YanYuCloudCube™. All Rights Reserved.**
+**© 2025-2026 YanYuCloudCube™ · Licensed under [MIT](LICENSE)**
 
 </div>

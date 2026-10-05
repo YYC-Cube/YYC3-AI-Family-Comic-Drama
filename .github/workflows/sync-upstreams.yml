@@ -25,7 +25,8 @@ jobs:
         run: REMOTE_BASE=https://github.com/YYC-Cube bash scripts/sync-upstreams.sh ci
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
+        # SHA 锁定 peter-evans/create-pull-request@v6（ supply-chain 安全红线）
+        uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c # v6
         with:
           branch: chore/upstream-sync
           delete-branch: true
