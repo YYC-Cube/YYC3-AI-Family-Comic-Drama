@@ -336,8 +336,18 @@ def main():
 
             out = proj / "images" / f"{sid}.png"
             style, style_src = resolve_style(style_cfg, args.episode, sid)
-            row["style_source"] = style_src  # 动态 prompt 定制留证（builtin=三集复用旧口径）
-            gen = gw.text_to_image(f"{style}, {shot['description']}",
+            # YYC3-74 G4：出图 prompt 以分镜 image_prompt 为基（场景+景别构图词+
+            # 内容+风格），杜绝 REF_STYLE「portrait of…」前缀主导的景别塌缩；
+            # shot_override 全权替换（运营兜底），episode/default 并入尾部
+            if style_src == "shot_override":
+                prompt = style
+            elif style_src == "builtin":
+                prompt = shot["image_prompt"]
+            else:
+                prompt = f"{shot['image_prompt']}, {style}"
+                style_src = f"{style_src}+image_prompt"
+            row["style_source"] = style_src  # 动态 prompt 定制留证
+            gen = gw.text_to_image(prompt,
                                    ref_assets=[args.char], out_path=str(out),
                                    seed=seed, ref_image=args.ref_image,
                                    lora=args.lora or None,
@@ -356,7 +366,7 @@ def main():
                     # 生产策略（G3 v1.3/v1.4 实证）：IPAdapter 锚定不足时回退
                     # seed-lock（角色基础种子确定性重绘，同参缓存近零成本）
                     row["redraw"] = "seed_lock"
-                    gen = gw.text_to_image(f"{style}, {shot['description']}",
+                    gen = gw.text_to_image(prompt,
                                            ref_assets=[args.char], out_path=str(out),
                                            seed=base_seed, ref_image=args.ref_image,
                                            lora=args.lora or None,

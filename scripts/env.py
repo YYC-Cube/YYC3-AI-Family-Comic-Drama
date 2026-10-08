@@ -80,8 +80,13 @@ def ensure_project_root() -> Path:
 
 
 def comfy_env(model: str | None = None, timeout: int = 900) -> None:
-    """ComfyUI 相关环境变量统一 setdefault（替代各脚本散装 os.environ 行）。"""
+    """ComfyUI 相关环境变量统一 setdefault（替代各脚本散装 os.environ 行）。
+
+    YYC3-74 P1：默认模型对齐 SDXL 产线档（SDXL["ckpt"]）——旧默认
+    DreamShaper_8_pruned 是 SD1.5 底模，与产线 SDXL LoRA（sd-hero-xl-v1）
+    组合会在 KSampler 报「y is None」且前端死等 900s 超时（006-v2 试点实证）。
+    """
     os.environ.setdefault("COMFYUI_URL",
                           f"http://localhost:{PORTS['comfyui']}")
-    os.environ.setdefault("COMFYUI_MODEL", model or "DreamShaper_8_pruned.safetensors")
+    os.environ.setdefault("COMFYUI_MODEL", model or SDXL["ckpt"])
     os.environ.setdefault("COMFYUI_TIMEOUT", str(timeout))

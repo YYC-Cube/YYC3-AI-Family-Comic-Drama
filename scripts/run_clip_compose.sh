@@ -49,6 +49,7 @@ echo "[2/3] ffmpeg 合成（H.264 + AAC，交付规格 ${W}x${H}@30（ASPECT=${A
 # 方形原图（1024x1024）→ 等比放大覆盖目标画幅后居中裁切，避免拉伸变形
 ffmpeg -y -loop 1 -i "$IMG" -i "$TMP_WAV" \
   -c:v libx264 -tune stillimage -pix_fmt yuv420p -r 30 \
+  -b:v 4M -maxrate 6M -bufsize 12M \
   -vf "scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H}" \
   -c:a aac -b:a 128k -shortest "$OUT" 2>&1 | tail -2
 

@@ -40,3 +40,22 @@ bash "$DYNAMIC" "$DYN" "$TMP_EP/c3.mp4"
 
 # 4) 串联成片（内建 ±1 帧/黑帧/规格验证）
 bash "$REPO/scripts/run_episode_concat.sh" "$TMP_EP/c1.mp4" "$TMP_EP/c2.mp4" "$TMP_EP/c3.mp4" "$OUT"
+
+# 5) YYC3-74 G5：段级时长清单（gate_segment_identity 镜级采样的事实依据——
+# shot_id ↔ 片段时长映射，使「动画面段 vs 已验收关键帧」校验可精确到镜）
+mkdir -p "$PROJ/state"
+python3 -c "
+import json, subprocess
+sb = json.load(open('$SB'))
+ids = [s['shot_id'] for s in sb['shots'][:3]]
+segs = []
+for sid, f in zip(ids, ['$TMP_EP/c1.mp4', '$TMP_EP/c2.mp4', '$TMP_EP/c3.mp4']):
+    d = float(subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries',
+                                       'format=duration', '-of', 'csv=p=0', f]).strip())
+    segs.append({'shot_id': sid, 'duration': round(d, 3)})
+json.dump({'version': 1, 'segments': segs},
+          open('$PROJ/state/segments.json', 'w', encoding='utf-8'),
+          ensure_ascii=False, indent=2)
+print('[build] segments.json 已写入（%d 段，总 %.2fs）'
+      % (len(segs), sum(s['duration'] for s in segs)))
+"

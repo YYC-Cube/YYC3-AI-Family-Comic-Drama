@@ -28,6 +28,7 @@ echo "[1/2] 动态镜头规格适配（H.264+AAC → ${W}x${H}@30（ASPECT=${ASP
 # 音频 32kHz → 128k AAC 重编；时长以源为准（H3 为音视频联合生成，内生同步）
 ffmpeg -y -i "$SRC" \
   -c:v libx264 -pix_fmt yuv420p -r 30 \
+  -b:v 4M -maxrate 6M -bufsize 12M \
   -vf "scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H}" \
   -c:a aac -b:a 128k "$OUT" 2>&1 | tail -2
 

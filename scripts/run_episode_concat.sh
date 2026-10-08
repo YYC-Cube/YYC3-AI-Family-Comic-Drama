@@ -53,7 +53,8 @@ IN=()
 for c in "${CLIPS[@]}"; do IN+=(-i "$c"); done
 ffmpeg -y "${IN[@]}" -filter_complex "$FC" \
   -map "[v]" -map "[a]" \
-  -c:v libx264 -pix_fmt yuv420p -c:a aac -b:a 128k "$OUT" 2>&1 | tail -1
+  -c:v libx264 -pix_fmt yuv420p -b:v 4M -maxrate 6M -bufsize 12M \
+  -c:a aac -b:a 128k "$OUT" 2>&1 | tail -1
 
 # 2) 验证：视频轨时长 vs 各镜之和（±1 帧）、音频轨齐平、黑帧、规格
 # 2026-10-05 口径修正（对齐定版语义「按视频轨计；AAC padding 为编码器物理
